@@ -35,7 +35,36 @@ class Order(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="orders",
-        help_text="The user who owns this order."
+        null=True, blank=True,
+        help_text="Deprecated: customer orders no longer create a user. Retained "
+                  "until the guest-User removal migration drops it."
+    )
+    customer_email = models.EmailField(
+        null=True, blank=True,
+        help_text="The customer's email, captured at checkout (claim)."
+    )
+    customer_first_name = models.CharField(
+        max_length=150, blank=True, default='',
+        help_text="The customer's first name."
+    )
+    customer_last_name = models.CharField(
+        max_length=150, blank=True, default='',
+        help_text="The customer's last name."
+    )
+    stripe_customer_id = models.CharField(
+        max_length=255, blank=True, null=True,
+        help_text="The Stripe Customer ID for this order's buyer."
+    )
+    terms_accepted_at = models.DateTimeField(
+        null=True, blank=True,
+        help_text="When the customer accepted the terms during checkout."
+    )
+    accepted_terms = models.ForeignKey(
+        'data_management.TermsAndConditions',
+        null=True, blank=True,
+        on_delete=models.PROTECT,
+        related_name='order_acceptances',
+        help_text="The terms version the customer accepted at checkout."
     )
     status = models.CharField(
         max_length=20,

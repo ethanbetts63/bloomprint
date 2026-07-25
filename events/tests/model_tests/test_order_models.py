@@ -6,6 +6,22 @@ from events.models import Order
 
 @pytest.mark.django_db
 class TestOrderModels:
+    def test_order_stores_customer_details_directly(self):
+        from django.utils import timezone
+        order = OrderFactory(
+            customer_email='buyer@example.com',
+            customer_first_name='Buyer',
+            customer_last_name='Person',
+            stripe_customer_id='cus_test123',
+            terms_accepted_at=timezone.now(),
+        )
+        order.refresh_from_db()
+        assert order.customer_email == 'buyer@example.com'
+        assert order.customer_first_name == 'Buyer'
+        assert order.customer_last_name == 'Person'
+        assert order.stripe_customer_id == 'cus_test123'
+        assert order.terms_accepted_at is not None
+
     def test_one_time_order_creation(self):
         plan = OrderFactory(billing_mode='one_time', budget=100)
         assert plan.status == 'pending_payment'
