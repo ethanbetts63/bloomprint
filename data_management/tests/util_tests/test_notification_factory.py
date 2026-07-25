@@ -11,15 +11,17 @@ from events.tests.factories.order_factory import OrderFactory
 class TestCreateCustomerDeliveryDayNotification:
 
     def test_creates_notification_with_correct_fields(self):
-        user = UserFactory(first_name='Alice')
-        plan = OrderFactory(billing_mode='one_time', user=user)
+        plan = OrderFactory(
+            billing_mode='one_time', user=None,
+            customer_first_name='Alice', customer_email='alice@example.com',
+        )
         delivery_date = date.today() + timedelta(days=10)
         event = EventFactory(order=plan, delivery_date=delivery_date)
 
         create_customer_delivery_day_notification(event)
 
         notif = Notification.objects.get(related_event=event, recipient_type='customer')
-        assert notif.recipient_user == user
+        assert notif.recipient_email == 'alice@example.com'
         assert notif.channel == 'email'
         assert notif.scheduled_for == delivery_date
         assert notif.subject == "Your FutureFlower delivery is today!"
@@ -68,15 +70,14 @@ class TestCreateCustomerDeliveryDayNotification:
         notif = Notification.objects.get(related_event=event, recipient_type='customer')
         assert 'next delivery' not in notif.body
 
-    def test_uses_username_as_fallback_when_first_name_is_blank(self):
-        user = UserFactory(first_name='', username='janedoe99')
-        plan = OrderFactory(billing_mode='one_time', user=user)
+    def test_uses_generic_greeting_when_first_name_is_blank(self):
+        plan = OrderFactory(billing_mode='one_time', user=None, customer_first_name='')
         event = EventFactory(order=plan, delivery_date=date.today() + timedelta(days=10))
 
         create_customer_delivery_day_notification(event)
 
         notif = Notification.objects.get(related_event=event, recipient_type='customer')
-        assert 'janedoe99' in notif.body
+        assert 'Hi there' in notif.body
 
     def test_only_next_event_is_referenced_not_the_one_after(self):
         """Confirms we pick the immediately next event, not a later one."""

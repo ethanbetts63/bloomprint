@@ -8,6 +8,7 @@ def _make_notification(recipient_type, **kwargs):
     notif.recipient_type = recipient_type
     notif.recipient_partner = kwargs.get('partner', None)
     notif.recipient_user = kwargs.get('user', None)
+    notif.recipient_email = kwargs.get('email', None)
     return notif
 
 
@@ -35,16 +36,14 @@ class TestResolveRecipient:
         assert email is None
         assert phone is None
 
-    def test_customer_returns_user_email_and_no_phone(self):
-        user = MagicMock()
-        user.email = 'customer@example.com'
-        notif = _make_notification('customer', user=user)
+    def test_customer_returns_recipient_email_and_no_phone(self):
+        notif = _make_notification('customer', email='customer@example.com')
         email, phone = resolve_recipient(notif)
         assert email == 'customer@example.com'
         assert phone is None
 
-    def test_customer_with_no_user_returns_none_none(self):
-        notif = _make_notification('customer', user=None)
+    def test_customer_with_no_email_returns_none_none(self):
+        notif = _make_notification('customer', email=None)
         email, phone = resolve_recipient(notif)
         assert email is None
         assert phone is None

@@ -73,14 +73,13 @@ def create_customer_delivery_day_notification(event):
     from events.models import Event as EventModel
 
     order = event.order
-    user = order.user
 
     next_event = EventModel.objects.filter(
         order=order,
         delivery_date__gt=event.delivery_date,
     ).order_by('delivery_date').first()
 
-    first_name = user.first_name or user.username
+    first_name = order.customer_first_name or 'there'
     recipient_name = f"{order.recipient_first_name} {order.recipient_last_name}".strip()
 
     body = (
@@ -96,7 +95,7 @@ def create_customer_delivery_day_notification(event):
 
     Notification.objects.create(
         recipient_type='customer',
-        recipient_user=user,
+        recipient_email=order.customer_email,
         channel='email',
         subject="Your FutureFlower delivery is today!",
         body=body,

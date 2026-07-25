@@ -25,10 +25,7 @@ def resolve_recipient(notification):
         return email, phone
 
     if rtype == 'customer':
-        user = notification.recipient_user
-        if not user:
-            return None, None
-        return user.email, None
+        return notification.recipient_email, None
 
     return None, None
 
