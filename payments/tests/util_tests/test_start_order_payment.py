@@ -38,7 +38,7 @@ def stripe_subscription(stripe_product, mocker):
 def no_stripe_customer_call(mocker):
     mocker.patch(
         'payments.utils.checkout.ensure_stripe_customer',
-        side_effect=lambda user: setattr(user, 'stripe_customer_id', 'cus_test_123'),
+        side_effect=lambda order: setattr(order, 'stripe_customer_id', 'cus_test_123'),
     )
 
 

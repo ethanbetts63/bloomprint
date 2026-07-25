@@ -12,9 +12,10 @@ class Payment(models.Model):
     )
 
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, 
-        on_delete=models.CASCADE, 
-        related_name='payments'
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='payments',
+        null=True, blank=True,
     )
     order = models.ForeignKey(
         'events.Order',

@@ -12,15 +12,16 @@ STRIPE_MINIMUM_CHARGE = Decimal('0.50')
 _SUBSCRIPTION_PRODUCT_CACHE_KEY = 'stripe_subscription_product_id'
 
 
-def ensure_stripe_customer(user):
-    if not user.stripe_customer_id:
+def ensure_stripe_customer(order):
+    if not order.stripe_customer_id:
+        name = f"{order.customer_first_name} {order.customer_last_name}".strip()
         customer = stripe.Customer.create(
-            email=user.email,
-            name=user.get_full_name(),
-            metadata={'user_id': user.id}
+            email=order.customer_email,
+            name=name,
+            metadata={'order_id': order.id}
         )
-        user.stripe_customer_id = customer.id
-        user.save()
+        order.stripe_customer_id = customer.id
+        order.save(update_fields=['stripe_customer_id'])
 
 
 def _subscription_product_id():
@@ -42,7 +43,7 @@ def validate_order_ready_for_payment(order):
 
 
 def start_order_payment(order):
-    ensure_stripe_customer(order.user)
+    ensure_stripe_customer(order)
 
     if order.billing_mode == 'recurring':
         return _start_subscription_payment(order)
@@ -58,7 +59,6 @@ def _record_pending_payment(order, payment_intent_id, amount_in_cents):
     from payments.models import Payment
 
     Payment.objects.create(
-        user=order.user,
         order=order,
         stripe_payment_intent_id=payment_intent_id,
         amount=Decimal(amount_in_cents) / 100,
@@ -82,7 +82,7 @@ def _start_one_time_payment(order):
     payment_intent = stripe.PaymentIntent.create(
         amount=amount_in_cents,
         currency=order.currency.lower(),
-        customer=order.user.stripe_customer_id,
+        customer=order.stripe_customer_id,
         automatic_payment_methods={'enabled': True},
         metadata=metadata,
     )
@@ -131,7 +131,7 @@ def _start_subscription_payment(order):
 
     product_id = _subscription_product_id()
     subscription = stripe.Subscription.create(
-        customer=order.user.stripe_customer_id,
+        customer=order.stripe_customer_id,
         items=[{
             'price_data': {
                 'currency': order.currency.lower(),
