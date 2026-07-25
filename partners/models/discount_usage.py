@@ -1,5 +1,4 @@
 from django.db import models
-from django.conf import settings
 
 
 class DiscountUsage(models.Model):
@@ -7,12 +6,6 @@ class DiscountUsage(models.Model):
         'partners.DiscountCode',
         on_delete=models.CASCADE,
         related_name='usages'
-    )
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='discount_usages',
-        null=True, blank=True,
     )
     payment = models.OneToOneField(
         'payments.Payment',

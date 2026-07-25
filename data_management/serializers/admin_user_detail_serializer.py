@@ -37,15 +37,6 @@ class AdminUserDetailSerializer(serializers.ModelSerializer):
         return p.business_name or f"{p.user.first_name} {p.user.last_name}".strip()
 
     def get_plans(self, obj):
-        from events.models import Order
-        orders = list(
-            Order.objects.filter(user=obj).order_by('-created_at').values(
-                'id', 'status', 'total_amount', 'created_at',
-                'recipient_first_name', 'recipient_last_name', 'billing_mode',
-            )
-        )
-        for o in orders:
-            o['plan_type'] = o.pop('billing_mode')
-            o['total_amount'] = str(o['total_amount']) if o['total_amount'] is not None else None
-            o['created_at'] = o['created_at'].isoformat()
-        return orders
+        # Orders are no longer owned by a User; customer identity lives on the
+        # order itself. Staff/partner accounts own no orders.
+        return []

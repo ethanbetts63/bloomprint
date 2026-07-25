@@ -29,8 +29,9 @@ class AdminUserSerializer(serializers.ModelSerializer):
         return hasattr(obj, 'partner_profile')
 
     def get_plan_count(self, obj):
-        from events.models import Order
-        return Order.objects.filter(user=obj).count()
+        # Orders are no longer owned by a User; customer identity lives on the
+        # order itself. Staff/partner accounts own no orders.
+        return 0
 
     def get_referred_by(self, obj):
         if not obj.referred_by_partner:

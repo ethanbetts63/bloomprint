@@ -31,14 +31,6 @@ class Order(models.Model):
         ('other', 'Other'),
     )
 
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="orders",
-        null=True, blank=True,
-        help_text="Deprecated: customer orders no longer create a user. Retained "
-                  "until the guest-User removal migration drops it."
-    )
     customer_email = models.EmailField(
         null=True, blank=True,
         help_text="The customer's email, captured at checkout (claim)."

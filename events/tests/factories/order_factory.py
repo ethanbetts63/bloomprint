@@ -1,15 +1,13 @@
 import factory
 from factory.django import DjangoModelFactory
-from factory import Faker, SubFactory
+from factory import Faker
 from events.models import Order
-from users.tests.factories.user_factory import UserFactory
 
 
 class OrderFactory(DjangoModelFactory):
     class Meta:
         model = Order
 
-    user = SubFactory(UserFactory)
     status = 'pending_payment'
     billing_mode = 'one_time'
     budget = Faker('pydecimal', left_digits=2, right_digits=2, positive=True, min_value=50, max_value=99)

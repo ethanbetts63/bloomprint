@@ -1,5 +1,4 @@
 from django.db import models
-from django.conf import settings
 
 
 class Notification(models.Model):
@@ -22,12 +21,6 @@ class Notification(models.Model):
     recipient_type = models.CharField(max_length=20, choices=RECIPIENT_TYPE_CHOICES)
     recipient_partner = models.ForeignKey(
         'partners.Partner',
-        null=True, blank=True,
-        on_delete=models.SET_NULL,
-        related_name='notifications',
-    )
-    recipient_user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
         null=True, blank=True,
         on_delete=models.SET_NULL,
         related_name='notifications',

@@ -27,8 +27,8 @@ class DiscountCodeAdmin(admin.ModelAdmin):
 
 @admin.register(DiscountUsage)
 class DiscountUsageAdmin(admin.ModelAdmin):
-    list_display = ['discount_code', 'user', 'created_at']
-    search_fields = ['discount_code__code', 'user__email']
+    list_display = ['discount_code', 'payment', 'created_at']
+    search_fields = ['discount_code__code', 'payment__order__customer_email']
 
 
 @admin.register(Commission)

@@ -1,5 +1,4 @@
 from django.db import models
-from django.conf import settings
 
 class Payment(models.Model):
     """
@@ -11,12 +10,6 @@ class Payment(models.Model):
         ('failed', 'Failed'),
     )
 
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='payments',
-        null=True, blank=True,
-    )
     order = models.ForeignKey(
         'events.Order',
         on_delete=models.CASCADE,
@@ -42,4 +35,4 @@ class Payment(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Payment {self.id} for {self.user} - {self.status}"
+        return f"Payment {self.id} for order {self.order_id} - {self.status}"
