@@ -1,4 +1,5 @@
 import logging
+from django.db.models import Q
 from django.utils import timezone
 from datetime import timedelta
 from rest_framework.views import APIView
@@ -33,15 +34,25 @@ class PasswordResetRequestView(APIView):
             )
 
         email = serializer.validated_data.get('email')
-        
+
         try:
-            user = User.objects.get(email__iexact=email, is_active=True)
-            if not (user.is_staff or user.is_superuser or hasattr(user, 'partner_profile')):
+            # An email can be attached to several rows (guest-checkout placeholders
+            # reuse the buyer's email), so filtering to the single reset-eligible
+            # account avoids MultipleObjectsReturned. Only staff/superusers/partners
+            # hold passwords; those accounts have username == email (unique), so at
+            # most one matches.
+            user = User.objects.filter(
+                email__iexact=email,
+                is_active=True,
+            ).filter(
+                Q(is_staff=True) | Q(is_superuser=True) | Q(partner_profile__isnull=False)
+            ).first()
+            if user is None:
                 return Response(
                     {"detail": "If an account with this email exists, a password reset link has been sent."},
                     status=status.HTTP_200_OK,
                 )
-            
+
             if user.password_reset_last_sent_at:
                 time_since_last_send = timezone.now() - user.password_reset_last_sent_at
                 if time_since_last_send < timedelta(seconds=60):
@@ -56,8 +67,6 @@ class PasswordResetRequestView(APIView):
                 user.password_reset_last_sent_at = timezone.now()
                 user.save(update_fields=['password_reset_last_sent_at'])
                 
-        except User.DoesNotExist:
-            pass
         except Exception as e:
             logger.error("Unexpected error during password reset request: %s", e)
             pass

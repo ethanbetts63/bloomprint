@@ -36,6 +36,21 @@ class TestPasswordResetRequestView:
         self.user.refresh_from_db()
         assert self.user.password_reset_last_sent_at is not None
 
+    def test_reset_sent_when_guest_rows_share_the_email(self, mocker):
+        """
+        Guest-checkout placeholder rows reuse the buyer's email. The reset
+        request must still resolve to the single eligible account instead of
+        raising MultipleObjectsReturned.
+        """
+        mock_send_email = mocker.patch('users.views.password_reset_request_view.send_password_reset_email', return_value=True)
+        for i in range(3):
+            UserFactory(username=f'guest-{i}@checkout.invalid', email='test@example.com')
+
+        response = self.client.post(self.url, {'email': 'test@example.com'}, format='json')
+
+        assert response.status_code == 200
+        mock_send_email.assert_called_once_with(self.user)
+
     def test_request_with_non_existent_email_does_not_send(self, mocker):
         mock_send_email = mocker.patch('users.views.password_reset_request_view.send_password_reset_email')
         

@@ -31,7 +31,7 @@ class PartnerRegistrationSerializer(serializers.Serializer):
 
     def validate_email(self, value):
         lower_email = value.lower()
-        if User.objects.filter(email__iexact=lower_email).exists():
+        if User.objects.real().filter(email__iexact=lower_email).exists():
             raise serializers.ValidationError("An account with this email address already exists.")
         return lower_email
 

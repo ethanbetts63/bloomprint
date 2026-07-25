@@ -30,7 +30,7 @@ class TestPartnerRegistrationView:
         
         partner = Partner.objects.get(user=user)
         assert partner.business_name == "Partner Flowers"
-            assert partner.status == 'pending'
+        assert partner.status == 'pending'
 
     def test_partner_registration_does_not_create_stripe_connect_account(self, mocker):
         mock_account = mocker.patch('stripe.Account.create')

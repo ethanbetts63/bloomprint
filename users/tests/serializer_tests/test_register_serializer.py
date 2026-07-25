@@ -48,6 +48,30 @@ def test_register_serializer_duplicate_email():
     assert "email" in excinfo.value.detail
 
 @pytest.mark.django_db
+def test_register_serializer_ignores_guest_email():
+    """
+    Guest-checkout placeholder rows reuse the buyer's email but are not real
+    accounts, so they must not block a genuine registration with that email.
+    """
+    User.objects.create_user(
+        username="guest-abc123@checkout.invalid",
+        email="buyer@example.com",
+    )
+
+    user_data = {
+        "email": "buyer@example.com",
+        "password": "newpassword123",
+        "first_name": "Real",
+        "last_name": "Buyer",
+    }
+    serializer = RegisterSerializer(data=user_data)
+    assert serializer.is_valid(raise_exception=True)
+    user = serializer.save()
+
+    assert user.email == "buyer@example.com"
+    assert user.username == "buyer@example.com"
+
+@pytest.mark.django_db
 def test_register_serializer_missing_fields():
     """
     Tests that the serializer raises a ValidationError if required fields are missing.

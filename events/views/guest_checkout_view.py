@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 
 from data_management.models import TermsAcceptance, TermsAndConditions
 from events.models import CheckoutSession, Order
+from users.models.user import GUEST_USERNAME_SUFFIX
 from events.serializers import OrderSerializer
 from partners.serializers import ValidateDiscountCodeSerializer
 from payments.utils.checkout import (
@@ -122,7 +123,7 @@ class GuestCheckoutView(APIView):
         if existing and existing.order.status == 'pending_payment':
             order = existing.order
         else:
-            placeholder = f'guest-{uuid.uuid4()}@checkout.invalid'
+            placeholder = f'guest-{uuid.uuid4()}{GUEST_USERNAME_SUFFIX}'
             user = User.objects.create_user(username=placeholder, email=placeholder)
             user.set_unusable_password()
             user.save(update_fields=['password'])
