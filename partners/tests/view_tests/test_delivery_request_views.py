@@ -34,7 +34,7 @@ class TestDeliveryRequestViews:
 
         partner = PartnerFactory()
         # budget=100: tier calculation returns $10
-        event = EventFactory(order__user=None, order__referred_by_partner=partner, order__budget=100)
+        event = EventFactory(order__referred_by_partner=partner, order__budget=100)
         dr = DeliveryRequestFactory(partner=partner, event=event, status='pending')
 
         url = f"/api/partners/delivery-requests/{dr.token}/respond/"
@@ -55,7 +55,7 @@ class TestDeliveryRequestViews:
 
         partner = PartnerFactory()
         # Snapshot of $7 overrides the tier-calculated $10 for budget=100
-        event = EventFactory(order__user=None, order__referred_by_partner=partner, order__budget=100, commission_amount=Decimal('7'))
+        event = EventFactory(order__referred_by_partner=partner, order__budget=100, commission_amount=Decimal('7'))
         dr = DeliveryRequestFactory(partner=partner, event=event, status='pending')
 
         url = f"/api/partners/delivery-requests/{dr.token}/respond/"
@@ -70,7 +70,7 @@ class TestDeliveryRequestViews:
 
         partner = PartnerFactory()
         other_partner = PartnerFactory()
-        event = EventFactory(order__user=None, order__referred_by_partner=other_partner, order__budget=100)
+        event = EventFactory(order__referred_by_partner=other_partner, order__budget=100)
         dr = DeliveryRequestFactory(partner=partner, event=event, status='pending')
 
         url = f"/api/partners/delivery-requests/{dr.token}/respond/"

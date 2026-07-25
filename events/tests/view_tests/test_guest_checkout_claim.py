@@ -38,7 +38,6 @@ class TestGuestCheckoutClaim:
 
         assert response.status_code == 200, response.data
         order.refresh_from_db()
-        assert order.user_id is None
         assert order.customer_email == 'buyer@example.com'
         assert order.customer_first_name == 'Bo'
         assert order.customer_last_name == 'Buyer'
@@ -63,7 +62,6 @@ class TestGuestCheckoutClaim:
         assert response.status_code == 200, response.data
 
         order.refresh_from_db()
-        assert order.user_id is None
         assert order.customer_email == 'boss@futureflower.app'
         assert order.total_amount == Decimal('125.00')
         staff.refresh_from_db()

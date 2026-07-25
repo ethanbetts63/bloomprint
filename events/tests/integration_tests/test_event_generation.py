@@ -11,7 +11,6 @@ class TestEventGeneration:
     def test_one_time_order_activation_creates_event(self):
         plan = OrderFactory(billing_mode='one_time', status='pending_payment', frequency='monthly')
         payment = Payment.objects.create(
-            user=plan.user,
             order=plan,
             stripe_payment_intent_id="pi_123",
             amount=plan.total_amount,

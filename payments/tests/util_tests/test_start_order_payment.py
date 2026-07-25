@@ -107,7 +107,7 @@ class TestStartOrderPayment:
 
     def test_staff_are_charged_the_order_total_like_anyone_else(self, stripe_intent):
         staff = UserFactory(is_staff=True, is_superuser=True)
-        order = OrderFactory(user=staff, budget=Decimal('500.00'))
+        order = OrderFactory(budget=Decimal('500.00'))
         start_order_payment(order)
 
         assert stripe_intent.call_args.kwargs['amount'] == 50000

@@ -28,29 +28,12 @@ class TestAdminUserSerializer:
         data = AdminUserSerializer(partner.user).data
         assert data['is_partner'] is True
 
-    def test_plan_count_zero_for_user_with_no_plans(self):
+    def test_plan_count_is_zero_users_no_longer_own_orders(self):
+        # Orders are no longer owned by a User; customer identity lives on the
+        # order. plan_count is always 0 for staff/partner accounts.
         user = UserFactory()
         data = AdminUserSerializer(user).data
         assert data['plan_count'] == 0
-
-    def test_plan_count_includes_upfront_plans(self):
-        user = UserFactory()
-        OrderFactory(billing_mode='one_time', user=user)
-        data = AdminUserSerializer(user).data
-        assert data['plan_count'] == 1
-
-    def test_plan_count_includes_subscription_plans(self):
-        user = UserFactory()
-        OrderFactory(billing_mode='recurring', user=user)
-        data = AdminUserSerializer(user).data
-        assert data['plan_count'] == 1
-
-    def test_plan_count_sums_both_types(self):
-        user = UserFactory()
-        OrderFactory(billing_mode='one_time', user=user)
-        OrderFactory(billing_mode='recurring', user=user)
-        data = AdminUserSerializer(user).data
-        assert data['plan_count'] == 2
 
     def test_referred_by_none_when_no_referral(self):
         user = UserFactory()

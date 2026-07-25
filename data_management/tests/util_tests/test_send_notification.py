@@ -7,7 +7,6 @@ def _make_notification(recipient_type, **kwargs):
     notif = MagicMock()
     notif.recipient_type = recipient_type
     notif.recipient_partner = kwargs.get('partner', None)
-    notif.recipient_user = kwargs.get('user', None)
     notif.recipient_email = kwargs.get('email', None)
     return notif
 

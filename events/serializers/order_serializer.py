@@ -16,7 +16,7 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = [
-            'id', 'user', 'status', 'billing_mode', 'currency',
+            'id', 'status', 'billing_mode', 'currency',
             'recipient_first_name', 'recipient_last_name', 'recipient_street_address',
             'recipient_suburb', 'recipient_city', 'recipient_state',
             'recipient_postcode', 'recipient_country',
@@ -30,7 +30,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at', 'events', 'payments',
         ]
         read_only_fields = [
-            'id', 'user', 'status', 'delivery_fee', 'subtotal', 'discount_amount',
+            'id', 'status', 'delivery_fee', 'subtotal', 'discount_amount',
             'total_amount', 'discount_code_display', 'stripe_subscription_id',
             'next_payment_date', 'next_delivery_date',
             'created_at', 'updated_at', 'events', 'payments',

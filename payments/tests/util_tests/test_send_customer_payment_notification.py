@@ -13,7 +13,7 @@ class TestSendCustomerPaymentNotification:
         return mock_response
 
     def test_sends_email_to_order_email_via_mailgun(self):
-        plan = OrderFactory(billing_mode='one_time', user=None, customer_email='customer@example.com')
+        plan = OrderFactory(billing_mode='one_time', customer_email='customer@example.com')
 
         with patch(
             'payments.utils.send_customer_payment_notification.requests.post',
@@ -26,7 +26,7 @@ class TestSendCustomerPaymentNotification:
 
     def test_email_body_contains_customer_first_name(self):
         plan = OrderFactory(
-            billing_mode='one_time', user=None,
+            billing_mode='one_time',
             customer_first_name='Bob', customer_email='bob@example.com',
         )
 
@@ -41,7 +41,7 @@ class TestSendCustomerPaymentNotification:
 
     def test_email_body_contains_recipient_name(self):
         plan = OrderFactory(
-            billing_mode='one_time', user=None, customer_email='customer@example.com',
+            billing_mode='one_time', customer_email='customer@example.com',
             recipient_first_name='Carol', recipient_last_name='Smith',
         )
 
@@ -55,7 +55,7 @@ class TestSendCustomerPaymentNotification:
         assert 'Carol Smith' in body
 
     def test_email_body_contains_start_date_and_budget(self):
-        plan = OrderFactory(billing_mode='one_time', user=None, customer_email='customer@example.com')
+        plan = OrderFactory(billing_mode='one_time', customer_email='customer@example.com')
 
         with patch(
             'payments.utils.send_customer_payment_notification.requests.post',
@@ -68,7 +68,7 @@ class TestSendCustomerPaymentNotification:
         assert str(plan.budget) in body
 
     def test_skips_send_when_order_has_no_email(self):
-        plan = OrderFactory(billing_mode='one_time', user=None, customer_email=None)
+        plan = OrderFactory(billing_mode='one_time', customer_email=None)
 
         with patch(
             'payments.utils.send_customer_payment_notification.requests.post',
@@ -78,7 +78,7 @@ class TestSendCustomerPaymentNotification:
         mock_post.assert_not_called()
 
     def test_mailgun_error_does_not_raise(self):
-        plan = OrderFactory(billing_mode='one_time', user=None, customer_email='fail@example.com')
+        plan = OrderFactory(billing_mode='one_time', customer_email='fail@example.com')
 
         mock_response = MagicMock()
         mock_response.raise_for_status.side_effect = Exception('503 Service Unavailable')

@@ -7,6 +7,9 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("data_management", "0004_notification_recipient_email"),
+        # The backfill reads Notification.recipient_user, so it must run before
+        # this removal regardless of cross-app migration ordering.
+        ("events", "0005_backfill_customer_from_guest"),
     ]
 
     operations = [

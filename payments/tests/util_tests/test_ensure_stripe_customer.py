@@ -10,7 +10,6 @@ from payments.utils.checkout import ensure_stripe_customer
 @pytest.mark.django_db
 def test_creates_stripe_customer_from_order_details(mocker):
     order = OrderFactory(
-        user=None,
         customer_email='buyer@example.com',
         customer_first_name='Buyer',
         customer_last_name='Person',
@@ -32,7 +31,7 @@ def test_creates_stripe_customer_from_order_details(mocker):
 
 @pytest.mark.django_db
 def test_does_nothing_when_order_already_has_a_customer(mocker):
-    order = OrderFactory(user=None, stripe_customer_id='cus_existing', budget=Decimal('80.00'))
+    order = OrderFactory(stripe_customer_id='cus_existing', budget=Decimal('80.00'))
     create = mocker.patch.object(stripe.Customer, 'create')
 
     ensure_stripe_customer(order)

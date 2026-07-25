@@ -16,7 +16,6 @@ class TestWebhookCommissionAmount:
         # budget=150: not < 150, is < 200 → tier gives $15
         plan = OrderFactory(billing_mode='one_time', status='pending_payment', budget=Decimal('150'), frequency='annually')
         payment = PaymentFactory(
-            user=plan.user,
             order=plan,
             stripe_payment_intent_id='pi_upfront_test',
             status='pending',
@@ -41,7 +40,6 @@ class TestWebhookCommissionAmount:
         # budget=75 → tier gives $5
         plan = OrderFactory(billing_mode='one_time', status='pending_payment', budget=Decimal('75'), frequency='annually')
         payment = PaymentFactory(
-            user=plan.user,
             order=plan,
             stripe_payment_intent_id='pi_upfront_test2',
             status='pending',
@@ -69,7 +67,6 @@ class TestWebhookCommissionAmount:
             stripe_subscription_id='sub_existing',
         )
         payment = PaymentFactory(
-            user=plan.user,
             order=plan,
             stripe_payment_intent_id='pi_sub_test',
             status='pending',

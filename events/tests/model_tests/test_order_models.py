@@ -87,5 +87,5 @@ class TestOrderModels:
         assert plan.total_amount == Decimal('120.00')
 
     def test_order_str_representation(self):
-        plan = OrderFactory(billing_mode='one_time')
-        assert str(plan) == f"Order {plan.id} (one_time) for {plan.user.username}"
+        plan = OrderFactory(billing_mode='one_time', customer_email='buyer@example.com')
+        assert str(plan) == f"Order {plan.id} (one_time) for buyer@example.com"

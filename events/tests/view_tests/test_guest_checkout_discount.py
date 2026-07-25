@@ -158,9 +158,9 @@ def _record_usage(code, email):
     from payments.tests.factories.payment_factory import PaymentFactory
     from events.tests.factories.order_factory import OrderFactory
 
-    order = OrderFactory(user=None, customer_email=email)
+    order = OrderFactory(customer_email=email)
     DiscountUsage.objects.create(
-        discount_code=code, payment=PaymentFactory(user=None, order=order)
+        discount_code=code, payment=PaymentFactory(order=order)
     )
 
 
