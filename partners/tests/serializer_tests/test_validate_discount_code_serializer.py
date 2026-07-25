@@ -81,31 +81,30 @@ class TestValidateDiscountCodeSerializer:
         assert order.discount_code is None
         assert order.discount_amount == 0
 
-    def test_apply_discount_attributes_the_order_user_to_the_partner(self):
+    def test_apply_discount_attributes_the_order_to_the_partner(self):
         partner = PartnerFactory(status='active')
         dc = DiscountCodeFactory(partner=partner, is_active=True)
-        order = OrderFactory(billing_mode='one_time', user=UserFactory(), budget=100)
+        order = OrderFactory(billing_mode='one_time', user=None, budget=100)
 
         serializer = serializer_for(dc.code)
         assert serializer.is_valid(), serializer.errors
         serializer.apply_discount(order)
 
-        order.user.refresh_from_db()
-        assert order.user.referred_by_partner == partner
+        order.refresh_from_db()
+        assert order.referred_by_partner == partner
 
     def test_apply_discount_keeps_an_existing_attribution(self):
         first = PartnerFactory(status='active')
         second = PartnerFactory(status='active')
-        user = UserFactory(referred_by_partner=first)
         dc = DiscountCodeFactory(partner=second, is_active=True)
-        order = OrderFactory(billing_mode='one_time', user=user, budget=100)
+        order = OrderFactory(billing_mode='one_time', user=None, budget=100, referred_by_partner=first)
 
         serializer = serializer_for(dc.code)
         assert serializer.is_valid(), serializer.errors
         serializer.apply_discount(order)
 
-        user.refresh_from_db()
-        assert user.referred_by_partner == first
+        order.refresh_from_db()
+        assert order.referred_by_partner == first
 
     def test_apply_discount_works_for_a_recurring_order(self):
         partner = PartnerFactory(status='active')

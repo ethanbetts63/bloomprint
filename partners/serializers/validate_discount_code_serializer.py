@@ -48,10 +48,9 @@ class ValidateDiscountCodeSerializer(serializers.Serializer):
         order.discount_amount = discount_code.discount_amount
         order.save()
 
-        customer = order.user
-        if not customer.referred_by_partner:
-            customer.referred_by_partner = discount_code.partner
-            customer.save(update_fields=['referred_by_partner'])
+        if not order.referred_by_partner:
+            order.referred_by_partner = discount_code.partner
+            order.save(update_fields=['referred_by_partner'])
 
         return {
             'code': discount_code.code,

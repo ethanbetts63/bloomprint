@@ -11,9 +11,11 @@ from events.tests.factories.order_factory import OrderFactory
 class TestCommissionUtils:
     def test_process_referral_commission_success(self):
         partner = PartnerFactory(partner_type='non_delivery')
-        user = UserFactory(referred_by_partner=partner)
-        plan = OrderFactory(billing_mode='one_time', user=user, budget=75)
-        payment = PaymentFactory(user=user, order=plan, status='succeeded')
+        plan = OrderFactory(
+            billing_mode='one_time', user=None, budget=75,
+            referred_by_partner=partner, customer_email='c@example.com',
+        )
+        payment = PaymentFactory(user=None, order=plan, status='succeeded')
 
         process_referral_commission(payment)
 
@@ -23,33 +25,40 @@ class TestCommissionUtils:
         assert commission.commission_type == 'referral'
 
     def test_process_referral_commission_no_partner(self):
-        user = UserFactory(referred_by_partner=None)
-        plan = OrderFactory(billing_mode='one_time', user=user, budget=100)
-        payment = PaymentFactory(user=user, order=plan, status='succeeded')
+        plan = OrderFactory(
+            billing_mode='one_time', user=None, budget=100,
+            referred_by_partner=None, customer_email='c@example.com',
+        )
+        payment = PaymentFactory(user=None, order=plan, status='succeeded')
 
         process_referral_commission(payment)
         assert Commission.objects.count() == 0
 
     def test_process_referral_commission_delivery_partner_skipped(self):
         partner = PartnerFactory(partner_type='delivery')
-        user = UserFactory(referred_by_partner=partner)
-        plan = OrderFactory(billing_mode='one_time', user=user, budget=100)
-        payment = PaymentFactory(user=user, order=plan, status='succeeded')
+        plan = OrderFactory(
+            billing_mode='one_time', user=None, budget=100,
+            referred_by_partner=partner, customer_email='c@example.com',
+        )
+        payment = PaymentFactory(user=None, order=plan, status='succeeded')
 
         process_referral_commission(payment)
         assert Commission.objects.count() == 0
 
     def test_process_referral_commission_limit_exceeded(self):
         partner = PartnerFactory(partner_type='non_delivery')
-        user = UserFactory(referred_by_partner=partner)
-        plan = OrderFactory(billing_mode='one_time', user=user, budget=100)
+        plan = OrderFactory(
+            billing_mode='one_time', user=None, budget=100,
+            referred_by_partner=partner, customer_email='c@example.com',
+        )
 
-        # Create 3 previous succeeded payments
+        # Three previous succeeded payments on orders sharing this email.
         for _ in range(3):
-            PaymentFactory(user=user, order=plan, status='succeeded')
+            prior = OrderFactory(user=None, budget=100, customer_email='c@example.com')
+            PaymentFactory(user=None, order=prior, status='succeeded')
 
         # 4th succeeded payment
-        payment = PaymentFactory(user=user, order=plan, status='succeeded')
+        payment = PaymentFactory(user=None, order=plan, status='succeeded')
 
         process_referral_commission(payment)
         assert Commission.objects.count() == 0
@@ -79,9 +88,11 @@ class TestReferralCommissionTiers:
 
     def test_tiered_commission_applied_to_payment(self):
         partner = PartnerFactory(partner_type='non_delivery')
-        user = UserFactory(referred_by_partner=partner)
-        plan = OrderFactory(billing_mode='one_time', user=user, budget=175)
-        payment = PaymentFactory(user=user, order=plan, status='succeeded')
+        plan = OrderFactory(
+            billing_mode='one_time', user=None, budget=175,
+            referred_by_partner=partner, customer_email='c@example.com',
+        )
+        payment = PaymentFactory(user=None, order=plan, status='succeeded')
 
         process_referral_commission(payment)
 

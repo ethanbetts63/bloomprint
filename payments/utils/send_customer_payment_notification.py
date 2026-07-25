@@ -27,17 +27,17 @@ def _format_address_lines(order):
     return lines
 
 
-def send_customer_payment_notification(user, order):
+def send_customer_payment_notification(order):
     """
     Sends an immediate payment confirmation email to the customer after a successful payment.
     Includes every order detail the customer entered at checkout, so they can
     catch and report any mistakes before the first delivery.
     """
-    if not user.email:
-        logger.warning("No email for user %s — skipping customer payment notification.", user.pk)
+    if not order.customer_email:
+        logger.warning("No email on order %s — skipping customer payment notification.", order.pk)
         return
 
-    first_name = user.first_name or user.username
+    first_name = order.customer_first_name or 'there'
     recipient_name = f"{order.recipient_first_name} {order.recipient_last_name}".strip()
     address_lines = _format_address_lines(order)
 
@@ -98,7 +98,7 @@ def send_customer_payment_notification(user, order):
             auth=("api", settings.MAILGUN_API_KEY),
             data={
                 "from": settings.DEFAULT_FROM_EMAIL,
-                "to": [user.email],
+                "to": [order.customer_email],
                 "subject": "Your FutureFlower order is confirmed",
                 "text": text_body,
                 "html": html_body,
@@ -107,4 +107,4 @@ def send_customer_payment_notification(user, order):
         )
         response.raise_for_status()
     except Exception as e:
-        logger.error("Failed to send customer payment notification for user %s: %s", user.pk, e)
+        logger.error("Failed to send customer payment notification for order %s: %s", order.pk, e)

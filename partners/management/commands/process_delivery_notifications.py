@@ -24,7 +24,6 @@ class Command(BaseCommand):
 
         for event in events_needing_request:
             order = event.order
-            user = order.user
 
             delivery_lat = getattr(order, 'latitude', None)
             delivery_lng = getattr(order, 'longitude', None)
@@ -37,7 +36,7 @@ class Command(BaseCommand):
 
             chosen_partner = None
 
-            referred_partner = getattr(user, 'referred_by_partner', None)
+            referred_partner = order.referred_by_partner
             if (referred_partner and referred_partner.partner_type == 'delivery'
                     and referred_partner.status == 'active'
                     and referred_partner.latitude is not None

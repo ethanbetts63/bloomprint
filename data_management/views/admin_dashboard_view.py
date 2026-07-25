@@ -15,21 +15,21 @@ class AdminDashboardView(APIView):
         to_order_qs = (
             Event.objects
             .filter(status='scheduled', delivery_date__lte=cutoff)
-            .select_related('order', 'order__user')
+            .select_related('order')
             .order_by('delivery_date')
         )
 
         ordered_qs = (
             Event.objects
             .filter(status='ordered')
-            .select_related('order', 'order__user')
+            .select_related('order')
             .order_by('delivery_date')
         )
 
         delivered_qs = (
             Event.objects
             .filter(status='delivered')
-            .select_related('order', 'order__user')
+            .select_related('order')
             .order_by('-delivered_at')[:50]
         )
 

@@ -21,20 +21,23 @@ def get_referral_commission_amount(budget):
 
 
 def process_referral_commission(payment):
-    partner = payment.user.referred_by_partner
+    order = payment.order
+    partner = order.referred_by_partner
     if not partner:
         return
 
     if partner.partner_type != 'non_delivery':
         return
 
+    # Referral commission is limited to a customer's first few orders. With no
+    # customer User, "same customer" is identified by the order's email.
+    customer_email = order.customer_email
     succeeded_count = Payment.objects.filter(
-        user=payment.user, status='succeeded'
-    ).count()
+        order__customer_email__iexact=customer_email, status='succeeded'
+    ).count() if customer_email else 1
     if succeeded_count > 3:
         return
 
-    order = payment.order
     budget = getattr(order, 'budget', None)
     if not budget:
         return

@@ -20,6 +20,12 @@ def start_order(client, budget='125.00'):
 
 @pytest.mark.django_db
 class TestGuestCheckoutClaim:
+    def test_start_creates_an_order_but_no_user(self):
+        client = APIClient()
+        before = User.objects.count()
+        start_order(client)
+        assert User.objects.count() == before
+
     def test_claim_records_the_customer_details_on_the_order(self):
         client = APIClient()
         order = start_order(client)
@@ -32,17 +38,15 @@ class TestGuestCheckoutClaim:
 
         assert response.status_code == 200, response.data
         order.refresh_from_db()
-        assert order.user.email == 'buyer@example.com'
-        assert order.user.first_name == 'Bo'
-        assert order.user.last_name == 'Buyer'
+        assert order.user_id is None
+        assert order.customer_email == 'buyer@example.com'
+        assert order.customer_first_name == 'Bo'
+        assert order.customer_last_name == 'Buyer'
 
-    def test_claiming_someone_elses_email_does_not_take_over_their_account(self):
+    def test_claiming_an_existing_staff_email_does_not_touch_that_account(self):
         """
-        The email is never verified. Resolving it against existing accounts used to
-        hand the order to whoever held the address, which put this customer's
-        payment on their Stripe customer and their terms acceptance on the wrong
-        person. A staff address additionally billed the order at $1 via the (now
-        removed) staff override.
+        The email is never verified and is stored only on the order, so claiming
+        with a staff address neither resolves to that account nor grants anything.
         """
         staff = User.objects.create_user(
             username='boss', email='boss@futureflower.app', is_staff=True
@@ -50,7 +54,6 @@ class TestGuestCheckoutClaim:
 
         client = APIClient()
         order = start_order(client, budget='125.00')
-        placeholder_user_id = order.user_id
 
         response = client.post(
             CLAIM_URL,
@@ -60,17 +63,13 @@ class TestGuestCheckoutClaim:
         assert response.status_code == 200, response.data
 
         order.refresh_from_db()
-        assert order.user_id == placeholder_user_id
-        assert order.user_id != staff.pk
-        assert not order.user.is_staff
+        assert order.user_id is None
+        assert order.customer_email == 'boss@futureflower.app'
         assert order.total_amount == Decimal('125.00')
+        staff.refresh_from_db()
+        assert staff.is_staff
 
     def test_two_orders_may_share_an_email_without_colliding(self):
-        """
-        `username` must stay the opaque placeholder. Setting it to the email is
-        what made a second order with the same address collide, which is why the
-        account-takeover lookup existed.
-        """
         first_client = APIClient()
         first_order = start_order(first_client)
         response = first_client.post(
@@ -92,5 +91,4 @@ class TestGuestCheckoutClaim:
         first_order.refresh_from_db()
         second_order.refresh_from_db()
         assert first_order.pk != second_order.pk
-        assert first_order.user_id != second_order.user_id
-        assert first_order.user.email == second_order.user.email == 'repeat@example.com'
+        assert first_order.customer_email == second_order.customer_email == 'repeat@example.com'

@@ -10,6 +10,7 @@ def test_admin_event_serializer_fields():
     """
     order = OrderFactory(billing_mode='one_time',
         budget=100.00,
+        customer_email="jane.buyer@example.com",
         recipient_first_name="Jane",
         recipient_last_name="Doe",
         delivery_notes="Leave at door",
@@ -29,4 +30,4 @@ def test_admin_event_serializer_fields():
     assert data['delivery_notes'] == "Leave at door"
     assert data['order_type'] == "One-time"
     assert data['flower_notes'] == "Occasion / vibe: Romance"
-    assert data['customer_email'] == order.user.email
+    assert data['customer_email'] == order.customer_email

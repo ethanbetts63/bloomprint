@@ -66,6 +66,13 @@ class Order(models.Model):
         related_name='order_acceptances',
         help_text="The terms version the customer accepted at checkout."
     )
+    referred_by_partner = models.ForeignKey(
+        'partners.Partner',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='referred_orders',
+        help_text="The partner who referred this order via discount code."
+    )
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
@@ -213,7 +220,8 @@ class Order(models.Model):
         )
 
     def __str__(self):
-        return f"Order {self.id} ({self.billing_mode}) for {self.user.username}"
+        who = self.customer_email or 'unclaimed'
+        return f"Order {self.id} ({self.billing_mode}) for {who}"
 
     class Meta:
         ordering = ['-created_at']

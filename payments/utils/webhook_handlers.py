@@ -35,7 +35,7 @@ def _create_first_event(order, payment_intent_id):
     )
     create_admin_event_notifications(event)
     create_customer_delivery_day_notification(event)
-    send_customer_payment_notification(order.user, order)
+    send_customer_payment_notification(order)
     send_admin_payment_notification(payment_intent_id, order=order)
 
 
@@ -74,7 +74,6 @@ def handle_payment_intent_succeeded(payment_intent):
                 if not DiscountUsage.objects.filter(payment=payment).exists():
                     DiscountUsage.objects.create(
                         discount_code=payment.order.discount_code,
-                        user=payment.user,
                         payment=payment,
                     )
                     print(f"DiscountUsage created for Payment {payment.pk}")
@@ -164,7 +163,6 @@ def handle_invoice_payment_succeeded(invoice):
         payment, created = Payment.objects.get_or_create(
             stripe_payment_intent_id=payment_intent_id,
             defaults={
-                'user': order.user,
                 'order': order,
                 'amount': invoice.get('amount_paid') / 100.0,
                 'status': 'succeeded',

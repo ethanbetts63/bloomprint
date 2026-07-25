@@ -14,7 +14,7 @@ class AdminPlanListView(APIView):
         plan_type_filter = request.query_params.get('plan_type', '').strip()
         search = request.query_params.get('search', '').strip()
 
-        orders_qs = Order.objects.select_related('user')
+        orders_qs = Order.objects.all()
 
         if status_filter:
             orders_qs = orders_qs.filter(status=status_filter)
@@ -24,9 +24,9 @@ class AdminPlanListView(APIView):
 
         if search:
             q = (
-                Q(user__first_name__icontains=search)
-                | Q(user__last_name__icontains=search)
-                | Q(user__email__icontains=search)
+                Q(customer_first_name__icontains=search)
+                | Q(customer_last_name__icontains=search)
+                | Q(customer_email__icontains=search)
                 | Q(recipient_first_name__icontains=search)
                 | Q(recipient_last_name__icontains=search)
             )

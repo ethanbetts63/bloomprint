@@ -45,9 +45,8 @@ class TestAdminPlanListView:
         assert active.pk in ids
         assert len(ids) == 1
 
-    def test_search_by_user_email(self):
-        user = UserFactory(email='findme@example.com')
-        plan = OrderFactory(billing_mode='one_time', user=user)
+    def test_search_by_customer_email(self):
+        plan = OrderFactory(billing_mode='one_time', user=None, customer_email='findme@example.com')
         OrderFactory(billing_mode='one_time', )
         response = self.client.get(self._url(), {'search': 'findme'})
         ids = [p['id'] for p in response.data]

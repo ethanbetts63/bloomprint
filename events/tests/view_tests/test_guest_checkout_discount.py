@@ -51,7 +51,7 @@ class TestGuestCheckoutDiscount:
 
     def test_applying_a_code_attributes_the_order_to_the_partner(self):
         """Attribution is what pays the affiliate; process_referral_commission
-        reads it off the order's user at payment time."""
+        reads it off the order at payment time."""
         client = APIClient()
         order = start_order(client)
         code = DiscountCodeFactory(code='SAVE5', discount_amount=Decimal('5.00'))
@@ -59,7 +59,7 @@ class TestGuestCheckoutDiscount:
         client.post(DISCOUNT_URL, {'code': 'SAVE5'}, format='json')
 
         order.refresh_from_db()
-        assert order.user.referred_by_partner == code.partner
+        assert order.referred_by_partner == code.partner
 
     def test_an_empty_code_clears_the_discount(self):
         client = APIClient()
@@ -156,11 +156,11 @@ def _record_usage(code, email):
     """A past redemption of this code by this email."""
     from partners.models import DiscountUsage
     from payments.tests.factories.payment_factory import PaymentFactory
-    from users.tests.factories.user_factory import UserFactory
+    from events.tests.factories.order_factory import OrderFactory
 
-    user = UserFactory(email=email)
+    order = OrderFactory(user=None, customer_email=email)
     DiscountUsage.objects.create(
-        discount_code=code, user=user, payment=PaymentFactory(user=user)
+        discount_code=code, payment=PaymentFactory(user=None, order=order)
     )
 
 

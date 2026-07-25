@@ -11,7 +11,8 @@ class DiscountUsage(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='discount_usages'
+        related_name='discount_usages',
+        null=True, blank=True,
     )
     payment = models.OneToOneField(
         'payments.Payment',
@@ -21,4 +22,5 @@ class DiscountUsage(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.discount_code.code} used by {self.user.email}"
+        email = self.payment.order.customer_email or 'unknown'
+        return f"{self.discount_code.code} used by {email}"

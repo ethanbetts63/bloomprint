@@ -1,17 +1,14 @@
-import uuid
-
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.middleware.csrf import get_token
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from data_management.models import TermsAcceptance, TermsAndConditions
+from data_management.models import TermsAndConditions
 from events.models import CheckoutSession, Order
-from users.models.user import GUEST_USERNAME_SUFFIX
 from events.serializers import OrderSerializer
 from partners.serializers import ValidateDiscountCodeSerializer
 from payments.utils.checkout import (
@@ -19,22 +16,20 @@ from payments.utils.checkout import (
     validate_order_ready_for_payment,
 )
 
-User = get_user_model()
-
 CHECKOUT_COOKIE = 'guest_checkout_token'
 
 
 def _discount_already_used_by_email(code, email):
     """
     Whether this discount code has already been redeemed by this email.
-    Guests get a fresh placeholder user per order, so the email — set at claim
-    time — is the only identity that persists across checkouts. (Card
-    fingerprint tracking would be stronger; deliberately deferred.)
+    Orders store the customer email directly, so it is the identity that
+    persists across checkouts. (Card fingerprint tracking would be stronger;
+    deliberately deferred.)
     """
     from partners.models import DiscountUsage
     return DiscountUsage.objects.filter(
         discount_code__code__iexact=code,
-        user__email__iexact=email,
+        payment__order__customer_email__iexact=email,
     ).exists()
 
 
@@ -61,7 +56,7 @@ class GuestCheckoutView(APIView):
         if not token:
             return None
         try:
-            session = CheckoutSession.objects.select_related('order__user').get(
+            session = CheckoutSession.objects.select_related('order').get(
                 token_hash=CheckoutSession.hash_token(token)
             )
         except CheckoutSession.DoesNotExist:
@@ -103,19 +98,20 @@ class GuestCheckoutView(APIView):
         if not session:
             return Response({'detail': 'Your checkout session has expired. Please start again.'}, status=410)
         if action == 'order':
-            data = OrderSerializer(session.order).data
-            data['customer_email'] = session.customer_email or ''
-            data['customer_first_name'] = session.order.user.first_name or ''
-            data['customer_last_name'] = session.order.user.last_name or ''
-            data['terms_accepted'] = self._has_accepted_current_terms(session.order.user)
+            order = session.order
+            data = OrderSerializer(order).data
+            data['customer_email'] = order.customer_email or ''
+            data['customer_first_name'] = order.customer_first_name or ''
+            data['customer_last_name'] = order.customer_last_name or ''
+            data['terms_accepted'] = self._has_accepted_current_terms(order)
             return Response(data)
         return Response({'detail': 'Unknown checkout action.'}, status=404)
 
-    def _has_accepted_current_terms(self, user):
+    def _has_accepted_current_terms(self, order):
         latest = TermsAndConditions.objects.filter(terms_type='customer').order_by('-published_at').first()
         if not latest:
             return False
-        return TermsAcceptance.objects.filter(user=user, terms=latest).exists()
+        return order.accepted_terms_id == latest.id
 
     @transaction.atomic
     def start(self, request):
@@ -123,11 +119,7 @@ class GuestCheckoutView(APIView):
         if existing and existing.order.status == 'pending_payment':
             order = existing.order
         else:
-            placeholder = f'guest-{uuid.uuid4()}{GUEST_USERNAME_SUFFIX}'
-            user = User.objects.create_user(username=placeholder, email=placeholder)
-            user.set_unusable_password()
-            user.save(update_fields=['password'])
-            order = Order.objects.create(user=user, billing_mode='one_time')
+            order = Order.objects.create(billing_mode='one_time')
             _, token = CheckoutSession.create_for_order(order)
 
         serializer = OrderSerializer(order, data=request.data.get('brief', {}), partial=True)
@@ -151,15 +143,15 @@ class GuestCheckoutView(APIView):
         if not email or not first_name or not last_name:
             return Response({'detail': 'First name, last name, and email are required.'}, status=400)
 
-        customer = session.order.user
-        customer.email = email
-        customer.first_name = first_name
-        customer.last_name = last_name
-        customer.save(update_fields=['email', 'first_name', 'last_name'])
+        order = session.order
+        order.customer_email = email
+        order.customer_first_name = first_name
+        order.customer_last_name = last_name
+        order.save(update_fields=['customer_email', 'customer_first_name', 'customer_last_name'])
 
         session.customer_email = email
         session.save(update_fields=['customer_email', 'updated_at'])
-        return Response(OrderSerializer(session.order).data)
+        return Response(OrderSerializer(order).data)
 
     def make_recurring(self, request, session):
         frequency = request.data.get('frequency')
@@ -187,7 +179,12 @@ class GuestCheckoutView(APIView):
         latest = TermsAndConditions.objects.filter(terms_type='customer').order_by('-published_at').first()
         if not latest:
             return Response({'detail': 'Customer terms are unavailable.'}, status=404)
-        _, created = TermsAcceptance.objects.get_or_create(user=session.order.user, terms=latest)
+        order = session.order
+        created = order.accepted_terms_id != latest.id
+        order.accepted_terms = latest
+        if order.terms_accepted_at is None:
+            order.terms_accepted_at = timezone.now()
+        order.save(update_fields=['accepted_terms', 'terms_accepted_at'])
         return Response({'accepted': True, 'created': created}, status=201 if created else 200)
 
     def checkout(self, session):

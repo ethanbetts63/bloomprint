@@ -75,10 +75,9 @@ class DeliveryRequestRespondView(APIView):
         dr.status = 'declined'
         dr.save()
 
-        # If the user was referred by this partner, create a commission
+        # If the order was referred by this partner, create a commission
         order = dr.event.order
-        user = order.user
-        if hasattr(user, 'referred_by_partner') and user.referred_by_partner == dr.partner:
+        if order.referred_by_partner_id == dr.partner_id:
             budget = getattr(order, 'budget', None)
             if budget:
                 # Use snapshotted commission_amount from event if available, else calculate

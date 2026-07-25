@@ -7,12 +7,12 @@ def test_admin_plan_serializer_upfront():
     """
     Test AdminPlanSerializer correctly identifies an upfront plan.
     """
-    plan = OrderFactory(billing_mode='one_time', )
+    plan = OrderFactory(billing_mode='one_time', customer_email='buyer@example.com')
     serializer = AdminPlanSerializer(plan)
     data = serializer.data
     assert data['plan_type'] == 'one_time'
     assert data['status'] == plan.status
-    assert data['customer_email'] == plan.user.email
+    assert data['customer_email'] == plan.customer_email
 
 @pytest.mark.django_db
 def test_admin_plan_serializer_subscription():

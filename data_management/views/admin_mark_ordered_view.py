@@ -15,7 +15,7 @@ class AdminMarkOrderedView(APIView):
         try:
             event = (
                 Event.objects
-                .select_related('order', 'order__user')
+                .select_related('order')
                 .get(pk=pk)
             )
         except Event.DoesNotExist:

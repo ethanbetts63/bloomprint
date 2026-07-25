@@ -3,10 +3,7 @@ from events.models import Order
 
 
 class AdminPlanDetailSerializer(serializers.ModelSerializer):
-    customer_id = serializers.IntegerField(source='user.id', read_only=True)
-    customer_first_name = serializers.CharField(source='user.first_name', read_only=True)
-    customer_last_name = serializers.CharField(source='user.last_name', read_only=True)
-    customer_email = serializers.EmailField(source='user.email', read_only=True)
+    customer_id = serializers.IntegerField(source='id', read_only=True)
     plan_type = serializers.CharField(source='billing_mode', read_only=True)
     events = serializers.SerializerMethodField()
 

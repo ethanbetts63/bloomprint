@@ -13,7 +13,6 @@ class AdminPlanDetailView(APIView):
         try:
             order = (
                 Order.objects
-                .select_related('user')
                 .prefetch_related('events')
                 .get(pk=pk)
             )

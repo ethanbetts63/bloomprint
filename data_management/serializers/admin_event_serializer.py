@@ -23,10 +23,10 @@ class AdminEventSerializer(serializers.ModelSerializer):
 
     flower_notes = serializers.CharField(source='order.flower_notes')
 
-    customer_id = serializers.IntegerField(source='order.user.id')
-    customer_first_name = serializers.CharField(source='order.user.first_name')
-    customer_last_name = serializers.CharField(source='order.user.last_name')
-    customer_email = serializers.EmailField(source='order.user.email')
+    customer_id = serializers.IntegerField(source='order.id')
+    customer_first_name = serializers.CharField(source='order.customer_first_name')
+    customer_last_name = serializers.CharField(source='order.customer_last_name')
+    customer_email = serializers.EmailField(source='order.customer_email')
 
     class Meta:
         model = Event
