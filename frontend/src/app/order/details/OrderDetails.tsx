@@ -28,8 +28,7 @@ interface OrderDetailsProps {
 /**
  * The final step of the guest ordering flow before payment: contact details,
  * optional subscription, promotions, and the order total. The brief itself was
- * already reviewed step by step, so nothing here re-summarizes it — the read-
- * only view of an existing order is PlanOverview.
+ * already reviewed step by step, so nothing here re-summarizes it.
  */
 const OrderDetails = ({ initialOrder }: OrderDetailsProps) => {
   const router = useRouter();

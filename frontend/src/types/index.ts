@@ -2,23 +2,17 @@
 
 export type { DecodedToken } from './DecodedToken';
 export type { AuthResponse } from './AuthResponse';
-export type { PaymentHistoryCardProps } from './PaymentHistoryCardProps';
 export type { BannerProps } from './BannerProps';
 export type { SelectableTagProps } from './SelectableTagProps';
 export type { OrderRecipientEditorProps } from './OrderRecipientEditorProps';
 export type { OrderPreferencesEditorProps } from './OrderPreferencesEditorProps';
-export type { PlanDisplayProps } from './PlanDisplayProps';
-export type { PlanActivationBannerProps } from './PlanActivationBannerProps';
 
 export type { FaqProps } from './FaqProps';
-export type { UserDetailsSummaryProps } from './UserDetailsSummaryProps';
 export type { ArticleCarouselProps } from './ArticleCarouselProps';
 export type { ArticleLayoutProps } from './ArticleLayoutProps';
 export type { FaqV2Props } from './FaqV2Props';
 export type { HeroProps } from './HeroProps';
 export type { HeroV2Props } from './HeroV2Props';
-export type { NextDeliveryInfo } from './NextDeliveryInfo';
-export type { NextDeliveryCardProps } from './NextDeliveryCardProps';
 export type { OtherSite } from './OtherSite';
 export type { OtherSitesProps } from './OtherSitesProps';
 export type { AuthContextType } from './AuthContextType';
@@ -28,7 +22,6 @@ export type { DeliveryEvent } from './DeliveryEvent';
 export type { DeliveryEventCreationResponse } from './DeliveryEventCreationResponse';
 export type { RecipientData } from './RecipientData';
 export type { RecipientFormProps } from './RecipientFormProps';
-export type { ProfileFormProps } from './ProfileFormProps';
 export type { EventCreationData } from './EventCreationData';
 export type { CheckoutFormProps } from './CheckoutFormProps';
 export type { Payment } from './Payment';
