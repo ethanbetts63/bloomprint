@@ -26,6 +26,21 @@ def test_notification_recipient_customer():
     assert notification.recipient_partner is None
 
 @pytest.mark.django_db
+def test_notification_stores_recipient_email():
+    """
+    Customer notifications carry the recipient email directly, so no user row
+    is needed.
+    """
+    notification = NotificationFactory(
+        recipient_type='customer',
+        recipient_user=None,
+        recipient_partner=None,
+        recipient_email='buyer@example.com',
+    )
+    assert notification.recipient_email == 'buyer@example.com'
+
+
+@pytest.mark.django_db
 def test_notification_recipient_partner():
     """
     Test creation of a notification for a partner.
