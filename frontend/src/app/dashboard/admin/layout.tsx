@@ -1,7 +1,8 @@
 'use client';
 
 import { LayoutDashboard, ClipboardList, CalendarRange, Users, Store, Wallet } from 'lucide-react';
-import DashboardShell, { type DashboardNavSection } from '@/shared_components/dashboard/DashboardShell';
+import DashboardShell, { type DashboardNavSection } from '@/components/dashboard/DashboardShell';
+import AdminGuard from '@/components/dashboard/AdminGuard';
 
 const nav: DashboardNavSection[] = [
   {
@@ -28,8 +29,10 @@ const nav: DashboardNavSection[] = [
 
 export default function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <DashboardShell role="admin" brandTitle="FutureFlower" brandSubtitle="Admin" nav={nav}>
-      {children}
-    </DashboardShell>
+    <AdminGuard>
+      <DashboardShell role="admin" brandTitle="FutureFlower" brandSubtitle="Admin" nav={nav}>
+        {children}
+      </DashboardShell>
+    </AdminGuard>
   );
 }

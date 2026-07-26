@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from 'next/navigation';
-import { Card, CardContent } from '@/shared_components/ui/card';
-import { Button } from '@/shared_components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { CreditCard } from 'lucide-react';
 import type { StripeConnectBannerProps } from '@/types/StripeConnectBannerProps';
 

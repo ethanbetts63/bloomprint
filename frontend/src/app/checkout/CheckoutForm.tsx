@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
-import { Button } from '@/shared_components/ui/button';
-import { Spinner } from '@/shared_components/ui/spinner';
+import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 
 import type { CheckoutFormProps } from '@/types/CheckoutFormProps';
 

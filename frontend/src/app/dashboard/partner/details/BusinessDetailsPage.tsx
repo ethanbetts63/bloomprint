@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Input } from '@/shared_components/ui/input';
-import { Label } from '@/shared_components/ui/label';
-import { Button } from '@/shared_components/ui/button';
-import { Spinner } from '@/shared_components/ui/spinner';
-import ServiceAreaMap from '@/shared_components/ServiceAreaMap';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
+import ServiceAreaMap from '@/components/marketing/ServiceAreaMap';
 import DeleteAccountSection from '@/app/dashboard/partner/details/DeleteAccountSection';
-import UnifiedSummaryCard from '@/shared_components/form_flow/UnifiedSummaryCard';
-import FlowBackButton from '@/shared_components/form_flow/FlowBackButton';
+import UnifiedSummaryCard from '@/components/order/UnifiedSummaryCard';
+import FlowBackButton from '@/components/order/FlowBackButton';
 import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { getPartnerDashboard, updatePartnerDetails } from '@/api/partners';

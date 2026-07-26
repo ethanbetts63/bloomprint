@@ -1,9 +1,9 @@
-﻿"use client";
+"use client";
 
 import { useState } from 'react';
 import { deleteAccount } from '@/api';
-import { Button } from "@/shared_components/ui/button";
-import { Alert, AlertDescription, AlertTitle } from "@/shared_components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal } from "lucide-react";
 import {
     AlertDialog,
@@ -15,7 +15,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
-} from "@/shared_components/ui/alert-dialog";
+} from "@/components/ui/alert-dialog";
 import { errorMessage } from '@/lib/errors';
 
 const DeleteAccountSection = () => {

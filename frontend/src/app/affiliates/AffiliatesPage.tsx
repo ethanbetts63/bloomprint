@@ -1,12 +1,12 @@
 "use client";
 
 import { useRef } from 'react';
-import JsonLd from '@/shared_components/JsonLd';
+import JsonLd from '@/components/marketing/JsonLd';
 import { HeroAffiliatesPage } from './HeroAffiliatesPage';
 import { ValuePropsAffiliates } from './ValuePropsAffiliates';
 import { WhyFutureFlowerAffiliatesSection } from './WhyFutureFlowerAffiliatesSection';
-import { HowItWorksSection } from '@/shared_components/HowItWorksSection';
-import type { HowItWorksStep } from '@/shared_components/HowItWorksSection';
+import { HowItWorksSection } from '@/components/marketing/HowItWorksSection';
+import type { HowItWorksStep } from '@/components/marketing/HowItWorksSection';
 import { ContentIdeasSection } from './ContentIdeasSection';
 import petalImage from '@/assets/petal-1280w.webp';
 import floristImage from '@/assets/florist-1280w.webp';

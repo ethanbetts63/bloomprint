@@ -1,7 +1,7 @@
 
 import Image from 'next/image';
-import { LandingHero } from '@/shared_components/LandingHero';
-import PartnerRegistrationForm from '@/shared_components/PartnerRegistrationForm';
+import { LandingHero } from '@/components/marketing/LandingHero';
+import PartnerRegistrationForm from '@/components/marketing/PartnerRegistrationForm';
 
 import deliveryImage from '@/assets/delivery.webp';
 

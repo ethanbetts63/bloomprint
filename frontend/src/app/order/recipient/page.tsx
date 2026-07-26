@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
-import RecipientPage from '@/app/order/recipient/RecipientPage';
+import GuestRecipientEditor from '@/app/order/recipient/GuestRecipientEditor';
+import StepProgressBar from '@/components/order/StepProgressBar';
 import { getGuestOrderServerSide } from '@/lib/guestCheckoutServer';
 
 export default async function Page() {
@@ -7,5 +8,10 @@ export default async function Page() {
   // No draft to edit — start again from the homepage form.
   if (!order) redirect('/');
 
-  return <RecipientPage initialOrder={order} />;
+  return (
+    <>
+      <StepProgressBar currentStep={2} totalSteps={3} planName="Single Delivery Plan" />
+      <GuestRecipientEditor initialOrder={order} />
+    </>
+  );
 }

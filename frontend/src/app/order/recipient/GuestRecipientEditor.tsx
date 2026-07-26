@@ -2,12 +2,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import PlanEditorShell from '@/shared_components/form_flow/PlanEditorShell';
-import RecipientForm from '@/shared_components/form_flow/RecipientForm';
-import { Checkbox } from '@/shared_components/ui/checkbox';
-import { Label } from '@/shared_components/ui/label';
-import { Input } from '@/shared_components/ui/input';
-import { Textarea } from '@/shared_components/ui/textarea';
+import PlanEditorShell from '@/components/order/PlanEditorShell';
+import RecipientForm from '@/components/order/RecipientForm';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { claimGuestCheckout, updateGuestOrder } from '@/api/guestCheckout';
 import { errorMessage } from '@/lib/errors';
 import { recipientFromPlan } from '@/lib/recipientData';

@@ -1,10 +1,10 @@
-﻿"use client";
+"use client";
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared_components/ui/card';
-import { Button } from '@/shared_components/ui/button';
-import { Spinner } from '@/shared_components/ui/spinner';
-import { Badge } from '@/shared_components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
+import { Badge } from '@/components/ui/badge';
 import { CheckCircle, XCircle, MapPin, Calendar, DollarSign } from 'lucide-react';
 import { toast } from 'sonner';
 import { getDeliveryRequestByToken, respondToDeliveryRequest, markDeliveryComplete } from '@/api/partners';

@@ -3,13 +3,13 @@
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { cn } from "@/lib/utils"
-import { Button } from "@/shared_components/ui/button"
-import { Card, CardContent } from "@/shared_components/ui/card"
-import { Input } from "@/shared_components/ui/input"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared_components/ui/form";
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
-import { Spinner } from "@/shared_components/ui/spinner";
+import { Spinner } from "@/components/ui/spinner";
 
 type LoginFormData = {
   email: string;

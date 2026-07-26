@@ -3,12 +3,12 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getAdminEvent, markEventOrdered } from '@/api/admin';
 import type { AdminEvent } from '@/types/AdminEvent';
-import { Spinner } from '@/shared_components/ui/spinner';
-import { Button } from '@/shared_components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
+import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import UnifiedSummaryCard from '@/shared_components/form_flow/UnifiedSummaryCard';
-import SummarySection from '@/shared_components/SummarySection';
-import FlowBackButton from '@/shared_components/form_flow/FlowBackButton';
+import UnifiedSummaryCard from '@/components/order/UnifiedSummaryCard';
+import SummarySection from '@/components/SummarySection';
+import FlowBackButton from '@/components/order/FlowBackButton';
 import { errorMessage } from '@/lib/errors';
 
 function toLocalDatetimeInputValue(date: Date): string {

@@ -4,10 +4,10 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getAdminPlanDetail } from '@/api/admin';
 import type { AdminPlanDetail } from '@/types/AdminPlanDetail';
-import { Spinner } from '@/shared_components/ui/spinner';
-import UnifiedSummaryCard from '@/shared_components/form_flow/UnifiedSummaryCard';
-import SummarySection from '@/shared_components/SummarySection';
-import FlowBackButton from '@/shared_components/form_flow/FlowBackButton';
+import { Spinner } from '@/components/ui/spinner';
+import UnifiedSummaryCard from '@/components/order/UnifiedSummaryCard';
+import SummarySection from '@/components/SummarySection';
+import FlowBackButton from '@/components/order/FlowBackButton';
 import { errorMessage } from '@/lib/errors';
 
 function formatDate(dtStr: string): string {

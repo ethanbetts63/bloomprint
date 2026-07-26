@@ -1,4 +1,4 @@
-import type { ButtonProps } from '@/shared_components/ui/button';
+import type { ButtonProps } from '@/components/ui/button';
 
 export interface FlowBackButtonProps extends ButtonProps {
   to?: string;

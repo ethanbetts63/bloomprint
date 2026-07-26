@@ -1,10 +1,10 @@
-﻿"use client";
+"use client";
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared_components/ui/card';
-import { Spinner } from '@/shared_components/ui/spinner';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Spinner } from '@/components/ui/spinner';
 import { CheckCircle, XCircle } from 'lucide-react';
-import { Button } from '@/shared_components/ui/button';
+import { Button } from '@/components/ui/button';
 import { getStripeConnectStatus } from '@/api/partners';
 
 const StripeConnectReturnPage = () => {

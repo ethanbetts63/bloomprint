@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { getAdminPartners } from '@/api/admin';
 import type { AdminPartner } from '@/types/AdminPartner';
 import { Loader2 } from 'lucide-react';
-import UnifiedSummaryCard from '@/shared_components/form_flow/UnifiedSummaryCard';
-import SummarySection from '@/shared_components/SummarySection';
+import UnifiedSummaryCard from '@/components/order/UnifiedSummaryCard';
+import SummarySection from '@/components/SummarySection';
 import { errorMessage } from '@/lib/errors';
 
 type StatusFilter = 'all' | 'pending' | 'active' | 'suspended' | 'denied';

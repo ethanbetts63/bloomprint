@@ -1,5 +1,5 @@
 
-import { FaqV2 } from '@/shared_components/FaqV2';
+import { FaqV2 } from '@/components/marketing/FaqV2';
 import type { FaqItem } from '@/types/FaqItem';
 import { DELIVERY_FEE, DELIVERY_INCLUDED_THRESHOLD } from '@/lib/systemConstants';
 

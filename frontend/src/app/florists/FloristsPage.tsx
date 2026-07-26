@@ -1,10 +1,10 @@
 "use client";
 
 import { useRef } from 'react';
-import JsonLd from '@/shared_components/JsonLd';
-import { HowItWorksSection } from '@/shared_components/HowItWorksSection';
-import type { HowItWorksStep } from '@/shared_components/HowItWorksSection';
-import { FaqV2 } from '@/shared_components/FaqV2';
+import JsonLd from '@/components/marketing/JsonLd';
+import { HowItWorksSection } from '@/components/marketing/HowItWorksSection';
+import type { HowItWorksStep } from '@/components/marketing/HowItWorksSection';
+import { FaqV2 } from '@/components/marketing/FaqV2';
 import floristPackingImage from '@/assets/florist_packing-1280w.webp';
 import petalImage from '@/assets/petal-1280w.webp';
 import deliveryImage from '@/assets/delivery-1280w.webp';

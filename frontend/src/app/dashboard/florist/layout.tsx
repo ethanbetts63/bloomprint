@@ -1,7 +1,7 @@
 'use client';
 
 import { LayoutDashboard } from 'lucide-react';
-import DashboardShell, { type DashboardNavSection } from '@/shared_components/dashboard/DashboardShell';
+import DashboardShell, { type DashboardNavSection } from '@/components/dashboard/DashboardShell';
 
 const nav: DashboardNavSection[] = [
   {

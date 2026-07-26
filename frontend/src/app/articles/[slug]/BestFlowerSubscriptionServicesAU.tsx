@@ -1,7 +1,7 @@
-﻿import { ArticleLayout } from './ArticleLayout';
+import { ArticleLayout } from './ArticleLayout';
 import articleImage from '@/assets/delivery.webp';
 import { ArticleCarousel } from './ArticleCarousel';
-import JsonLd from '@/shared_components/JsonLd';
+import JsonLd from '@/components/marketing/JsonLd';
 import { articleBySlug } from '@/lib/articles';
 import { assetSrc } from '@/lib/assets';
 

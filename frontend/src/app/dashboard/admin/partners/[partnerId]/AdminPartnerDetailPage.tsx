@@ -5,12 +5,12 @@ import Link from 'next/link';
 import { getAdminPartner, approvePartner, denyPartner, payCommission } from '@/api/admin';
 import type { AdminPartner } from '@/types/AdminPartner';
 import type { AdminCommission } from '@/types/AdminCommission';
-import { Spinner } from '@/shared_components/ui/spinner';
+import { Spinner } from '@/components/ui/spinner';
 import { toast } from 'sonner';
-import UnifiedSummaryCard from '@/shared_components/form_flow/UnifiedSummaryCard';
-import SummarySection from '@/shared_components/SummarySection';
-import FlowBackButton from '@/shared_components/form_flow/FlowBackButton';
-import { Button } from '@/shared_components/ui/button';
+import UnifiedSummaryCard from '@/components/order/UnifiedSummaryCard';
+import SummarySection from '@/components/SummarySection';
+import FlowBackButton from '@/components/order/FlowBackButton';
+import { Button } from '@/components/ui/button';
 import { errorMessage } from '@/lib/errors';
 
 function formatDate(dtStr: string): string {

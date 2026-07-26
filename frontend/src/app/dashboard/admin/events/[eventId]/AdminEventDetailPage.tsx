@@ -4,11 +4,11 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getAdminEvent } from '@/api/admin';
 import type { AdminEvent } from '@/types/AdminEvent';
-import { Spinner } from '@/shared_components/ui/spinner';
-import { Button } from '@/shared_components/ui/button';
-import UnifiedSummaryCard from '@/shared_components/form_flow/UnifiedSummaryCard';
-import SummarySection from '@/shared_components/SummarySection';
-import FlowBackButton from '@/shared_components/form_flow/FlowBackButton';
+import { Spinner } from '@/components/ui/spinner';
+import { Button } from '@/components/ui/button';
+import UnifiedSummaryCard from '@/components/order/UnifiedSummaryCard';
+import SummarySection from '@/components/SummarySection';
+import FlowBackButton from '@/components/order/FlowBackButton';
 import { errorMessage } from '@/lib/errors';
 
 function formatDate(dateStr: string): string {

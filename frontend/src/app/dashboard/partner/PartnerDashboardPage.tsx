@@ -1,10 +1,10 @@
 "use client";
 import { useEffect, useState } from 'react';
-import { Spinner } from '@/shared_components/ui/spinner';
-import { Badge } from '@/shared_components/ui/badge';
+import { Spinner } from '@/components/ui/spinner';
+import { Badge } from '@/components/ui/badge';
 import StripeConnectBanner from '@/app/dashboard/partner/StripeConnectBanner';
-import UnifiedSummaryCard from '@/shared_components/form_flow/UnifiedSummaryCard';
-import SummarySection from '@/shared_components/SummarySection';
+import UnifiedSummaryCard from '@/components/order/UnifiedSummaryCard';
+import SummarySection from '@/components/SummarySection';
 import { getPartnerDashboard, createDiscountCode } from '@/api/partners';
 import type { Partner } from '@/types';
 import type { DiscountCodesSectionProps } from '@/types/DiscountCodesSectionProps';

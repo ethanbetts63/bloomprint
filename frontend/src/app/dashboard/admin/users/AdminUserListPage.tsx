@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { getAdminUsers } from '@/api/admin';
 import type { AdminUser } from '@/types/AdminUser';
 import { Loader2, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
-import UnifiedSummaryCard from '@/shared_components/form_flow/UnifiedSummaryCard';
-import SummarySection from '@/shared_components/SummarySection';
+import UnifiedSummaryCard from '@/components/order/UnifiedSummaryCard';
+import SummarySection from '@/components/SummarySection';
 import {
   Table,
   TableHeader,
@@ -13,7 +13,7 @@ import {
   TableHead,
   TableRow,
   TableCell,
-} from '@/shared_components/ui/table';
+} from '@/components/ui/table';
 import { errorMessage } from '@/lib/errors';
 
 type SortKey = 'name' | 'email' | 'plans' | 'joined';

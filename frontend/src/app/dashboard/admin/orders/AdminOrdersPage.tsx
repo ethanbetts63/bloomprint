@@ -6,15 +6,13 @@ import {
   ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Search, SlidersHorizontal, X,
 } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
-import { Button } from '@/shared_components/ui/button';
-import { Input } from '@/shared_components/ui/input';
-import { Spinner } from '@/shared_components/ui/spinner';
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from '@/shared_components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Spinner } from '@/components/ui/spinner';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from '@/shared_components/ui/table';
+} from '@/components/ui/table';
+import { FilterSelect } from '@/components/dashboard/AdminDataTable';
 import { getAdminOrders } from '@/api/admin';
 import type { AdminPlan } from '@/types/AdminPlan';
 
@@ -150,18 +148,18 @@ export default function AdminOrdersPage() {
             )}
           </div>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
-              <SelectTrigger className="w-full bg-white"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {STATUS_OPTIONS.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            <Select value={planType} onValueChange={(v) => { setPlanType(v); setPage(1); }}>
-              <SelectTrigger className="w-full bg-white"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {PLAN_TYPE_OPTIONS.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <FilterSelect
+              value={status}
+              onValueChange={(v) => { setStatus(v); setPage(1); }}
+              options={STATUS_OPTIONS}
+              ariaLabel="Filter by status"
+            />
+            <FilterSelect
+              value={planType}
+              onValueChange={(v) => { setPlanType(v); setPage(1); }}
+              options={PLAN_TYPE_OPTIONS}
+              ariaLabel="Filter by type"
+            />
             <form className="sm:col-span-2 lg:col-span-1" onSubmit={submitSearch}>
               <div className="flex gap-2">
                 <Input

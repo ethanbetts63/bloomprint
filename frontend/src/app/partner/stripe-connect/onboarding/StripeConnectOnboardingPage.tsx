@@ -1,8 +1,8 @@
-﻿"use client";
+"use client";
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { initiateStripeConnectOnboarding } from '@/api/partners';
-import { Spinner } from '@/shared_components/ui/spinner';
+import { Spinner } from '@/components/ui/spinner';
 
 const StripeConnectOnboardingPage = () => {
   const router = useRouter();

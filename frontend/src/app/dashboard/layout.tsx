@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import ProtectedRoute from '@/shared_components/ProtectedRoute';
+import ProtectedRoute from '@/components/dashboard/ProtectedRoute';
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },

@@ -1,297 +1,187 @@
-"use client";
-import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
+'use client';
+
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { getAdminPlans } from '@/api/admin';
-import type { AdminPlan } from '@/types/AdminPlan';
-import { Loader2, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
-import UnifiedSummaryCard from '@/shared_components/form_flow/UnifiedSummaryCard';
-import SummarySection from '@/shared_components/SummarySection';
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableHead,
-  TableRow,
-  TableCell,
-} from '@/shared_components/ui/table';
 import { errorMessage } from '@/lib/errors';
+import type { AdminPlan } from '@/types/AdminPlan';
+import AdminDataTable, {
+  FilterSelect, formatAdminDate, type AdminColumn, type SortState,
+} from '@/components/dashboard/AdminDataTable';
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+const PAGE_SIZE = 50;
 
-type StatusFilter = '' | 'pending_payment' | 'active' | 'completed' | 'cancelled' | 'refunded';
-type PlanTypeFilter = '' | 'one_time' | 'recurring';
-type SortKey = 'customer' | 'recipient' | 'plan_type' | 'status' | 'total' | 'created';
-type SortDir = 'asc' | 'desc';
+// Whole-row tint + legend swatch per status (kept in step with the Orders table).
+const STATUS_STYLE: Record<string, { row: string; swatch: string; label: string }> = {
+  active: { row: 'bg-emerald-50 hover:bg-emerald-100', swatch: 'bg-emerald-300', label: 'Active' },
+  pending_payment: { row: 'bg-amber-50 hover:bg-amber-100', swatch: 'bg-amber-300', label: 'Pending payment' },
+  completed: { row: 'bg-sky-50 hover:bg-sky-100', swatch: 'bg-sky-300', label: 'Completed' },
+  refunded: { row: 'bg-rose-50 hover:bg-rose-100', swatch: 'bg-rose-300', label: 'Refunded' },
+  cancelled: { row: 'bg-slate-100 hover:bg-slate-200', swatch: 'bg-slate-400', label: 'Cancelled' },
+};
+const LEGEND_ORDER = ['active', 'pending_payment', 'completed', 'refunded', 'cancelled'];
 
-// ── Constants ─────────────────────────────────────────────────────────────────
-
-const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
-  { value: '', label: 'All' },
+const STATUS_OPTIONS = [
+  { value: 'all', label: 'All statuses' },
   { value: 'active', label: 'Active' },
-  { value: 'pending_payment', label: 'Pending Payment' },
+  { value: 'pending_payment', label: 'Pending payment' },
   { value: 'completed', label: 'Completed' },
   { value: 'cancelled', label: 'Cancelled' },
   { value: 'refunded', label: 'Refunded' },
 ];
-
-const TYPE_FILTERS: { value: PlanTypeFilter; label: string }[] = [
-  { value: '', label: 'All' },
-  { value: 'one_time', label: 'One-time' },
-  { value: 'recurring', label: 'Recurring' },
+const TYPE_OPTIONS = [
+  { value: 'all', label: 'All types' },
+  { value: 'one_time', label: 'One-off' },
+  { value: 'recurring', label: 'Subscription' },
 ];
 
-const STATUS_STYLES: Record<string, string> = {
-  active: 'bg-green-100 text-green-800',
-  pending_payment: 'bg-yellow-100 text-yellow-800',
-  completed: 'bg-blue-100 text-blue-800',
-  cancelled: 'bg-gray-100 text-gray-600',
-  refunded: 'bg-red-100 text-red-700',
-};
+const statusLabel = (v: string) => STATUS_STYLE[v]?.label ?? v.replace(/_/g, ' ');
+const typeLabel = (v: string) => (v === 'recurring' ? 'Subscription' : 'One-off');
+const customerName = (p: AdminPlan) => `${p.customer_first_name ?? ''} ${p.customer_last_name ?? ''}`.trim() || '—';
+const recipientName = (p: AdminPlan) =>
+  p.recipient_first_name ? `${p.recipient_first_name} ${p.recipient_last_name ?? ''}`.trim() : '—';
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-function formatDate(dtStr: string): string {
-  return new Date(dtStr).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+function compare(a: AdminPlan, b: AdminPlan, field: string): number {
+  switch (field) {
+    case 'customer_name': return customerName(a).localeCompare(customerName(b));
+    case 'recipient': return recipientName(a).localeCompare(recipientName(b));
+    case 'total': return parseFloat(a.total_amount) - parseFloat(b.total_amount);
+    case 'status': return a.status.localeCompare(b.status);
+    case 'created_at': return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    default: return 0;
+  }
 }
 
-function sortPlans(plans: AdminPlan[], key: SortKey, dir: SortDir): AdminPlan[] {
-  const mul = dir === 'asc' ? 1 : -1;
-  return [...plans].sort((a, b) => {
-    let av = '';
-    let bv = '';
-    if (key === 'customer') {
-      av = `${a.customer_last_name} ${a.customer_first_name}`.toLowerCase();
-      bv = `${b.customer_last_name} ${b.customer_first_name}`.toLowerCase();
-    } else if (key === 'recipient') {
-      av = `${a.recipient_last_name ?? ''} ${a.recipient_first_name ?? ''}`.toLowerCase();
-      bv = `${b.recipient_last_name ?? ''} ${b.recipient_first_name ?? ''}`.toLowerCase();
-    } else if (key === 'plan_type') {
-      av = a.plan_type;
-      bv = b.plan_type;
-    } else if (key === 'status') {
-      av = a.status;
-      bv = b.status;
-    } else if (key === 'total') {
-      return (parseFloat(a.total_amount) - parseFloat(b.total_amount)) * mul;
-    } else if (key === 'created') {
-      return (new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) * mul;
-    }
-    return av.localeCompare(bv) * mul;
-  });
-}
-
-// ── Sub-components ────────────────────────────────────────────────────────────
-
-const StatusBadge = ({ status }: { status: string }) => (
-  <span className={`px-2 py-0.5 rounded-full text-xs font-semibold capitalize ${STATUS_STYLES[status] ?? 'bg-gray-100 text-gray-600'}`}>
-    {status.replace('_', ' ')}
-  </span>
-);
-
-const TypeBadge = ({ type }: { type: string }) => (
-  <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-black/5 text-black/60 capitalize">
-    {type}
-  </span>
-);
-
-const SortIcon = ({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; sortDir: SortDir }) => {
-  if (col !== sortKey) return <ChevronsUpDown className="inline h-3 w-3 ml-1 text-black/20" />;
-  return sortDir === 'asc'
-    ? <ChevronUp className="inline h-3 w-3 ml-1" />
-    : <ChevronDown className="inline h-3 w-3 ml-1" />;
-};
-
-const FilterPills = ({ options, active, onChange }: {
-  options: { value: string; label: string }[];
-  active: string;
-  onChange: (v: string) => void;
-}) => (
-  <div className="flex flex-wrap gap-2">
-    {options.map(({ value, label }) => (
-      <button
-        key={value}
-        onClick={() => onChange(value)}
-        className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-colors ${
-          active === value ? 'bg-black text-white' : 'bg-black/5 text-black/60 hover:bg-black/10'
-        }`}
-      >
-        {label}
-      </button>
-    ))}
-  </div>
-);
-
-// ── Main page ─────────────────────────────────────────────────────────────────
-
-const AdminPlanListPage = () => {
+export default function AdminPlanListPage() {
+  const router = useRouter();
   const [plans, setPlans] = useState<AdminPlan[]>([]);
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('');
-  const [typeFilter, setTypeFilter] = useState<PlanTypeFilter>('');
-  const [searchInput, setSearchInput] = useState('');
-  const [activeSearch, setActiveSearch] = useState('');
-  const [sortKey, setSortKey] = useState<SortKey>('created');
-  const [sortDir, setSortDir] = useState<SortDir>('desc');
+  const [status, setStatus] = useState('all');
+  const [planType, setPlanType] = useState('all');
+  const [q, setQ] = useState('');
+  const [search, setSearch] = useState('');
+  const [sort, setSort] = useState<SortState | null>(null);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Debounce search input → activeSearch
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => setActiveSearch(searchInput), 400);
-    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
-  }, [searchInput]);
-
-  // Fetch when filters change
   useEffect(() => {
     let cancelled = false;
+    setLoading(true);
     getAdminPlans({
-      status: statusFilter || undefined,
-      plan_type: typeFilter || undefined,
-      search: activeSearch || undefined,
+      status: status === 'all' ? undefined : status,
+      plan_type: planType === 'all' ? undefined : planType,
+      search: search || undefined,
     })
-      .then((result) => { if (!cancelled) { setPlans(result); setError(null); } })
-      .catch((e) => { if (!cancelled) setError(errorMessage(e)); })
+      .then((res) => { if (!cancelled) { setPlans(res); setError(null); } })
+      .catch((e) => { if (!cancelled) { setPlans([]); setError(errorMessage(e)); } })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [statusFilter, typeFilter, activeSearch]);
+  }, [status, planType, search]);
 
-  function handleSort(col: SortKey) {
-    if (col === sortKey) {
-      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortKey(col);
-      setSortDir('asc');
-    }
-  }
+  const sorted = useMemo(() => {
+    if (!sort) return plans;
+    const mul = sort.dir === 'asc' ? 1 : -1;
+    return [...plans].sort((a, b) => compare(a, b, sort.field) * mul);
+  }, [plans, sort]);
 
-  const sorted = sortPlans(plans, sortKey, sortDir);
+  const total = sorted.length;
+  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const rows = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const toggleSort = (field: string) => {
+    setPage(1);
+    setSort((prev) => (prev?.field === field
+      ? { field, dir: prev.dir === 'asc' ? 'desc' : 'asc' }
+      : { field, dir: field === 'created_at' ? 'desc' : 'asc' }));
+  };
+  const submitSearch = (e: React.FormEvent) => { e.preventDefault(); setSearch(q.trim()); setPage(1); };
+  const clearFilters = () => {
+    setStatus('all'); setPlanType('all'); setQ(''); setSearch(''); setSort(null); setPage(1);
+  };
+  const activeFilters =
+    (status !== 'all' ? 1 : 0) + (planType !== 'all' ? 1 : 0) + (search ? 1 : 0) + (sort ? 1 : 0);
+
+  const columns: AdminColumn<AdminPlan>[] = [
+    {
+      key: 'customer_name', header: 'Customer', sortable: true,
+      render: (p) => (
+        <>
+          <div className="font-medium text-slate-900">{customerName(p)}</div>
+          <div className="text-xs text-slate-500">{p.customer_email ?? '—'}</div>
+        </>
+      ),
+    },
+    { key: 'recipient', header: 'Recipient', sortable: true, cellClassName: 'text-slate-700', render: recipientName },
+    { key: 'plan_type', header: 'Type', cellClassName: 'text-slate-700', render: (p) => typeLabel(p.plan_type) },
+    {
+      key: 'total', header: 'Total', sortable: true, align: 'right',
+      cellClassName: 'font-semibold text-slate-950', render: (p) => `$${p.total_amount}`,
+    },
+    {
+      key: 'status', header: 'Status', sortable: true,
+      cellClassName: 'text-sm font-medium text-slate-700', render: (p) => statusLabel(p.status),
+    },
+    {
+      key: 'created_at', header: 'Date', sortable: true,
+      cellClassName: 'text-sm text-slate-600', render: (p) => formatAdminDate(p.created_at),
+    },
+  ];
+
+  const filters = (
+    <>
+      <FilterSelect value={status} onValueChange={(v) => { setStatus(v); setPage(1); }} options={STATUS_OPTIONS} ariaLabel="Filter by status" />
+      <FilterSelect value={planType} onValueChange={(v) => { setPlanType(v); setPage(1); }} options={TYPE_OPTIONS} ariaLabel="Filter by type" />
+      <form className="sm:col-span-2 lg:col-span-1" onSubmit={submitSearch}>
+        <div className="flex gap-2">
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, email or recipient" aria-label="Search plans" className="bg-white" />
+          <Button type="submit" variant="outline" className="shrink-0 border-slate-300 bg-white text-slate-900 hover:bg-slate-100">
+            <Search className="mr-1.5 h-4 w-4" /> Search
+          </Button>
+        </div>
+      </form>
+    </>
+  );
+
+  const legend = (
+    <>
+      <span className="font-medium text-slate-600">Row colour:</span>
+      {LEGEND_ORDER.map((s) => (
+        <span key={s} className="inline-flex items-center gap-1.5">
+          <span className={`inline-block h-3 w-3 rounded-sm ${STATUS_STYLE[s].swatch}`} />
+          {STATUS_STYLE[s].label}
+        </span>
+      ))}
+    </>
+  );
 
   return (
-    <div style={{ backgroundColor: 'var(--color4)' }} className="min-h-screen py-0 md:py-12 px-0 md:px-4">
-      <div className="container mx-auto max-w-5xl">
-        <UnifiedSummaryCard
-          title="Plans"
-          description="All customer plans across every status and type."
-        >
-          {/* Filters */}
-          <SummarySection label="Status">
-            <FilterPills options={STATUS_FILTERS} active={statusFilter} onChange={(v) => setStatusFilter(v as StatusFilter)} />
-          </SummarySection>
-
-          <SummarySection label="Type">
-            <FilterPills options={TYPE_FILTERS} active={typeFilter} onChange={(v) => setTypeFilter(v as PlanTypeFilter)} />
-          </SummarySection>
-
-          <SummarySection label="Search">
-            <input
-              type="text"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Customer name, email or recipient name…"
-              className="w-full sm:max-w-sm px-3 py-2 text-sm border border-black/15 rounded-lg bg-white placeholder:text-black/30 focus:outline-none focus:ring-1 focus:ring-black/20"
-            />
-          </SummarySection>
-
-          {/* Results */}
-          <SummarySection label={`Results (${plans.length})`}>
-            {loading ? (
-              <div className="py-8 flex items-center justify-center gap-3">
-                <Loader2 className="h-5 w-5 animate-spin text-black/20" />
-                <span className="text-sm text-black/40">Loading…</span>
-              </div>
-            ) : error ? (
-              <p className="text-sm text-red-600">{error}</p>
-            ) : sorted.length === 0 ? (
-              <p className="text-sm text-black/40 italic">No plans found.</p>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-black/5">
-                    <TableHead
-                      className="cursor-pointer select-none text-xs font-bold tracking-[0.15em] uppercase text-black/50"
-                      onClick={() => handleSort('customer')}
-                    >
-                      Customer <SortIcon col="customer" sortKey={sortKey} sortDir={sortDir} />
-                    </TableHead>
-                    <TableHead
-                      className="cursor-pointer select-none text-xs font-bold tracking-[0.15em] uppercase text-black/50"
-                      onClick={() => handleSort('recipient')}
-                    >
-                      Recipient <SortIcon col="recipient" sortKey={sortKey} sortDir={sortDir} />
-                    </TableHead>
-                    <TableHead
-                      className="cursor-pointer select-none text-xs font-bold tracking-[0.15em] uppercase text-black/50"
-                      onClick={() => handleSort('plan_type')}
-                    >
-                      Type <SortIcon col="plan_type" sortKey={sortKey} sortDir={sortDir} />
-                    </TableHead>
-                    <TableHead
-                      className="cursor-pointer select-none text-xs font-bold tracking-[0.15em] uppercase text-black/50"
-                      onClick={() => handleSort('status')}
-                    >
-                      Status <SortIcon col="status" sortKey={sortKey} sortDir={sortDir} />
-                    </TableHead>
-                    <TableHead
-                      className="cursor-pointer select-none text-xs font-bold tracking-[0.15em] uppercase text-black/50 text-right"
-                      onClick={() => handleSort('total')}
-                    >
-                      Total <SortIcon col="total" sortKey={sortKey} sortDir={sortDir} />
-                    </TableHead>
-                    <TableHead
-                      className="cursor-pointer select-none text-xs font-bold tracking-[0.15em] uppercase text-black/50"
-                      onClick={() => handleSort('created')}
-                    >
-                      Created <SortIcon col="created" sortKey={sortKey} sortDir={sortDir} />
-                    </TableHead>
-                    <TableHead />
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sorted.map((plan) => (
-                    <TableRow key={`${plan.plan_type}-${plan.id}`} className="border-black/5">
-                      <TableCell>
-                        <p className="font-semibold text-black text-sm">
-                          {plan.customer_first_name} {plan.customer_last_name}
-                        </p>
-                        <p className="text-xs text-black/40">{plan.customer_email}</p>
-                      </TableCell>
-                      <TableCell className="text-sm text-black">
-                        {plan.recipient_first_name
-                          ? `${plan.recipient_first_name} ${plan.recipient_last_name ?? ''}`
-                          : <span className="text-black/30 italic">—</span>
-                        }
-                      </TableCell>
-                      <TableCell>
-                        <TypeBadge type={plan.plan_type} />
-                      </TableCell>
-                      <TableCell>
-                        <StatusBadge status={plan.status} />
-                      </TableCell>
-                      <TableCell className="text-sm text-black text-right">
-                        ${plan.total_amount}
-                      </TableCell>
-                      <TableCell className="text-sm text-black/50">
-                        {formatDate(plan.created_at)}
-                      </TableCell>
-                      <TableCell>
-                        <Link
-                          href={`/dashboard/admin/plans/${plan.id}`}
-                          className="text-xs px-3 py-1.5 rounded border border-black/20 hover:bg-black/5 text-black/70 whitespace-nowrap"
-                        >
-                          View
-                        </Link>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </SummarySection>
-        </UnifiedSummaryCard>
-      </div>
-    </div>
+    <>
+      {error && <p className="px-4 pt-4 text-sm text-red-600 md:px-6">{error}</p>}
+      <AdminDataTable
+        title="Plans"
+        filterSummary={`${total.toLocaleString('en-AU')} ${total === 1 ? 'plan' : 'plans'} matching this view`}
+        filters={filters}
+        legend={legend}
+        showClear={activeFilters > 0}
+        onClearFilters={clearFilters}
+        columns={columns}
+        rows={rows}
+        rowKey={(p) => p.id}
+        loading={loading}
+        emptyMessage="No plans match these filters."
+        sort={sort}
+        onSort={toggleSort}
+        onRowClick={(p) => router.push(`/dashboard/admin/plans/${p.id}`)}
+        rowClassName={(p) => STATUS_STYLE[p.status]?.row ?? 'hover:bg-slate-50'}
+        pagination={{
+          page, pageCount, total, pageSize: PAGE_SIZE,
+          hasPrev: page > 1, hasNext: page < pageCount,
+          onPrev: () => setPage((p) => p - 1), onNext: () => setPage((p) => p + 1),
+        }}
+      />
+    </>
   );
-};
-
-export default AdminPlanListPage;
+}

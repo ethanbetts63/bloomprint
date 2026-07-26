@@ -10,8 +10,8 @@ const playfair = Playfair_Display({
   style: ['normal', 'italic'],
 });
 import Providers from './providers';
-import SiteChrome from '@/shared_components/SiteChrome';
-import { Toaster } from '@/shared_components/ui/sonner';
+import SiteChrome from '@/components/layout/SiteChrome';
+import { Toaster } from '@/components/ui/sonner';
 import { buildWebsiteSchema, buildOrganizationSchema } from '@/lib/seo';
 
 export const metadata: Metadata = {
