@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { LoginForm } from "@/app/login/LoginForm";
 import { useAuth } from '@/context/AuthContext';
+import { roleHome } from '@/lib/roleHome';
 
 const LoginPage = () => {
   const router = useRouter();
@@ -11,13 +12,7 @@ const LoginPage = () => {
 
   useEffect(() => {
     if (isLoading || !user) return;
-    if (user.is_staff || user.is_superuser) {
-      router.replace('/dashboard/admin');
-    } else if (user.is_partner) {
-      router.replace('/dashboard/partner');
-    } else {
-      router.replace('/order-support');
-    }
+    router.replace(roleHome(user.role));
   }, [isLoading, router, user]);
 
   if (isLoading || user) {

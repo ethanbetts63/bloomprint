@@ -155,3 +155,33 @@ export async function getAdminPlans(params: { status?: string; plan_type?: strin
   if (!res.ok) throw new Error('Failed to fetch plans');
   return res.json();
 }
+
+export interface Paginated<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+}
+
+export interface AdminOrderListParams {
+  status?: string;
+  plan_type?: string;
+  search?: string;
+  ordering?: string;
+  page?: number;
+  page_size?: number;
+}
+
+export async function getAdminOrders(params: AdminOrderListParams = {}): Promise<Paginated<AdminPlan>> {
+  const qs = new URLSearchParams();
+  if (params.status) qs.set('status', params.status);
+  if (params.plan_type) qs.set('plan_type', params.plan_type);
+  if (params.search) qs.set('search', params.search);
+  if (params.ordering) qs.set('ordering', params.ordering);
+  if (params.page) qs.set('page', String(params.page));
+  if (params.page_size) qs.set('page_size', String(params.page_size));
+  const query = qs.toString();
+  const res = await authedFetch(`/api/data/admin/orders/${query ? `?${query}` : ''}`);
+  if (!res.ok) throw new Error('Failed to fetch orders');
+  return res.json();
+}

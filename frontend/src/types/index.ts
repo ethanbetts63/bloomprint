@@ -26,7 +26,7 @@ export type { EventCreationData } from './EventCreationData';
 export type { CheckoutFormProps } from './CheckoutFormProps';
 export type { Payment } from './Payment';
 export type { Order, PartialOrder, BillingMode } from './Order';
-export type { UserProfile } from './UserProfile';
+export type { UserProfile, UserRole } from './UserProfile';
 export type { FeaturePoint } from './FeaturePoint';
 export type { DetailedProductInfoProps } from './DetailedProductInfoProps';
 export type { ProductData } from './ProductData';

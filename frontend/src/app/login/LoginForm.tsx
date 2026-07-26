@@ -1,7 +1,6 @@
 "use client"
 
 import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils"
 import { Button } from "@/shared_components/ui/button"
@@ -21,7 +20,6 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const router = useRouter();
   const { loginWithPassword } = useAuth();
 
   const form = useForm<LoginFormData>({
@@ -36,7 +34,8 @@ export function LoginForm({
   const onSubmit = async (data: LoginFormData) => {
     try {
       await loginWithPassword(data.email, data.password);
-      router.push('/dashboard');
+      // LoginPage redirects to the right dashboard once the profile (and its
+      // role) loads, so we don't route here.
     } catch (error) {
       console.error("Login failed", error);
       toast.error("Login Failed", {

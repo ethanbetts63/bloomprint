@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Spinner } from '@/shared_components/ui/spinner';
+import { roleHome } from '@/lib/roleHome';
 import type { AdminGuardProps } from '@/types/AdminGuardProps';
 
 const AdminGuard = ({ children }: AdminGuardProps) => {
@@ -11,8 +12,11 @@ const AdminGuard = ({ children }: AdminGuardProps) => {
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && !user?.is_staff && !user?.is_superuser) {
-      router.replace('/dashboard');
+    if (isLoading) return;
+    if (!user) {
+      router.replace('/login');
+    } else if (!user.is_staff && !user.is_superuser) {
+      router.replace(roleHome(user.role));
     }
   }, [user, isLoading, router]);
 

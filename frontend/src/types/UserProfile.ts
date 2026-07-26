@@ -1,6 +1,12 @@
 // futureflower/frontend/src/types/users.ts
 
 /**
+ * The dashboard a user belongs to. Computed on the backend (see
+ * UserProfileSerializer.get_role) so routing has a single source of truth.
+ */
+export type UserRole = 'admin' | 'florist' | 'affiliate' | 'customer';
+
+/**
  * Defines the structure for a user's profile.
  */
 export interface UserProfile {
@@ -12,4 +18,5 @@ export interface UserProfile {
     is_staff?: boolean;
     is_superuser?: boolean;
     is_partner?: boolean;
+    role: UserRole;
 }
