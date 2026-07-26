@@ -8,6 +8,7 @@ from .views.admin_event_detail_view import AdminEventDetailView
 from .views.admin_mark_ordered_view import AdminMarkOrderedView
 from .views.admin_mark_delivered_view import AdminMarkDeliveredView
 from .views.admin_plan_list_view import AdminPlanListView
+from .views.admin_order_list_view import AdminOrderListView
 from .views.admin_plan_detail_view import AdminPlanDetailView
 from .views.admin_user_list_view import AdminUserListView
 from .views.admin_user_detail_view import AdminUserDetailView
@@ -21,6 +22,7 @@ urlpatterns = [
     path('terms/accept/', AcceptTermsView.as_view(), name='accept-terms'),
     path('admin/dashboard/', AdminDashboardView.as_view(), name='admin-dashboard'),
     path('admin/plans/', AdminPlanListView.as_view(), name='admin-plan-list'),
+    path('admin/orders/', AdminOrderListView.as_view(), name='admin-order-list'),
     path('admin/plans/<int:pk>/', AdminPlanDetailView.as_view(), name='admin-plan-detail'),
     path('admin/events/<int:pk>/', AdminEventDetailView.as_view(), name='admin-event-detail'),
     path('admin/events/<int:pk>/mark-ordered/', AdminMarkOrderedView.as_view(), name='admin-mark-ordered'),
