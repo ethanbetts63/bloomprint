@@ -9,6 +9,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     user is allowed to view and edit.
     """
     is_partner = serializers.SerializerMethodField()
+    role = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -21,6 +22,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'is_staff',
             'is_superuser',
             'is_partner',
+            'role',
         ]
         read_only_fields = [
             'username',
@@ -28,10 +30,23 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'is_staff',
             'is_superuser',
             'is_partner',
+            'role',
         ]
 
     def get_is_partner(self, obj):
         return hasattr(obj, 'partner_profile')
+
+    def get_role(self, obj):
+        """
+        The single source of truth for which dashboard a user lands on.
+        Admin wins over a partner profile; florists deliver, affiliates refer.
+        """
+        if obj.is_staff or obj.is_superuser:
+            return 'admin'
+        partner = getattr(obj, 'partner_profile', None)
+        if partner is not None:
+            return 'florist' if partner.partner_type == 'delivery' else 'affiliate'
+        return 'customer'
 
     def validate_email(self, value):
         """
