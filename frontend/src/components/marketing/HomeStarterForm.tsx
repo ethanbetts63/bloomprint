@@ -184,7 +184,7 @@ export default function HomeStarterForm({ defaultVibeName }: HomeStarterFormProp
                       Selected
                     </span>
                   )}
-                  <span className="relative block h-36 w-full overflow-hidden bg-[#f8f3ef]">
+                  <span className="relative block h-36 w-full overflow-hidden bg-[var(--surface-beige)]">
                     <Image
                       src={tier.image}
                       alt=""
@@ -220,7 +220,7 @@ export default function HomeStarterForm({ defaultVibeName }: HomeStarterFormProp
                   Selected
                 </span>
               )}
-              <div className="flex h-36 items-center justify-center bg-[#f8f3ef] px-5">
+              <div className="flex h-36 items-center justify-center bg-[var(--surface-beige)] px-5">
                 <div className="text-center">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black">
                     Custom

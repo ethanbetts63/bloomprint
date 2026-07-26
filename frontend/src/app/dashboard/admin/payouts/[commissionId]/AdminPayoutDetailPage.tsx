@@ -89,7 +89,7 @@ const AdminPayoutDetailPage = () => {
 
   if (loading) {
     return (
-      <div style={{ backgroundColor: 'var(--color4)' }} className="min-h-screen flex items-center justify-center">
+      <div style={{ backgroundColor: 'var(--surface-beige)' }} className="min-h-screen flex items-center justify-center">
         <Spinner className="h-10 w-10" />
       </div>
     );
@@ -97,7 +97,7 @@ const AdminPayoutDetailPage = () => {
 
   if (error || !commission) {
     return (
-      <div style={{ backgroundColor: 'var(--color4)' }} className="min-h-screen py-0 md:py-12 px-0 md:px-4">
+      <div style={{ backgroundColor: 'var(--surface-beige)' }} className="min-h-screen py-0 md:py-12 px-0 md:px-4">
         <div className="container mx-auto max-w-4xl">
           <p className="p-8 text-red-600">{error ?? 'Commission not found.'}</p>
         </div>
@@ -108,7 +108,7 @@ const AdminPayoutDetailPage = () => {
   const canAct = commission.status === 'pending' || commission.status === 'approved';
 
   return (
-    <div style={{ backgroundColor: 'var(--color4)' }} className="min-h-screen py-0 md:py-12 px-0 md:px-4">
+    <div style={{ backgroundColor: 'var(--surface-beige)' }} className="min-h-screen py-0 md:py-12 px-0 md:px-4">
       <div className="container mx-auto max-w-4xl">
         <UnifiedSummaryCard
           title="Commission Detail"

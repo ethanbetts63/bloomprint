@@ -64,7 +64,7 @@ const ResetPasswordConfirmPage = () => {
   };
 
   return (
-    <div className="bg-[var(--color4)] flex flex-grow min-h-full flex-col items-center justify-center p-6 md:p-10">
+    <div className="bg-[var(--surface-beige)] flex flex-grow min-h-full flex-col items-center justify-center p-6 md:p-10">
       <div className="flex flex-col gap-6 w-full max-w-sm md:max-w-md">
         <Card className="overflow-hidden p-0 bg-white text-black shadow-md border-none">
           <CardContent className="p-0">

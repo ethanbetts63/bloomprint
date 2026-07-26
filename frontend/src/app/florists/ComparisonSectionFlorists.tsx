@@ -10,10 +10,10 @@ const rows = [
 ];
 
 const ComparisonSection = () => (
-  <section className="bg-[var(--color4)] border-t border-black/5">
+  <section className="bg-[var(--surface-beige)] border-t border-black/5">
     <div className="grid grid-cols-1 lg:grid-cols-2">
 
-      <div className="flex items-center justify-center p-8 bg-[var(--color4)]">
+      <div className="flex items-center justify-center p-8 bg-[var(--surface-beige)]">
         <div className="max-w-xl w-full">
           <h2 className="mt-3 text-3xl md:text-4xl lg:text-5xl font-bold text-black font-playfair-display leading-tight">
             Stop taking a 40% haircut
@@ -36,7 +36,7 @@ const ComparisonSection = () => (
         </div>
       </div>
 
-      <div className="flex flex-col items-center justify-center p-4 md:p-12 lg:px-20 bg-[var(--color4)]">
+      <div className="flex flex-col items-center justify-center p-4 md:p-12 lg:px-20 bg-[var(--surface-beige)]">
         <p className="mb-6 text-s font-bold tracking-[0.2em] text-black uppercase">
           How Big Online Platforms Treat Florists
         </p>

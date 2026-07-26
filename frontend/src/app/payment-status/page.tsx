@@ -3,7 +3,7 @@ import PaymentStatusPage from '@/app/payment-status/PaymentStatusPage';
 
 export default function Page() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[var(--color4)]" />}>
+    <Suspense fallback={<div className="min-h-screen bg-[var(--surface-beige)]" />}>
       <PaymentStatusPage />
     </Suspense>
   );

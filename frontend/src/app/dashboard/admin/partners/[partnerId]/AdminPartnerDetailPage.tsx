@@ -103,7 +103,7 @@ const AdminPartnerDetailPage = () => {
 
   if (loading) {
     return (
-      <div style={{ backgroundColor: 'var(--color4)' }} className="min-h-screen flex items-center justify-center">
+      <div style={{ backgroundColor: 'var(--surface-beige)' }} className="min-h-screen flex items-center justify-center">
         <Spinner className="h-10 w-10" />
       </div>
     );
@@ -111,7 +111,7 @@ const AdminPartnerDetailPage = () => {
 
   if (error || !partner) {
     return (
-      <div style={{ backgroundColor: 'var(--color4)' }} className="min-h-screen py-0 md:py-12 px-0 md:px-4">
+      <div style={{ backgroundColor: 'var(--surface-beige)' }} className="min-h-screen py-0 md:py-12 px-0 md:px-4">
         <div className="container mx-auto max-w-4xl">
           <p className="p-8 text-red-600">{error ?? 'Partner not found.'}</p>
         </div>
@@ -132,7 +132,7 @@ const AdminPartnerDetailPage = () => {
   ].filter(Boolean).join(', ');
 
   return (
-    <div style={{ backgroundColor: 'var(--color4)' }} className="min-h-screen py-0 md:py-12 px-0 md:px-4">
+    <div style={{ backgroundColor: 'var(--surface-beige)' }} className="min-h-screen py-0 md:py-12 px-0 md:px-4">
       <div className="container mx-auto max-w-4xl">
         <UnifiedSummaryCard
           title={partner.business_name || `${partner.first_name} ${partner.last_name}`}

@@ -10,7 +10,8 @@ const playfair = Playfair_Display({
   style: ['normal', 'italic'],
 });
 import Providers from './providers';
-import SiteChrome from '@/components/layout/SiteChrome';
+import NavBar from '@/components/layout/NavBar';
+import Footer from '@/components/layout/Footer';
 import { Toaster } from '@/components/ui/sonner';
 import { buildWebsiteSchema, buildOrganizationSchema } from '@/lib/seo';
 
@@ -51,7 +52,9 @@ export default function RootLayout({
     <html lang="en" className={`${playfair.variable} scroll-smooth`}>
       <body>
         <Providers>
-          <SiteChrome>{children}</SiteChrome>
+          <NavBar />
+          {children}
+          <Footer />
         </Providers>
         <Toaster />
         <script

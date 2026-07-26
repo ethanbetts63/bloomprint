@@ -17,7 +17,7 @@ const StripeConnectOnboardingPage = () => {
 
   return (
     <>
-      <div style={{ backgroundColor: 'var(--color4)' }} className="min-h-screen flex items-center justify-center px-4">
+      <div style={{ backgroundColor: 'var(--surface-beige)' }} className="min-h-screen flex items-center justify-center px-4">
         <div className="bg-white rounded-[2rem] shadow-md px-10 py-12 flex flex-col items-center gap-5 max-w-sm w-full text-center">
           <h1 className="text-2xl font-bold font-playfair-display text-black">
             Connecting you to Stripe

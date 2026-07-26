@@ -47,7 +47,7 @@ export default function Page() {
         <main className="text-black">
             <JsonLd path="/pricing" structuredData={serviceSchema} />
 
-            <section className="relative overflow-hidden bg-[#f8f3ef]">
+            <section className="relative overflow-hidden bg-[var(--surface-beige)]">
                 <div className="mx-auto grid min-h-[70vh] max-w-7xl grid-cols-1 items-center gap-0 px-0 pb-0 pt-8 sm:px-6 lg:grid-cols-[1.02fr_0.98fr] lg:gap-8 lg:px-8 lg:py-12">
                     <div className="min-w-0 px-5 pb-10 sm:px-6 lg:px-0 lg:pb-0">
                         <div className="max-w-full sm:max-w-2xl">

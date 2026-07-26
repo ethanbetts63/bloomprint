@@ -11,7 +11,7 @@ export default async function Page() {
   return (
     <>
       <StepProgressBar planName="Single Delivery Plan" currentStep={3} totalSteps={3} />
-      <div className="min-h-screen w-full py-0 md:py-12" style={{ backgroundColor: 'var(--color4)' }}>
+      <div className="min-h-screen w-full py-0 md:py-12" style={{ backgroundColor: 'var(--surface-beige)' }}>
         <div className="container mx-auto px-0 md:px-4 max-w-4xl">
           <OrderDetails initialOrder={order} />
         </div>

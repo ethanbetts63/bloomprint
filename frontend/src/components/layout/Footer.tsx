@@ -1,5 +1,3 @@
-"use client";
-
 import Link from 'next/link';
 import logo from '@/assets/logo.webp';
 import logo128 from '@/assets/logo-128w.webp';
@@ -7,7 +5,6 @@ import logo192 from '@/assets/logo-192w.webp';
 import logo256 from '@/assets/logo-256w.webp';
 import stripeLogo from '@/assets/stripe-ar21.svg';
 import { assetSrc } from '@/lib/assets';
-import { useAuth } from '@/context/AuthContext';
 
 /**
  * A footer link, with prefetching turned off.
@@ -26,7 +23,6 @@ const FooterLink = ({ href, children }: { href: string; children: React.ReactNod
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  const { user } = useAuth();
 
   return (
     <footer className="border-t border-black/10 bg-white text-black">
@@ -39,9 +35,6 @@ const Footer = () => {
             <FooterLink href="/affiliates">Affiliates</FooterLink>
             <FooterLink href="/order-support">Order Support</FooterLink>
             <FooterLink href="/login">Log in</FooterLink>
-            {(user?.is_staff || user?.is_superuser) && (
-              <FooterLink href="/admin-dashboard">Admin Dashboard</FooterLink>
-            )}
           </div>
 
           <div className="flex flex-col gap-2">

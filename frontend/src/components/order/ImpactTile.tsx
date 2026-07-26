@@ -23,7 +23,7 @@ const ImpactTile = ({ budget, size = 64, eyebrow, subtitle, truncateName = false
   return (
     <div className={`flex items-center gap-4 ${className}`}>
       <div
-        className="relative flex-shrink-0 overflow-hidden rounded-xl border border-black/5 shadow-sm bg-[var(--color4)]"
+        className="relative flex-shrink-0 overflow-hidden rounded-xl border border-black/5 shadow-sm bg-[var(--surface-beige)]"
         style={{ width: size, height: size }}
       >
         <Image src={image} alt={name} fill sizes={`${size}px`} className="object-cover" />

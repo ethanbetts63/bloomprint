@@ -21,7 +21,7 @@ interface LandingHeroProps {
  */
 export const LandingHero = ({ eyebrow, heading, description, form, formId, image }: LandingHeroProps) => {
   return (
-    <section className="relative overflow-hidden bg-[#f8f3ef]">
+    <section className="relative overflow-hidden bg-[var(--surface-beige)]">
       <div className="mx-auto grid min-h-[calc(100vh-72px)] max-w-7xl grid-cols-1 items-start gap-0 px-0 pb-0 pt-8 sm:px-6 lg:grid-cols-[1.02fr_0.98fr] lg:gap-8 lg:px-8 lg:py-12">
         {/* Text */}
         <div className="min-w-0 px-5 sm:px-6 lg:col-start-1 lg:row-start-1 lg:self-end lg:px-0 lg:pb-4">

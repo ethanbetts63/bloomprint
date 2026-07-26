@@ -77,7 +77,7 @@ const FloristsPage = () => {
 
       <SoWhatsTheCatchSection />
 
-      <div className="bg-[var(--color4)]">
+      <div className="bg-[var(--surface-beige)]">
         <section className="pb-8">
           <FaqV2
             title="Questions? We have answers. "

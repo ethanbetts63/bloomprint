@@ -26,7 +26,7 @@ const OrderReviewGrid = ({ plan, scheduleOverride }: OrderReviewGridProps) => {
       <ImpactTile budget={Number(plan.budget)} eyebrow="Selection" />
 
       <div className="flex items-center gap-4">
-        <div className="flex items-center justify-center flex-shrink-0 rounded-xl border border-black/5 shadow-sm bg-[var(--color4)] w-16 h-16">
+        <div className="flex items-center justify-center flex-shrink-0 rounded-xl border border-black/5 shadow-sm bg-[var(--surface-beige)] w-16 h-16">
           {isSubscription ? <RefreshCw className="h-6 w-6 text-black/40" /> : <Calendar className="h-6 w-6 text-black/40" />}
         </div>
         <div>

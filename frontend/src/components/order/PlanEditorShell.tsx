@@ -36,7 +36,7 @@ const PlanEditorShell = ({
   }
 
   return (
-    <div className="min-h-screen w-full" style={{ backgroundColor: 'var(--color4)' }}>
+    <div className="min-h-screen w-full" style={{ backgroundColor: 'var(--surface-beige)' }}>
       <div className="container mx-auto max-w-4xl py-0 md:py-12 px-0 md:px-4">
         <Card className="bg-white text-black border-none shadow-none md:shadow-xl md:shadow-black/5 rounded-none md:rounded-[2rem] overflow-hidden">
           <CardHeader className="px-4 md:px-8 pt-2">

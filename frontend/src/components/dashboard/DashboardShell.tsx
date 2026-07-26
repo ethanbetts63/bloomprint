@@ -96,7 +96,7 @@ const DashboardShell = ({ role, brandTitle, brandSubtitle, nav, children }: Dash
   return (
     <div className="flex min-h-screen bg-white">
       {/* Sidebar — desktop only for now; a mobile drawer can hang off this later. */}
-      <aside className="hidden w-60 flex-shrink-0 flex-col border-r border-black/10 bg-[var(--color4)] md:flex">
+      <aside className="hidden w-60 flex-shrink-0 flex-col border-r border-black/10 bg-[var(--surface-beige)] md:flex">
         <div className="border-b border-black/10 px-4 py-5">
           <p className="text-base font-black uppercase tracking-widest text-black">{brandTitle}</p>
           <p className="mt-0.5 text-xs text-black/50">{brandSubtitle}</p>

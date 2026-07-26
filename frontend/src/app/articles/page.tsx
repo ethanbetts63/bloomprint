@@ -52,7 +52,7 @@ export default function Page() {
           </div>
         </section>
 
-        <div className="bg-[var(--color4)]">
+        <div className="bg-[var(--surface-beige)]">
           <div className="container mx-auto px-4 lg:px-8 py-10">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {ARTICLES.map((article) => (

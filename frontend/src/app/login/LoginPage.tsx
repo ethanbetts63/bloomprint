@@ -16,11 +16,11 @@ const LoginPage = () => {
   }, [isLoading, router, user]);
 
   if (isLoading || user) {
-    return <div className="min-h-screen bg-[var(--color4)]" />;
+    return <div className="min-h-screen bg-[var(--surface-beige)]" />;
   }
 
   return (
-    <div className="bg-[var(--color4)] flex flex-grow min-h-full flex-col items-center justify-center p-6 md:p-10">
+    <div className="bg-[var(--surface-beige)] flex flex-grow min-h-full flex-col items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm md:max-w-md">
         <LoginForm />
       </div>

@@ -162,7 +162,7 @@ const UniversalPaymentStatusPage = () => {
     const isSubscription = plan?.billing_mode === 'recurring';
 
     return (
-        <div className="min-h-screen w-full flex items-center py-12" style={{ backgroundColor: 'var(--color4)' }}>
+        <div className="min-h-screen w-full flex items-center py-12" style={{ backgroundColor: 'var(--surface-beige)' }}>
             <div className="container mx-auto max-w-2xl px-4">
                 <Card className="bg-white text-black border-none shadow-md">
                     <CardHeader>

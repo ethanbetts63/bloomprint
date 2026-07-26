@@ -5,7 +5,7 @@ const REFUND_EMAIL = 'admin@futureflower.app';
 
 export default function Page() {
   return (
-    <div className="min-h-screen w-full py-0 md:py-12" style={{ backgroundColor: 'var(--color4)' }}>
+    <div className="min-h-screen w-full py-0 md:py-12" style={{ backgroundColor: 'var(--surface-beige)' }}>
       <div className="container mx-auto px-0 md:px-4 max-w-4xl">
         <UnifiedSummaryCard
           title="Order Support"
