@@ -16,7 +16,7 @@ import {
 
 // ── Shared helpers ──────────────────────────────────────────────────────────
 
-export function formatAdminDate(dtStr: string | null): string {
+export function formatDashboardTableDate(dtStr: string | null): string {
   if (!dtStr) return '—';
   return new Date(dtStr).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
 }
@@ -24,7 +24,7 @@ export function formatAdminDate(dtStr: string | null): string {
 // Standard-coloured filter dropdown. The app theme sets --popover to a green and
 // --accent to navy, which makes the default shadcn Select look wrong — this keeps
 // dashboard filters on neutral white/slate.
-export function FilterSelect({
+export function DashboardFilterSelect({
   value, onValueChange, options, ariaLabel, className,
 }: {
   value: string;
@@ -59,7 +59,7 @@ export function FilterSelect({
   );
 }
 
-export function StatusPill({ className, children }: { className?: string; children: React.ReactNode }) {
+export function DashboardTableStatusPill({ className, children }: { className?: string; children: React.ReactNode }) {
   return (
     <span className={cn('inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold capitalize', className)}>
       {children}
@@ -71,7 +71,7 @@ export function StatusPill({ className, children }: { className?: string; childr
 
 export interface SortState { field: string; dir: 'asc' | 'desc'; }
 
-export interface AdminColumn<T> {
+export interface DashboardColumn<T> {
   key: string;
   header: React.ReactNode;
   sortable?: boolean;
@@ -81,7 +81,7 @@ export interface AdminColumn<T> {
   render: (row: T) => React.ReactNode;
 }
 
-export interface AdminPagination {
+export interface DashboardPagination {
   page: number;
   pageCount: number;
   total: number;
@@ -92,14 +92,14 @@ export interface AdminPagination {
   onNext: () => void;
 }
 
-interface AdminDataTableProps<T> {
+interface DashboardDataTableProps<T> {
   title: string;
   filterSummary?: React.ReactNode;
   filters?: React.ReactNode;
   legend?: React.ReactNode;
   onClearFilters?: () => void;
   showClear?: boolean;
-  columns: AdminColumn<T>[];
+  columns: DashboardColumn<T>[];
   rows: T[];
   rowKey: (row: T) => React.Key;
   loading: boolean;
@@ -109,16 +109,16 @@ interface AdminDataTableProps<T> {
   onSort?: (field: string) => void;
   onRowClick?: (row: T) => void;
   rowClassName?: (row: T) => string;
-  pagination?: AdminPagination;
+  pagination?: DashboardPagination;
 }
 
 // ── Component ───────────────────────────────────────────────────────────────
 
-export default function AdminDataTable<T>({
+export default function DashboardDataTable<T>({
   title, filterSummary, filters, legend, onClearFilters, showClear = false,
   columns, rows, rowKey, loading, emptyMessage = 'Nothing matches these filters.',
   minWidth = 820, sort, onSort, onRowClick, rowClassName, pagination,
-}: AdminDataTableProps<T>) {
+}: DashboardDataTableProps<T>) {
   const colCount = columns.length;
 
   return (

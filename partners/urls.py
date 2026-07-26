@@ -2,6 +2,7 @@ from django.urls import path
 from partners.views import (
     PartnerRegistrationView,
     PartnerDashboardView,
+    PartnerCommissionListView,
     PartnerUpdateView,
     DeliveryRequestDetailView,
     DeliveryRequestRespondView,
@@ -27,6 +28,7 @@ from partners.views import (
 urlpatterns = [
     path('register/', PartnerRegistrationView.as_view(), name='partner-register'),
     path('dashboard/', PartnerDashboardView.as_view(), name='partner-dashboard'),
+    path('commissions/', PartnerCommissionListView.as_view(), name='partner-commission-list'),
     path('update/', PartnerUpdateView.as_view(), name='partner-update'),
     path('discount-codes/', DiscountCodeCreateView.as_view(), name='discount-code-create'),
 

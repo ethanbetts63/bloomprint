@@ -27,7 +27,6 @@ const PartnerRegistrationForm = ({ partnerType, className = '' }: PartnerRegistr
   const formTopRef = useRef<HTMLDivElement>(null);
   const { handleLoginSuccess } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [customerTermsAccepted, setCustomerTermsAccepted] = useState(false);
   const [partnerTermsAccepted, setPartnerTermsAccepted] = useState(false);
 
   const [latitude, setLatitude] = useState<number | null>(null);
@@ -70,8 +69,8 @@ const PartnerRegistrationForm = ({ partnerType, className = '' }: PartnerRegistr
       return;
     }
 
-    if ((!isDelivery && !customerTermsAccepted) || !partnerTermsAccepted) {
-      toast.error('Please accept all terms and conditions before registering.');
+    if (!partnerTermsAccepted) {
+      toast.error('Please accept the terms and conditions before registering.');
       return;
     }
 
@@ -91,9 +90,7 @@ const PartnerRegistrationForm = ({ partnerType, className = '' }: PartnerRegistr
 
       await registerPartner(data);
       await handleLoginSuccess();
-      const termsToAccept = [acceptTerms(isDelivery ? 'florist' : 'affiliate')];
-      if (!isDelivery) termsToAccept.push(acceptTerms('customer'));
-      await Promise.all(termsToAccept);
+      await acceptTerms(isDelivery ? 'florist' : 'affiliate');
       router.push('/dashboard/partner');
     } catch (error) {
       const description = fieldErrorSummary(error);
@@ -239,22 +236,6 @@ const PartnerRegistrationForm = ({ partnerType, className = '' }: PartnerRegistr
 
         {showTerms && (
         <div className="space-y-3 border-t border-black/10 pt-6">
-          {!isDelivery && (
-            <label className="flex cursor-pointer items-start gap-3">
-              <Checkbox
-                checked={customerTermsAccepted}
-                onCheckedChange={(checked) => setCustomerTermsAccepted(checked === true)}
-                className="mt-0.5 flex-shrink-0"
-              />
-              <span className="text-sm leading-relaxed text-black/70">
-                I have read and agree to the{' '}
-                <Link href="/terms-and-conditions/customer" target="_blank" className="text-black underline hover:text-black/70">
-                  Customer Terms &amp; Conditions
-                </Link>
-                .
-              </span>
-            </label>
-          )}
           <label className="flex cursor-pointer items-start gap-3">
             <Checkbox
               checked={partnerTermsAccepted}
@@ -295,7 +276,7 @@ const PartnerRegistrationForm = ({ partnerType, className = '' }: PartnerRegistr
             )}
             <button
               type="submit"
-              disabled={isSubmitting || (!isDelivery && !customerTermsAccepted) || !partnerTermsAccepted}
+              disabled={isSubmitting || !partnerTermsAccepted}
               className="flex w-full items-center justify-between rounded-lg bg-black px-5 py-4 text-left text-white transition hover:bg-black/85 disabled:cursor-not-allowed disabled:opacity-70"
             >
               <span className="block text-sm font-semibold">

@@ -6,9 +6,11 @@ import { toast } from 'sonner';
 import { approvePartner, denyPartner, getAdminPartner, payCommission } from '@/api/admin';
 import {
   AdminDetailError, AdminDetailField, AdminDetailGrid, AdminDetailLoading, AdminDetailPage,
-  AdminDetailSection, AdminDetailTable, AdminInlineLink, AdminStatusPill,
-  formatAdminCurrency, formatAdminDateLong,
+  AdminDetailSection, AdminDetailTable, AdminInlineLink,
 } from '@/components/dashboard/AdminDetail';
+import {
+  DashboardStatusPill, formatDashboardCurrency, formatDashboardDateLong,
+} from '@/components/dashboard/DashboardData';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { TableCell, TableRow } from '@/components/ui/table';
@@ -52,7 +54,7 @@ export default function AdminPartnerDetailPage() {
     setPayingId(commission.id);
     try {
       await payCommission(partner.id, commission.id);
-      toast.success(`Paid ${formatAdminCurrency(commission.amount)} to ${partner.business_name || partner.first_name}.`);
+      toast.success(`Paid ${formatDashboardCurrency(commission.amount)} to ${partner.business_name || partner.first_name}.`);
       setPartner(await getAdminPartner(partner.id));
     } catch (reason) {
       toast.error(errorMessage(reason) || 'Failed to pay commission.');
@@ -81,7 +83,7 @@ export default function AdminPartnerDetailPage() {
   return (
     <AdminDetailPage
       title={displayName}
-      description={`${isDelivery ? 'Delivery (florist)' : 'Referral'} · Applied ${formatAdminDateLong(partner.created_at)}`}
+      description={`${isDelivery ? 'Delivery (florist)' : 'Referral'} · Applied ${formatDashboardDateLong(partner.created_at)}`}
       backHref="/dashboard/admin/partners"
       backLabel="Back to partners"
       actions={actions}
@@ -94,10 +96,10 @@ export default function AdminPartnerDetailPage() {
           <AdminDetailField label="Last name" value={partner.last_name} />
           <AdminDetailField label="Email" value={partner.email} />
           <AdminDetailField label="Phone" value={partner.phone} />
-          <AdminDetailField label="Status" value={<AdminStatusPill status={partner.status} />} />
+          <AdminDetailField label="Status" value={<DashboardStatusPill status={partner.status} />} />
           <AdminDetailField
             label="Stripe onboarding"
-            value={<AdminStatusPill status={partner.stripe_connect_onboarding_complete ? 'complete' : 'incomplete'} />}
+            value={<DashboardStatusPill status={partner.stripe_connect_onboarding_complete ? 'complete' : 'incomplete'} />}
           />
         </AdminDetailGrid>
       </AdminDetailSection>
@@ -135,9 +137,9 @@ export default function AdminPartnerDetailPage() {
                   ? <AdminInlineLink href={`/dashboard/admin/events/${commission.event}`}>Event #{commission.event}</AdminInlineLink>
                   : '—'}
               </TableCell>
-              <TableCell className="font-semibold text-slate-950">{formatAdminCurrency(commission.amount)}</TableCell>
-              <TableCell><AdminStatusPill status={commission.status} /></TableCell>
-              <TableCell className="text-slate-600">{formatAdminDateLong(commission.created_at)}</TableCell>
+              <TableCell className="font-semibold text-slate-950">{formatDashboardCurrency(commission.amount)}</TableCell>
+              <TableCell><DashboardStatusPill status={commission.status} /></TableCell>
+              <TableCell className="text-slate-600">{formatDashboardDateLong(commission.created_at)}</TableCell>
               <TableCell className="text-right">
                 {commission.status === 'pending' || commission.status === 'approved' ? (
                   <Button

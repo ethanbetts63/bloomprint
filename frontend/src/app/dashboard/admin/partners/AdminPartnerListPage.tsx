@@ -4,13 +4,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
 import { getAdminPartners } from '@/api/admin';
-import AdminDataTable, {
-  FilterSelect,
-  StatusPill,
-  formatAdminDate,
-  type AdminColumn,
+import DashboardDataTable, {
+  DashboardFilterSelect,
+  DashboardTableStatusPill,
+  formatDashboardTableDate,
+  type DashboardColumn,
   type SortState,
-} from '@/components/dashboard/AdminDataTable';
+} from '@/components/dashboard/DashboardDataTable';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { errorMessage } from '@/lib/errors';
@@ -113,7 +113,7 @@ export default function AdminPartnerListPage() {
   };
   const showClear = status !== 'all' || search !== '' || sort?.field !== 'created_at' || sort?.dir !== 'desc';
 
-  const columns: AdminColumn<AdminPartner>[] = [
+  const columns: DashboardColumn<AdminPartner>[] = [
     {
       key: 'business', header: 'Business', sortable: true,
       render: (partner) => <span className="font-medium text-slate-900">{partnerName(partner)}</span>,
@@ -131,15 +131,15 @@ export default function AdminPartnerListPage() {
     {
       key: 'status', header: 'Status', sortable: true,
       render: (partner) => (
-        <StatusPill className={STATUS_STYLE[partner.status]?.pill}>{STATUS_STYLE[partner.status]?.label ?? partner.status}</StatusPill>
+        <DashboardTableStatusPill className={STATUS_STYLE[partner.status]?.pill}>{STATUS_STYLE[partner.status]?.label ?? partner.status}</DashboardTableStatusPill>
       ),
     },
-    { key: 'created_at', header: 'Joined', sortable: true, cellClassName: 'text-sm text-slate-600', render: (partner) => formatAdminDate(partner.created_at) },
+    { key: 'created_at', header: 'Joined', sortable: true, cellClassName: 'text-sm text-slate-600', render: (partner) => formatDashboardTableDate(partner.created_at) },
   ];
 
   const filters = (
     <>
-      <FilterSelect
+      <DashboardFilterSelect
         value={status}
         onValueChange={(value) => { setLoading(true); setStatus(value); setPage(1); }}
         options={STATUS_OPTIONS}
@@ -177,7 +177,7 @@ export default function AdminPartnerListPage() {
   return (
     <>
       {error && <p className="px-4 pt-4 text-sm text-red-600 md:px-6">{error}</p>}
-      <AdminDataTable
+      <DashboardDataTable
         title="Partners"
         filterSummary={`${total.toLocaleString('en-AU')} ${total === 1 ? 'partner' : 'partners'} matching this view`}
         filters={filters}

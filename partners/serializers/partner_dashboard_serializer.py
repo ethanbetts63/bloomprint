@@ -42,7 +42,7 @@ class DeliveryRequestDashboardSerializer(serializers.ModelSerializer):
 
 
 class PartnerDashboardSerializer(serializers.ModelSerializer):
-    discount_codes = DiscountCodeSerializer(many=True, read_only=True)
+    discount_codes = serializers.SerializerMethodField()
     commission_summary = serializers.SerializerMethodField()
     recent_commissions = serializers.SerializerMethodField()
     delivery_requests = serializers.SerializerMethodField()
@@ -69,6 +69,11 @@ class PartnerDashboardSerializer(serializers.ModelSerializer):
             'total_approved': commissions.filter(status='approved').aggregate(total=Sum('amount'))['total'] or 0,
             'total_paid': commissions.filter(status='paid').aggregate(total=Sum('amount'))['total'] or 0,
         }).data
+
+    def get_discount_codes(self, obj):
+        if obj.partner_type != 'non_delivery':
+            return []
+        return DiscountCodeSerializer(obj.discount_codes.all(), many=True).data
 
     def get_recent_commissions(self, obj):
         recent = obj.commissions.order_by('-created_at')[:20]

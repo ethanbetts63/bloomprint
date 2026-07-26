@@ -6,8 +6,11 @@ import { useParams } from 'next/navigation';
 import { getAdminEvent } from '@/api/admin';
 import {
   AdminDetailError, AdminDetailField, AdminDetailGrid, AdminDetailLoading, AdminDetailPage,
-  AdminDetailSection, AdminInlineLink, AdminStatusPill, adminLabel, formatAdminCurrency,
+  AdminDetailSection, AdminInlineLink,
 } from '@/components/dashboard/AdminDetail';
+import {
+  DashboardStatusPill, dashboardLabel, formatDashboardCurrency,
+} from '@/components/dashboard/DashboardData';
 import { Button } from '@/components/ui/button';
 import { errorMessage } from '@/lib/errors';
 import type { AdminEvent } from '@/types/AdminEvent';
@@ -63,7 +66,7 @@ export default function AdminEventDetailPage() {
         <AdminDetailGrid>
           <AdminDetailField label="Recipient" value={recipientName} />
           <AdminDetailField label="Delivery date" value={formatDeliveryDate(event.delivery_date)} />
-          <AdminDetailField label="Preferred delivery time" value={adminLabel(event.preferred_delivery_time)} />
+          <AdminDetailField label="Preferred delivery time" value={dashboardLabel(event.preferred_delivery_time)} />
           <AdminDetailField label="Address" value={address} wide />
           <AdminDetailField label="Delivery notes" value={event.delivery_notes} wide />
           <AdminDetailField label="Card message" value={event.message} wide />
@@ -72,10 +75,10 @@ export default function AdminEventDetailPage() {
 
       <AdminDetailSection title="Order">
         <AdminDetailGrid>
-          <AdminDetailField label="Budget" value={formatAdminCurrency(event.budget)} />
-          <AdminDetailField label="Total amount" value={formatAdminCurrency(event.total_amount)} />
-          <AdminDetailField label="Plan type" value={adminLabel(event.order_type)} />
-          <AdminDetailField label="Frequency" value={adminLabel(event.frequency)} />
+          <AdminDetailField label="Budget" value={formatDashboardCurrency(event.budget)} />
+          <AdminDetailField label="Total amount" value={formatDashboardCurrency(event.total_amount)} />
+          <AdminDetailField label="Plan type" value={dashboardLabel(event.order_type)} />
+          <AdminDetailField label="Frequency" value={dashboardLabel(event.frequency)} />
           <AdminDetailField
             label="Plan"
             value={<AdminInlineLink href={`/dashboard/admin/plans/${event.order_id}`}>View plan #{event.order_id}</AdminInlineLink>}
@@ -98,7 +101,7 @@ export default function AdminEventDetailPage() {
 
       <AdminDetailSection title="Status history" className="xl:col-span-2">
         <AdminDetailGrid className="lg:grid-cols-3">
-          <AdminDetailField label="Current status" value={<AdminStatusPill status={event.status} />} />
+          <AdminDetailField label="Current status" value={<DashboardStatusPill status={event.status} />} />
           <AdminDetailField label="Ordered at" value={event.ordered_at ? formatDateTime(event.ordered_at) : null} />
           <AdminDetailField label="Delivered at" value={event.delivered_at ? formatDateTime(event.delivered_at) : null} />
           <AdminDetailField

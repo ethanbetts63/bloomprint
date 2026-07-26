@@ -69,7 +69,6 @@ export type { BadgeProps } from './BadgeProps';
 export type { ValuePropsAffiliatesProps } from './ValuePropsAffiliatesProps';
 export type { SummarySectionProps } from './SummarySectionProps';
 export type { AdminGuardProps } from './AdminGuardProps';
-export type { StripeConnectBannerProps } from './StripeConnectBannerProps';
 export type { ServiceAreaMapProps } from './ServiceAreaMapProps';
 export type { ProtectedRouteProps } from './ProtectedRouteProps';
 export type { BecomePartnerButtonProps } from './BecomePartnerButtonProps';
@@ -85,5 +84,3 @@ export type { PaymentInitiatorButtonProps } from './PaymentInitiatorButtonProps'
 export type { StepProgressBarProps } from './StepProgressBarProps';
 export type { RecipientSummaryProps } from './RecipientSummaryProps';
 export type { UnifiedSummaryCardProps } from './UnifiedSummaryCardProps';
-export type { EventCardProps } from './EventCardProps';
-export type { QueueSectionProps } from './QueueSectionProps';

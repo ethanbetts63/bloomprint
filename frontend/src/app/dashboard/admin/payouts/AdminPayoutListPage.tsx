@@ -4,13 +4,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
 import { getAdminCommissions } from '@/api/admin';
-import AdminDataTable, {
-  FilterSelect,
-  StatusPill,
-  formatAdminDate,
-  type AdminColumn,
+import DashboardDataTable, {
+  DashboardFilterSelect,
+  DashboardTableStatusPill,
+  formatDashboardTableDate,
+  type DashboardColumn,
   type SortState,
-} from '@/components/dashboard/AdminDataTable';
+} from '@/components/dashboard/DashboardDataTable';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { errorMessage } from '@/lib/errors';
@@ -123,7 +123,7 @@ export default function AdminPayoutListPage() {
   };
   const showClear = status !== 'all' || type !== 'all' || search !== '' || sort?.field !== 'created_at' || sort?.dir !== 'desc';
 
-  const columns: AdminColumn<AdminCommission>[] = [
+  const columns: DashboardColumn<AdminCommission>[] = [
     {
       key: 'partner', header: 'Partner', sortable: true,
       render: (commission) => <span className="font-medium text-slate-900">{partnerName(commission)}</span>,
@@ -133,22 +133,22 @@ export default function AdminPayoutListPage() {
     {
       key: 'status', header: 'Status', sortable: true,
       render: (commission) => (
-        <StatusPill className={STATUS_STYLE[commission.status]?.pill}>{STATUS_STYLE[commission.status]?.label ?? commission.status}</StatusPill>
+        <DashboardTableStatusPill className={STATUS_STYLE[commission.status]?.pill}>{STATUS_STYLE[commission.status]?.label ?? commission.status}</DashboardTableStatusPill>
       ),
     },
     { key: 'event', header: 'Event', sortable: true, cellClassName: 'font-mono text-sm text-slate-600', render: (commission) => commission.event ? `#${commission.event}` : '—' },
-    { key: 'created_at', header: 'Created', sortable: true, cellClassName: 'text-sm text-slate-600', render: (commission) => formatAdminDate(commission.created_at) },
+    { key: 'created_at', header: 'Created', sortable: true, cellClassName: 'text-sm text-slate-600', render: (commission) => formatDashboardTableDate(commission.created_at) },
   ];
 
   const filters = (
     <>
-      <FilterSelect
+      <DashboardFilterSelect
         value={status}
         onValueChange={(value) => { setLoading(true); setStatus(value); setPage(1); }}
         options={STATUS_OPTIONS}
         ariaLabel="Filter payouts by status"
       />
-      <FilterSelect
+      <DashboardFilterSelect
         value={type}
         onValueChange={(value) => { setLoading(true); setType(value); setPage(1); }}
         options={TYPE_OPTIONS}
@@ -186,7 +186,7 @@ export default function AdminPayoutListPage() {
   return (
     <>
       {error && <p className="px-4 pt-4 text-sm text-red-600 md:px-6">{error}</p>}
-      <AdminDataTable
+      <DashboardDataTable
         title="Payouts"
         filterSummary={`${total.toLocaleString('en-AU')} ${total === 1 ? 'payout' : 'payouts'} matching this view`}
         filters={filters}

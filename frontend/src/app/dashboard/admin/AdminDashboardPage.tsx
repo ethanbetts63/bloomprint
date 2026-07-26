@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 import { getAdminCommissions, getAdminDashboard, getPendingPartners } from '@/api/admin';
-import { formatAdminDate } from '@/components/dashboard/AdminDataTable';
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from '@/components/ui/table';
+import { formatDashboardTableDate } from '@/components/dashboard/DashboardDataTable';
+import DashboardOverviewTable, {
+  DashboardPrimaryLink as PrimaryLink,
+  DashboardTableLink as ViewLink,
+} from '@/components/dashboard/DashboardOverviewTable';
+import { TableCell, TableRow } from '@/components/ui/table';
 import { errorMessage } from '@/lib/errors';
 import type { AdminCommission } from '@/types/AdminCommission';
 import type { AdminDashboard } from '@/types/AdminDashboard';
@@ -37,83 +38,9 @@ function personName(firstName: string, lastName: string): string {
   return `${firstName} ${lastName}`.trim() || '—';
 }
 
-function ViewLink({ href, children = 'View' }: { href: string; children?: React.ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className="inline-flex rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-100 hover:text-slate-950"
-    >
-      {children}
-    </Link>
-  );
-}
-
-function PrimaryLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className="inline-flex rounded-md bg-slate-950 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-slate-800"
-    >
-      {children}
-    </Link>
-  );
-}
-
-function OverviewTable({
-  title, count, viewAllHref, viewAllLabel, headers, children, emptyMessage, empty, minWidth = 760,
-}: {
-  title: string;
-  count: number;
-  viewAllHref?: string;
-  viewAllLabel?: string;
-  headers: string[];
-  children: React.ReactNode;
-  emptyMessage: string;
-  empty: boolean;
-  minWidth?: number;
-}) {
-  return (
-    <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-      <div className="flex items-center justify-between gap-4 border-b border-slate-200 px-4 py-4 sm:px-6">
-        <div>
-          <h2 className="font-semibold text-slate-950">{title}</h2>
-          <p className="mt-0.5 text-sm text-slate-500">{count} {count === 1 ? 'item' : 'items'}</p>
-        </div>
-        {viewAllHref && (
-          <Link href={viewAllHref} className="text-sm font-semibold text-slate-600 hover:text-slate-950">
-            {viewAllLabel ?? 'View all'}
-          </Link>
-        )}
-      </div>
-      <div className="overflow-x-auto">
-        <Table style={{ minWidth }}>
-          <TableHeader className="bg-slate-50">
-            <TableRow className="border-slate-200 hover:bg-slate-50">
-              {headers.map((header) => (
-                <TableHead key={header} className="font-semibold text-slate-600 last:text-right">
-                  {header}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {empty ? (
-              <TableRow>
-                <TableCell colSpan={headers.length} className="h-28 text-center text-slate-500">
-                  {emptyMessage}
-                </TableCell>
-              </TableRow>
-            ) : children}
-          </TableBody>
-        </Table>
-      </div>
-    </section>
-  );
-}
-
 function EventTable({ title, events, queue }: { title: string; events: AdminEvent[]; queue: EventQueue }) {
   return (
-    <OverviewTable
+    <DashboardOverviewTable
       title={title}
       count={events.length}
       headers={['Recipient', 'Delivery', 'Location', 'Budget', queue === 'to_order' ? 'Timing' : 'Status', 'Actions']}
@@ -156,7 +83,7 @@ function EventTable({ title, events, queue }: { title: string; events: AdminEven
           </TableRow>
         );
       })}
-    </OverviewTable>
+    </DashboardOverviewTable>
   );
 }
 
@@ -202,7 +129,7 @@ export default function AdminDashboardPage() {
         <section className="rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">{error}</section>
       ) : dashboard ? (
         <div className="space-y-6">
-          <OverviewTable
+          <DashboardOverviewTable
             title="Pending payouts"
             count={pendingPayouts.length}
             viewAllHref="/dashboard/admin/payouts"
@@ -216,15 +143,15 @@ export default function AdminDashboardPage() {
                 <TableCell className="font-medium text-slate-900">{commission.partner_name || 'Unknown partner'}</TableCell>
                 <TableCell className="capitalize text-slate-700">{commission.commission_type}</TableCell>
                 <TableCell className="font-semibold text-slate-950">{formatAmount(commission.amount)}</TableCell>
-                <TableCell className="text-slate-600">{formatAdminDate(commission.created_at)}</TableCell>
+                <TableCell className="text-slate-600">{formatDashboardTableDate(commission.created_at)}</TableCell>
                 <TableCell className="text-right">
                   <ViewLink href={`/dashboard/admin/payouts/${commission.id}`} />
                 </TableCell>
               </TableRow>
             ))}
-          </OverviewTable>
+          </DashboardOverviewTable>
 
-          <OverviewTable
+          <DashboardOverviewTable
             title="Partner requests"
             count={pendingPartners.length}
             viewAllHref="/dashboard/admin/partners"
@@ -245,13 +172,13 @@ export default function AdminDashboardPage() {
                 <TableCell className="text-slate-700">
                   {partner.partner_type === 'delivery' ? 'Delivery (florist)' : 'Referral'}
                 </TableCell>
-                <TableCell className="text-slate-600">{formatAdminDate(partner.created_at)}</TableCell>
+                <TableCell className="text-slate-600">{formatDashboardTableDate(partner.created_at)}</TableCell>
                 <TableCell className="text-right">
                   <ViewLink href={`/dashboard/admin/partners/${partner.id}`} />
                 </TableCell>
               </TableRow>
             ))}
-          </OverviewTable>
+          </DashboardOverviewTable>
 
           <EventTable title="To order" events={dashboard.to_order} queue="to_order" />
           <EventTable title="Ordered" events={dashboard.ordered} queue="ordered" />

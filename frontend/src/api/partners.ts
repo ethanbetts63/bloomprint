@@ -9,6 +9,8 @@ import type {
   DeliveryRequestDetail,
   Payout,
   PayoutDetail,
+  Commission,
+  DeliveryRequestSummary,
 } from '@/types';
 
 export async function registerPartner(data: PartnerRegistrationData): Promise<AuthResponse> {
@@ -21,6 +23,16 @@ export async function registerPartner(data: PartnerRegistrationData): Promise<Au
 
 export async function getPartnerDashboard(): Promise<Partner> {
   const response = await authedFetch('/api/partners/dashboard/');
+  return handleResponse(response);
+}
+
+export async function getPartnerCommissions(): Promise<Commission[]> {
+  const response = await authedFetch('/api/partners/commissions/');
+  return handleResponse(response);
+}
+
+export async function getPartnerDeliveryRequests(): Promise<DeliveryRequestSummary[]> {
+  const response = await authedFetch('/api/partners/delivery-requests/');
   return handleResponse(response);
 }
 

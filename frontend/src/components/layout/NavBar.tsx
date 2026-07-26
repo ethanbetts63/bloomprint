@@ -9,6 +9,7 @@ import logo192 from '@/assets/logo-192w.webp';
 import logo256 from '@/assets/logo-256w.webp';
 import { assetSrc } from '@/lib/assets';
 import { cn } from '@/lib/utils';
+import { roleHome } from '@/lib/roleHome';
 import { useAuth } from '@/context/AuthContext';
 
 const MENU_LINK =
@@ -16,12 +17,7 @@ const MENU_LINK =
 
 type MenuItem = { href: string; label: string };
 
-const ACCOUNT_LINKS: MenuItem[] = [
-  { href: '/order-support', label: 'Order Support' },
-];
-
 const PARTNER_LINKS: MenuItem[] = [
-  { href: '/dashboard/partner', label: 'Business Dashboard' },
   { href: '/dashboard/partner/details', label: 'Business Details' },
   { href: '/dashboard/partner/payouts', label: 'Payouts' },
 ];
@@ -54,8 +50,15 @@ const NavBar = () => {
 
   const menuItems: MenuItem[] = isAuthenticated
     ? [
-        ...ACCOUNT_LINKS,
-        ...(user?.is_partner ? PARTNER_LINKS : []),
+        ...(user?.is_partner ? [
+          {
+            href: user.role === 'florist' || user.role === 'affiliate' ? roleHome(user.role) : '/dashboard/partner',
+            label: user.role === 'florist'
+              ? 'Florist Dashboard'
+              : user.role === 'affiliate' ? 'Affiliate Dashboard' : 'Business Dashboard',
+          },
+          ...PARTNER_LINKS,
+        ] : []),
         ...(user?.is_staff || user?.is_superuser ? ADMIN_LINKS : []),
       ]
     : [];

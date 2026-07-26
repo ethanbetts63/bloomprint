@@ -60,6 +60,14 @@ class TestPartnerDashboardSerializer:
         data = PartnerDashboardSerializer(partner).data
         assert data['discount_codes'] == []
 
+    def test_discount_codes_hidden_for_delivery_partner(self):
+        partner = PartnerFactory(partner_type='delivery')
+        DiscountCodeFactory(partner=partner)
+
+        data = PartnerDashboardSerializer(partner).data
+
+        assert data['discount_codes'] == []
+
     def test_discount_codes_multiple(self):
         partner = PartnerFactory()
         DiscountCodeFactory(partner=partner, code='code-one-5')

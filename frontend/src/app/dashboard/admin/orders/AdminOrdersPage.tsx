@@ -4,12 +4,12 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
 import { getAdminOrders } from '@/api/admin';
-import AdminDataTable, {
-  FilterSelect,
-  formatAdminDate,
-  type AdminColumn,
+import DashboardDataTable, {
+  DashboardFilterSelect,
+  formatDashboardTableDate,
+  type DashboardColumn,
   type SortState,
-} from '@/components/dashboard/AdminDataTable';
+} from '@/components/dashboard/DashboardDataTable';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { errorMessage } from '@/lib/errors';
@@ -115,7 +115,7 @@ export default function AdminOrdersPage() {
     (status !== 'all' ? 1 : 0) + (planType !== 'all' ? 1 : 0) + (search ? 1 : 0) + (sort ? 1 : 0);
   const pageCount = Math.max(1, Math.ceil(count / PAGE_SIZE));
 
-  const columns: AdminColumn<AdminPlan>[] = [
+  const columns: DashboardColumn<AdminPlan>[] = [
     {
       key: 'id', header: 'Order',
       render: (order) => <span className="font-mono font-semibold text-slate-950">#{order.id}</span>,
@@ -140,19 +140,19 @@ export default function AdminOrdersPage() {
     },
     {
       key: 'created_at', header: 'Date', sortable: true,
-      cellClassName: 'text-sm text-slate-600', render: (order) => formatAdminDate(order.created_at),
+      cellClassName: 'text-sm text-slate-600', render: (order) => formatDashboardTableDate(order.created_at),
     },
   ];
 
   const filters = (
     <>
-      <FilterSelect
+      <DashboardFilterSelect
         value={status}
         onValueChange={(value) => { setLoading(true); setStatus(value); setPage(1); }}
         options={STATUS_OPTIONS}
         ariaLabel="Filter by status"
       />
-      <FilterSelect
+      <DashboardFilterSelect
         value={planType}
         onValueChange={(value) => { setLoading(true); setPlanType(value); setPage(1); }}
         options={TYPE_OPTIONS}
@@ -190,7 +190,7 @@ export default function AdminOrdersPage() {
   return (
     <>
       {error && <p className="px-4 pt-4 text-sm text-red-600 md:px-6">{error}</p>}
-      <AdminDataTable
+      <DashboardDataTable
         title="Orders"
         filterSummary={`${count.toLocaleString('en-AU')} ${count === 1 ? 'order' : 'orders'} matching this view`}
         filters={filters}

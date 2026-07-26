@@ -42,7 +42,7 @@ export interface Commission {
   id: number;
   commission_type: 'referral' | 'fulfillment';
   amount: string;
-  status: 'pending' | 'approved' | 'paid';
+  status: 'pending' | 'approved' | 'processing' | 'paid' | 'denied';
   note: string;
   created_at: string;
 }
@@ -52,9 +52,10 @@ export interface DeliveryRequestSummary {
   event_id: number;
   delivery_date: string;
   recipient_name: string;
+  budget?: string;
   status: 'pending' | 'accepted' | 'declined' | 'expired';
   token: string;
-  expires_at: string;
+  expires_at: string | null;
   created_at: string;
 }
 

@@ -52,11 +52,14 @@ const MapClickHandler = ({ onClick }: {
   return null;
 };
 
-const PanToCenter = ({ center }: { center: [number, number] }) => {
+const FitServiceArea = ({ center, radiusKm }: { center: [number, number]; radiusKm: number }) => {
   const map = useMap();
+
   useEffect(() => {
-    map.panTo(center);
-  }, [center, map]);
+    const bounds = L.latLng(center).toBounds(radiusKm * 2000);
+    map.fitBounds(bounds, { padding: [24, 24], maxZoom: 15, animate: true });
+  }, [center, radiusKm, map]);
+
   return null;
 };
 
@@ -72,7 +75,7 @@ const ServiceAreaMap = ({
   return (
     <div className="space-y-4 pb-4">
       <label className="text-sm font-medium">Service Area</label>
-      <p className="text-sm text-muted-foreground">Drop a pin on your store location and set the radius you're willing to deliver within. You'll only receive delivery requests for orders within this area.</p>
+      <p className="text-sm text-muted-foreground">Drop a pin on your store location and set the radius you would like to receive order requests for. You will not be penalized for declining orders.</p>
       <div className="h-[300px] rounded-lg overflow-hidden border relative z-0">
         <MapContainer center={[-25.2744, 133.7751]} zoom={4} style={{ height: '100%', width: '100%' }}>
           <TileLayer
@@ -82,7 +85,7 @@ const ServiceAreaMap = ({
           <MapClickHandler onClick={onLocationChange} />
           {hasPin && (
             <>
-              <PanToCenter center={[latitude!, longitude!]} />
+              <FitServiceArea center={[latitude!, longitude!]} radiusKm={radiusKm} />
               <DraggableMarker
                 position={[latitude!, longitude!]}
                 onDragEnd={onLocationChange}

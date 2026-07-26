@@ -1,5 +1,6 @@
 from .partner_registration_view import PartnerRegistrationView
 from .partner_dashboard_view import PartnerDashboardView
+from .partner_commission_list_view import PartnerCommissionListView
 from .partner_update_view import PartnerUpdateView
 from .delivery_request_views import (
     DeliveryRequestDetailView,

@@ -48,6 +48,15 @@ class TestDiscountCodeCreateView:
         response = self.client.post(self.url, {}, format='json')
         assert response.status_code == 404
 
+    def test_delivery_partner_cannot_create_discount_code(self):
+        florist = PartnerFactory(partner_type='delivery')
+        self.client.force_authenticate(user=florist.user)
+
+        response = self.client.post(self.url, {}, format='json')
+
+        assert response.status_code == 403
+        assert DiscountCode.objects.filter(partner=florist).count() == 0
+
     def test_collision_gets_counter_suffix(self):
         first = self.client.post(self.url, {'name': 'vip'}, format='json')
         second = self.client.post(self.url, {'name': 'vip'}, format='json')

@@ -6,8 +6,11 @@ import { toast } from 'sonner';
 import { approveCommission, denyCommission, getAdminCommission } from '@/api/admin';
 import {
   AdminDetailError, AdminDetailField, AdminDetailGrid, AdminDetailLoading, AdminDetailPage,
-  AdminDetailSection, AdminInlineLink, AdminStatusPill, formatAdminCurrency, formatAdminDateLong,
+  AdminDetailSection, AdminInlineLink,
 } from '@/components/dashboard/AdminDetail';
+import {
+  DashboardStatusPill, formatDashboardCurrency, formatDashboardDateLong,
+} from '@/components/dashboard/DashboardData';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { errorMessage } from '@/lib/errors';
@@ -69,7 +72,7 @@ export default function AdminPayoutDetailPage() {
   return (
     <AdminDetailPage
       title={`Commission #${commission.id}`}
-      description={`${commission.commission_type === 'fulfillment' ? 'Fulfillment' : 'Referral'} commission · ${formatAdminCurrency(commission.amount)}`}
+      description={`${commission.commission_type === 'fulfillment' ? 'Fulfillment' : 'Referral'} commission · ${formatDashboardCurrency(commission.amount)}`}
       backHref="/dashboard/admin/payouts"
       backLabel="Back to payouts"
       actions={actions}
@@ -84,12 +87,12 @@ export default function AdminPayoutDetailPage() {
           />
           <AdminDetailField label="Partner type" value={commission.partner_type === 'delivery' ? 'Delivery (florist)' : 'Referral'} />
           <AdminDetailField label="Commission type" value={commission.commission_type === 'fulfillment' ? 'Fulfillment' : 'Referral'} />
-          <AdminDetailField label="Amount" value={formatAdminCurrency(commission.amount)} />
-          <AdminDetailField label="Status" value={<AdminStatusPill status={commission.status} />} />
-          <AdminDetailField label="Created" value={formatAdminDateLong(commission.created_at)} />
+          <AdminDetailField label="Amount" value={formatDashboardCurrency(commission.amount)} />
+          <AdminDetailField label="Status" value={<DashboardStatusPill status={commission.status} />} />
+          <AdminDetailField label="Created" value={formatDashboardDateLong(commission.created_at)} />
           <AdminDetailField
             label="Stripe onboarding"
-            value={<AdminStatusPill status={commission.stripe_connect_onboarding_complete ? 'complete' : 'incomplete'} />}
+            value={<DashboardStatusPill status={commission.stripe_connect_onboarding_complete ? 'complete' : 'incomplete'} />}
           />
           <AdminDetailField
             label="Event"
@@ -104,7 +107,7 @@ export default function AdminPayoutDetailPage() {
       {STATUS_MESSAGE[commission.status] && (
         <AdminDetailSection title="Payout status" className="xl:col-span-2">
           <div className="flex items-center gap-3 rounded-lg bg-slate-50 px-4 py-3">
-            <AdminStatusPill status={commission.status} />
+            <DashboardStatusPill status={commission.status} />
             <p className="text-sm text-slate-700">{STATUS_MESSAGE[commission.status]}</p>
           </div>
         </AdminDetailSection>

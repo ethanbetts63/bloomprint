@@ -5,9 +5,11 @@ import { useParams } from 'next/navigation';
 import { getAdminUser } from '@/api/admin';
 import {
   AdminDetailError, AdminDetailField, AdminDetailGrid, AdminDetailLoading, AdminDetailPage,
-  AdminDetailSection, AdminDetailTable, AdminInlineLink, AdminStatusPill, adminLabel,
-  formatAdminCurrency, formatAdminDateLong,
+  AdminDetailSection, AdminDetailTable, AdminInlineLink,
 } from '@/components/dashboard/AdminDetail';
+import {
+  DashboardStatusPill, dashboardLabel, formatDashboardCurrency, formatDashboardDateLong,
+} from '@/components/dashboard/DashboardData';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { errorMessage } from '@/lib/errors';
 import type { AdminUserDetail } from '@/types/AdminUserDetail';
@@ -49,15 +51,15 @@ export default function AdminUserDetailPage() {
           <AdminDetailField label="First name" value={user.first_name} />
           <AdminDetailField label="Last name" value={user.last_name} />
           <AdminDetailField label="Email" value={user.email} />
-          <AdminDetailField label="Joined" value={formatAdminDateLong(user.date_joined)} />
-          <AdminDetailField label="Status" value={<AdminStatusPill status={user.is_active ? 'active' : 'inactive'} />} />
+          <AdminDetailField label="Joined" value={formatDashboardDateLong(user.date_joined)} />
+          <AdminDetailField label="Status" value={<DashboardStatusPill status={user.is_active ? 'active' : 'inactive'} />} />
           <AdminDetailField
             label="Roles"
-            value={<div className="flex flex-wrap gap-1.5">{roles.map((role) => <AdminStatusPill key={role} status={role} />)}</div>}
+            value={<div className="flex flex-wrap gap-1.5">{roles.map((role) => <DashboardStatusPill key={role} status={role} />)}</div>}
           />
           <AdminDetailField label="Referred by" value={user.referred_by} />
           <AdminDetailField label="Stripe customer ID" value={user.stripe_customer_id} mono />
-          <AdminDetailField label="Deleted at" value={user.deleted_at ? formatAdminDateLong(user.deleted_at) : null} />
+          <AdminDetailField label="Deleted at" value={user.deleted_at ? formatDashboardDateLong(user.deleted_at) : null} />
         </AdminDetailGrid>
       </AdminDetailSection>
 
@@ -72,11 +74,11 @@ export default function AdminUserDetailPage() {
             const recipient = [plan.recipient_first_name, plan.recipient_last_name].filter(Boolean).join(' ');
             return (
               <TableRow key={`${plan.plan_type}-${plan.id}`} className="border-slate-100 hover:bg-slate-50">
-                <TableCell className="font-medium text-slate-900">{adminLabel(plan.plan_type)} #{plan.id}</TableCell>
+                <TableCell className="font-medium text-slate-900">{dashboardLabel(plan.plan_type)} #{plan.id}</TableCell>
                 <TableCell className="text-slate-700">{recipient || '—'}</TableCell>
-                <TableCell className="font-semibold text-slate-950">{formatAdminCurrency(plan.total_amount)}</TableCell>
-                <TableCell><AdminStatusPill status={plan.status} /></TableCell>
-                <TableCell className="text-slate-600">{formatAdminDateLong(plan.created_at)}</TableCell>
+                <TableCell className="font-semibold text-slate-950">{formatDashboardCurrency(plan.total_amount)}</TableCell>
+                <TableCell><DashboardStatusPill status={plan.status} /></TableCell>
+                <TableCell className="text-slate-600">{formatDashboardDateLong(plan.created_at)}</TableCell>
                 <TableCell className="text-right">
                   <AdminInlineLink href={`/dashboard/admin/plans/${plan.id}`}>View plan</AdminInlineLink>
                 </TableCell>

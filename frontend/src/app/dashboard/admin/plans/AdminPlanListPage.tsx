@@ -8,9 +8,9 @@ import { Input } from '@/components/ui/input';
 import { getAdminPlans } from '@/api/admin';
 import { errorMessage } from '@/lib/errors';
 import type { AdminPlan } from '@/types/AdminPlan';
-import AdminDataTable, {
-  FilterSelect, formatAdminDate, type AdminColumn, type SortState,
-} from '@/components/dashboard/AdminDataTable';
+import DashboardDataTable, {
+  DashboardFilterSelect, formatDashboardTableDate, type DashboardColumn, type SortState,
+} from '@/components/dashboard/DashboardDataTable';
 
 const PAGE_SIZE = 50;
 
@@ -110,7 +110,7 @@ export default function AdminPlanListPage() {
   const activeFilters =
     (status !== 'all' ? 1 : 0) + (planType !== 'all' ? 1 : 0) + (search ? 1 : 0) + (sort ? 1 : 0);
 
-  const columns: AdminColumn<AdminPlan>[] = [
+  const columns: DashboardColumn<AdminPlan>[] = [
     {
       key: 'customer_name', header: 'Customer', sortable: true,
       render: (p) => (
@@ -132,14 +132,14 @@ export default function AdminPlanListPage() {
     },
     {
       key: 'created_at', header: 'Date', sortable: true,
-      cellClassName: 'text-sm text-slate-600', render: (p) => formatAdminDate(p.created_at),
+      cellClassName: 'text-sm text-slate-600', render: (p) => formatDashboardTableDate(p.created_at),
     },
   ];
 
   const filters = (
     <>
-      <FilterSelect value={status} onValueChange={(v) => { setLoading(true); setStatus(v); setPage(1); }} options={STATUS_OPTIONS} ariaLabel="Filter by status" />
-      <FilterSelect value={planType} onValueChange={(v) => { setLoading(true); setPlanType(v); setPage(1); }} options={TYPE_OPTIONS} ariaLabel="Filter by type" />
+      <DashboardFilterSelect value={status} onValueChange={(v) => { setLoading(true); setStatus(v); setPage(1); }} options={STATUS_OPTIONS} ariaLabel="Filter by status" />
+      <DashboardFilterSelect value={planType} onValueChange={(v) => { setLoading(true); setPlanType(v); setPage(1); }} options={TYPE_OPTIONS} ariaLabel="Filter by type" />
       <form className="sm:col-span-2 lg:col-span-1" onSubmit={submitSearch}>
         <div className="flex gap-2">
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, email or recipient" aria-label="Search plans" className="border-slate-300 bg-white text-slate-900 placeholder:text-slate-400" />
@@ -166,7 +166,7 @@ export default function AdminPlanListPage() {
   return (
     <>
       {error && <p className="px-4 pt-4 text-sm text-red-600 md:px-6">{error}</p>}
-      <AdminDataTable
+      <DashboardDataTable
         title="Plans"
         filterSummary={`${total.toLocaleString('en-AU')} ${total === 1 ? 'plan' : 'plans'} matching this view`}
         filters={filters}

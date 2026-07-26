@@ -15,6 +15,12 @@ class DiscountCodeCreateView(APIView):
         except Partner.DoesNotExist:
             return Response({'error': 'Not a partner.'}, status=status.HTTP_404_NOT_FOUND)
 
+        if partner.partner_type != 'non_delivery':
+            return Response(
+                {'error': 'Discount codes are only available to affiliate partners.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         name = request.data.get('name', '').strip() or partner.business_name
         code = DiscountCode.generate_code(name)
         dc = DiscountCode.objects.create(partner=partner, code=code, discount_amount=5)

@@ -5,9 +5,11 @@ import { useParams } from 'next/navigation';
 import { getAdminPlanDetail } from '@/api/admin';
 import {
   AdminDetailError, AdminDetailField, AdminDetailGrid, AdminDetailLoading, AdminDetailPage,
-  AdminDetailSection, AdminDetailTable, AdminInlineLink, AdminStatusPill, adminLabel,
-  formatAdminCurrency, formatAdminDateLong,
+  AdminDetailSection, AdminDetailTable, AdminInlineLink,
 } from '@/components/dashboard/AdminDetail';
+import {
+  DashboardStatusPill, dashboardLabel, formatDashboardCurrency, formatDashboardDateLong,
+} from '@/components/dashboard/DashboardData';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { errorMessage } from '@/lib/errors';
 import type { AdminPlanDetail } from '@/types/AdminPlanDetail';
@@ -38,19 +40,19 @@ export default function AdminPlanDetailPage() {
 
   return (
     <AdminDetailPage
-      title={`${adminLabel(plan.plan_type)} plan #${plan.id}`}
-      description={`${customerName} · Created ${formatAdminDateLong(plan.created_at)}`}
+      title={`${dashboardLabel(plan.plan_type)} plan #${plan.id}`}
+      description={`${customerName} · Created ${formatDashboardDateLong(plan.created_at)}`}
       backHref="/dashboard/admin/plans"
       backLabel="Back to plans"
     >
       <AdminDetailSection title="Plan details">
         <AdminDetailGrid>
-          <AdminDetailField label="Status" value={<AdminStatusPill status={plan.status} />} />
-          <AdminDetailField label="Type" value={adminLabel(plan.plan_type)} />
-          <AdminDetailField label="Budget" value={formatAdminCurrency(plan.budget)} />
-          <AdminDetailField label="Total" value={formatAdminCurrency(plan.total_amount)} />
-          <AdminDetailField label="Frequency" value={adminLabel(plan.frequency)} />
-          <AdminDetailField label="Start date" value={formatAdminDateLong(plan.start_date)} />
+          <AdminDetailField label="Status" value={<DashboardStatusPill status={plan.status} />} />
+          <AdminDetailField label="Type" value={dashboardLabel(plan.plan_type)} />
+          <AdminDetailField label="Budget" value={formatDashboardCurrency(plan.budget)} />
+          <AdminDetailField label="Total" value={formatDashboardCurrency(plan.total_amount)} />
+          <AdminDetailField label="Frequency" value={dashboardLabel(plan.frequency)} />
+          <AdminDetailField label="Start date" value={formatDashboardDateLong(plan.start_date)} />
         </AdminDetailGrid>
       </AdminDetailSection>
 
@@ -64,7 +66,7 @@ export default function AdminPlanDetailPage() {
       <AdminDetailSection title="Recipient">
         <AdminDetailGrid>
           <AdminDetailField label="Name" value={recipientName} />
-          <AdminDetailField label="Preferred delivery time" value={adminLabel(plan.preferred_delivery_time)} />
+          <AdminDetailField label="Preferred delivery time" value={dashboardLabel(plan.preferred_delivery_time)} />
           <AdminDetailField label="Address" value={address} wide />
           <AdminDetailField label="Delivery notes" value={plan.delivery_notes} wide />
         </AdminDetailGrid>
@@ -84,8 +86,8 @@ export default function AdminPlanDetailPage() {
         >
           {plan.events.map((event) => (
             <TableRow key={event.id} className="border-slate-100 hover:bg-slate-50">
-              <TableCell className="font-medium text-slate-900">{formatAdminDateLong(event.delivery_date)}</TableCell>
-              <TableCell><AdminStatusPill status={event.status} /></TableCell>
+              <TableCell className="font-medium text-slate-900">{formatDashboardDateLong(event.delivery_date)}</TableCell>
+              <TableCell><DashboardStatusPill status={event.status} /></TableCell>
               <TableCell className="text-right">
                 <AdminInlineLink href={`/dashboard/admin/events/${event.id}`}>View delivery</AdminInlineLink>
               </TableCell>

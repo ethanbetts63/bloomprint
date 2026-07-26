@@ -16,7 +16,7 @@ export const HeroAffiliatesPage = () => {
           Affiliate program
         </p>
       }
-      description="Give your audience $5 off custom flowers from a local florist, and earn $10 for every new customer you send. Flat and simple."
+      description="Give your audience $5 off custom flowers from a local florist, and earn $10 for every new customer you send. Simple!"
       form={<PartnerRegistrationForm partnerType="referral" />}
       image={
         <div className="relative min-h-[420px] overflow-hidden bg-black lg:min-h-[560px] lg:rounded-xl">

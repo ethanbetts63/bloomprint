@@ -4,13 +4,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
 import { getAdminUsers } from '@/api/admin';
-import AdminDataTable, {
-  FilterSelect,
-  StatusPill,
-  formatAdminDate,
-  type AdminColumn,
+import DashboardDataTable, {
+  DashboardFilterSelect,
+  DashboardTableStatusPill,
+  formatDashboardTableDate,
+  type DashboardColumn,
   type SortState,
-} from '@/components/dashboard/AdminDataTable';
+} from '@/components/dashboard/DashboardDataTable';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { errorMessage } from '@/lib/errors';
@@ -113,7 +113,7 @@ export default function AdminUserListPage() {
   };
   const showClear = account !== 'all' || search !== '' || sort?.field !== 'joined' || sort?.dir !== 'desc';
 
-  const columns: AdminColumn<AdminUser>[] = [
+  const columns: DashboardColumn<AdminUser>[] = [
     {
       key: 'name', header: 'Name', sortable: true,
       render: (user) => <span className="font-medium text-slate-900">{fullName(user)}</span>,
@@ -123,21 +123,21 @@ export default function AdminUserListPage() {
       key: 'account', header: 'Account',
       render: (user) => (
         <div className="flex flex-wrap gap-1">
-          {user.is_superuser && <StatusPill className="bg-violet-100 text-violet-800">Admin</StatusPill>}
-          {user.is_staff && !user.is_superuser && <StatusPill className="bg-sky-100 text-sky-800">Staff</StatusPill>}
-          {user.is_partner && <StatusPill className="bg-emerald-100 text-emerald-800">Partner</StatusPill>}
-          {!user.is_active && <StatusPill className="bg-rose-100 text-rose-700">Inactive</StatusPill>}
+          {user.is_superuser && <DashboardTableStatusPill className="bg-violet-100 text-violet-800">Admin</DashboardTableStatusPill>}
+          {user.is_staff && !user.is_superuser && <DashboardTableStatusPill className="bg-sky-100 text-sky-800">Staff</DashboardTableStatusPill>}
+          {user.is_partner && <DashboardTableStatusPill className="bg-emerald-100 text-emerald-800">Partner</DashboardTableStatusPill>}
+          {!user.is_active && <DashboardTableStatusPill className="bg-rose-100 text-rose-700">Inactive</DashboardTableStatusPill>}
           {!user.is_staff && !user.is_partner && user.is_active && <span className="text-sm text-slate-500">Standard</span>}
         </div>
       ),
     },
     { key: 'plans', header: 'Plans', sortable: true, align: 'right', cellClassName: 'text-slate-700', render: (user) => user.plan_count },
-    { key: 'joined', header: 'Joined', sortable: true, cellClassName: 'text-sm text-slate-600', render: (user) => formatAdminDate(user.date_joined) },
+    { key: 'joined', header: 'Joined', sortable: true, cellClassName: 'text-sm text-slate-600', render: (user) => formatDashboardTableDate(user.date_joined) },
   ];
 
   const filters = (
     <>
-      <FilterSelect
+      <DashboardFilterSelect
         value={account}
         onValueChange={(value) => { setAccount(value); setPage(1); }}
         options={ACCOUNT_OPTIONS}
@@ -173,7 +173,7 @@ export default function AdminUserListPage() {
   return (
     <>
       {error && <p className="px-4 pt-4 text-sm text-red-600 md:px-6">{error}</p>}
-      <AdminDataTable
+      <DashboardDataTable
         title="Users"
         filterSummary={`${total.toLocaleString('en-AU')} ${total === 1 ? 'user' : 'users'} matching this view`}
         filters={filters}
