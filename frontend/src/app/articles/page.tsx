@@ -11,7 +11,7 @@ export default function Page() {
   return (
     <>
       <JsonLd path="/articles" />
-      <div className="bg-primary text-primary-foreground">
+      <div className="bg-[var(--color2)] text-black">
         <section className="w-full">
           <div className="md:hidden">
             <div className="relative w-full h-48 overflow-hidden">

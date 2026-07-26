@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
@@ -24,6 +24,7 @@ interface PartnerRegistrationFormProps {
 
 const PartnerRegistrationForm = ({ partnerType, className = '' }: PartnerRegistrationFormProps) => {
   const router = useRouter();
+  const formTopRef = useRef<HTMLDivElement>(null);
   const { handleLoginSuccess } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [customerTermsAccepted, setCustomerTermsAccepted] = useState(false);
@@ -69,7 +70,7 @@ const PartnerRegistrationForm = ({ partnerType, className = '' }: PartnerRegistr
       return;
     }
 
-    if (!customerTermsAccepted || !partnerTermsAccepted) {
+    if ((!isDelivery && !customerTermsAccepted) || !partnerTermsAccepted) {
       toast.error('Please accept all terms and conditions before registering.');
       return;
     }
@@ -90,10 +91,9 @@ const PartnerRegistrationForm = ({ partnerType, className = '' }: PartnerRegistr
 
       await registerPartner(data);
       await handleLoginSuccess();
-      await Promise.all([
-        acceptTerms('customer'),
-        acceptTerms(isDelivery ? 'florist' : 'affiliate'),
-      ]);
+      const termsToAccept = [acceptTerms(isDelivery ? 'florist' : 'affiliate')];
+      if (!isDelivery) termsToAccept.push(acceptTerms('customer'));
+      await Promise.all(termsToAccept);
       router.push('/dashboard/partner');
     } catch (error) {
       const description = fieldErrorSummary(error);
@@ -114,7 +114,14 @@ const PartnerRegistrationForm = ({ partnerType, className = '' }: PartnerRegistr
       toast.error('Passwords do not match.');
       return;
     }
-    setStep(2);
+    changeStep(2);
+  };
+
+  const changeStep = (nextStep: 1 | 2) => {
+    setStep(nextStep);
+    requestAnimationFrame(() => {
+      formTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   };
 
   const showAccountStep = !isDelivery || step === 1;
@@ -123,7 +130,8 @@ const PartnerRegistrationForm = ({ partnerType, className = '' }: PartnerRegistr
 
   return (
     <div
-      className={`min-w-0 rounded-none border-y border-black/10 bg-white p-5 text-black shadow-xl shadow-black/5 sm:rounded-xl sm:border sm:p-6 lg:p-7 ${className}`}
+      ref={formTopRef}
+      className={`min-w-0 scroll-mt-28 rounded-none border-y border-black/10 bg-white p-5 text-black shadow-xl shadow-black/5 sm:rounded-xl sm:border sm:p-6 lg:p-7 ${className}`}
     >
       <div className="border-b border-black/10 pb-4">
         <div className="flex items-center justify-between gap-4">
@@ -189,7 +197,7 @@ const PartnerRegistrationForm = ({ partnerType, className = '' }: PartnerRegistr
         )}
 
         {showLocationStep && (
-          <div className="space-y-4 border-t border-black/10 pt-6">
+          <div className="space-y-4">
             <h3 className="text-lg font-semibold">Store Location</h3>
 
             <div className="space-y-2">
@@ -231,20 +239,22 @@ const PartnerRegistrationForm = ({ partnerType, className = '' }: PartnerRegistr
 
         {showTerms && (
         <div className="space-y-3 border-t border-black/10 pt-6">
-          <label className="flex cursor-pointer items-start gap-3">
-            <Checkbox
-              checked={customerTermsAccepted}
-              onCheckedChange={(checked) => setCustomerTermsAccepted(checked === true)}
-              className="mt-0.5 flex-shrink-0"
-            />
-            <span className="text-sm leading-relaxed text-black/70">
-              I have read and agree to the{' '}
-              <Link href="/terms-and-conditions/customer" target="_blank" className="text-black underline hover:text-black/70">
-                Customer Terms &amp; Conditions
-              </Link>
-              .
-            </span>
-          </label>
+          {!isDelivery && (
+            <label className="flex cursor-pointer items-start gap-3">
+              <Checkbox
+                checked={customerTermsAccepted}
+                onCheckedChange={(checked) => setCustomerTermsAccepted(checked === true)}
+                className="mt-0.5 flex-shrink-0"
+              />
+              <span className="text-sm leading-relaxed text-black/70">
+                I have read and agree to the{' '}
+                <Link href="/terms-and-conditions/customer" target="_blank" className="text-black underline hover:text-black/70">
+                  Customer Terms &amp; Conditions
+                </Link>
+                .
+              </span>
+            </label>
+          )}
           <label className="flex cursor-pointer items-start gap-3">
             <Checkbox
               checked={partnerTermsAccepted}
@@ -254,7 +264,7 @@ const PartnerRegistrationForm = ({ partnerType, className = '' }: PartnerRegistr
             <span className="text-sm leading-relaxed text-black/70">
               I have read and agree to the{' '}
               <Link href={`/terms-and-conditions/${isDelivery ? 'florist' : 'affiliate'}`} target="_blank" className="text-black underline hover:text-black/70">
-                {isDelivery ? 'Florist' : 'Affiliate'} Terms &amp; Conditions
+                {isDelivery ? 'Florist Terms & Conditions' : 'Affiliate Terms & Conditions'}
               </Link>
               .
             </span>
@@ -276,7 +286,7 @@ const PartnerRegistrationForm = ({ partnerType, className = '' }: PartnerRegistr
             {isDelivery && step === 2 && (
               <button
                 type="button"
-                onClick={() => setStep(1)}
+                onClick={() => changeStep(1)}
                 className="inline-flex items-center gap-1 text-sm font-medium text-black/60 transition hover:text-black"
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -285,7 +295,7 @@ const PartnerRegistrationForm = ({ partnerType, className = '' }: PartnerRegistr
             )}
             <button
               type="submit"
-              disabled={isSubmitting || !customerTermsAccepted || !partnerTermsAccepted}
+              disabled={isSubmitting || (!isDelivery && !customerTermsAccepted) || !partnerTermsAccepted}
               className="flex w-full items-center justify-between rounded-lg bg-black px-5 py-4 text-left text-white transition hover:bg-black/85 disabled:cursor-not-allowed disabled:opacity-70"
             >
               <span className="block text-sm font-semibold">

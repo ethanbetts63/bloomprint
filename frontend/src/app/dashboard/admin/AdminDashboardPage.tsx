@@ -1,133 +1,166 @@
-"use client";
+'use client';
+
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getAdminDashboard, getPendingPartners, getAdminCommissions } from '@/api/admin';
-import type { AdminDashboard } from '@/types/AdminDashboard';
-import type { AdminPartner } from '@/types/AdminPartner';
-import type { AdminCommission } from '@/types/AdminCommission';
 import { Loader2 } from 'lucide-react';
-import UnifiedSummaryCard from '@/components/order/UnifiedSummaryCard';
-import SummarySection from '@/components/SummarySection';
-import type { EventCardProps } from '@/types/EventCardProps';
-import type { QueueSectionProps } from '@/types/QueueSectionProps';
+import { getAdminCommissions, getAdminDashboard, getPendingPartners } from '@/api/admin';
+import { formatAdminDate } from '@/components/dashboard/AdminDataTable';
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from '@/components/ui/table';
 import { errorMessage } from '@/lib/errors';
+import type { AdminCommission } from '@/types/AdminCommission';
+import type { AdminDashboard } from '@/types/AdminDashboard';
+import type { AdminEvent } from '@/types/AdminEvent';
+import type { AdminPartner } from '@/types/AdminPartner';
 
-function formatDate(dateStr: string): string {
-  const date = new Date(dateStr + 'T00:00:00');
-  return date.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
+type EventQueue = 'to_order' | 'ordered' | 'delivered';
+
+function formatDeliveryDate(dateString: string): string {
+  return new Date(`${dateString}T00:00:00`).toLocaleDateString('en-AU', {
+    day: 'numeric', month: 'short', year: 'numeric',
+  });
 }
 
-function daysUntil(dateStr: string): number {
+function daysUntil(dateString: string): number {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const target = new Date(dateStr + 'T00:00:00');
-  return Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  const target = new Date(`${dateString}T00:00:00`);
+  return Math.ceil((target.getTime() - today.getTime()) / 86_400_000);
 }
-
-const EventCard = ({ event, section }: EventCardProps) => {
-  const days = daysUntil(event.delivery_date);
-  const recipientName = `${event.recipient_first_name} ${event.recipient_last_name}`;
-  const location = [event.recipient_suburb, event.recipient_city].filter(Boolean).join(', ');
-
-  return (
-    <div className="flex justify-between items-start gap-4 py-3 border-b border-black/5 last:border-0">
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold text-black truncate">{recipientName}</p>
-        <p className="text-sm text-black/60">{formatDate(event.delivery_date)}</p>
-        {location && <p className="text-sm text-black/40">{location}</p>}
-        <p className="text-sm font-medium text-black/70 mt-0.5">${event.budget}</p>
-        {section === 'to_order' && (
-          <p className={`text-sm font-semibold mt-0.5 ${days <= 3 ? 'text-red-600' : days <= 7 ? 'text-orange-500' : 'text-black/40'}`}>
-            {days < 0 ? `${Math.abs(days)} days overdue` : days === 0 ? 'Today' : `in ${days} day${days === 1 ? '' : 's'}`}
-          </p>
-        )}
-      </div>
-      <div className="flex flex-col gap-2 flex-shrink-0">
-        <Link
-          href={`/dashboard/admin/events/${event.id}`}
-          className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-white text-black/70 ring-1 ring-black/15 hover:text-black hover:ring-black/40 transition-colors shadow-sm text-center"
-        >
-          View
-        </Link>
-        {section === 'to_order' && (
-          <Link
-            href={`/dashboard/admin/events/${event.id}/mark-ordered`}
-            className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-black text-white hover:bg-black/85 transition-colors shadow-sm text-center"
-          >
-            Place Order
-          </Link>
-        )}
-        {section === 'ordered' && (
-          <Link
-            href={`/dashboard/admin/events/${event.id}/mark-delivered`}
-            className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-black text-white hover:bg-black/85 transition-colors shadow-sm text-center"
-          >
-            Confirm Delivery
-          </Link>
-        )}
-      </div>
-    </div>
-  );
-};
-
-const QueueSection = ({ title, events, section }: QueueSectionProps) => (
-  <SummarySection label={`${title} (${events.length})`}>
-    {events.length === 0 ? (
-      <p className="text-sm text-black/40 italic">No events currently in this queue.</p>
-    ) : (
-      <div className="flex flex-col">
-        {events.map((event) => (
-          <EventCard key={event.id} event={event} section={section} />
-        ))}
-      </div>
-    )}
-  </SummarySection>
-);
-
-const PartnerRequestRow = ({ partner }: { partner: AdminPartner }) => (
-  <div className="flex justify-between items-center gap-4 py-3 border-b border-black/5 last:border-0">
-    <div className="flex-1 min-w-0">
-      <p className="font-semibold text-black truncate">{partner.business_name || `${partner.first_name} ${partner.last_name}`}</p>
-      <p className="text-sm text-black/60">
-        {partner.partner_type === 'delivery' ? 'Delivery (Florist)' : 'Referral'}
-        {' · '}
-        {partner.first_name} {partner.last_name}
-      </p>
-      <p className="text-sm text-black/40">{partner.email}</p>
-    </div>
-    <Link
-      href={`/dashboard/admin/partners/${partner.id}`}
-      className="text-xs px-3 py-1.5 rounded border border-black/20 hover:bg-black/5 text-center text-black/70 flex-shrink-0"
-    >
-      View
-    </Link>
-  </div>
-);
 
 function formatAmount(amount: string): string {
-  return `$${parseFloat(amount).toFixed(2)}`;
+  return Number(amount).toLocaleString('en-AU', { style: 'currency', currency: 'AUD' });
 }
 
-const PendingPayoutRow = ({ commission }: { commission: AdminCommission }) => (
-  <div className="flex justify-between items-center gap-4 py-3 border-b border-black/5 last:border-0">
-    <div className="flex-1 min-w-0">
-      <p className="font-semibold text-black truncate">{commission.partner_name}</p>
-      <p className="text-sm text-black/60">
-        {commission.commission_type === 'fulfillment' ? 'Fulfillment' : 'Referral'}
-        {' · '}
-        {formatAmount(commission.amount)}
-      </p>
-    </div>
-    <Link
-      href={`/dashboard/admin/payouts/${commission.id}`}
-      className="text-xs px-3 py-1.5 rounded border border-black/20 hover:bg-black/5 text-center text-black/70 flex-shrink-0"
-    >
-      View
-    </Link>
-  </div>
-);
+function personName(firstName: string, lastName: string): string {
+  return `${firstName} ${lastName}`.trim() || '—';
+}
 
-const AdminDashboardPage = () => {
+function ViewLink({ href, children = 'View' }: { href: string; children?: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      className="inline-flex rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-100 hover:text-slate-950"
+    >
+      {children}
+    </Link>
+  );
+}
+
+function PrimaryLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      className="inline-flex rounded-md bg-slate-950 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-slate-800"
+    >
+      {children}
+    </Link>
+  );
+}
+
+function OverviewTable({
+  title, count, viewAllHref, viewAllLabel, headers, children, emptyMessage, empty, minWidth = 760,
+}: {
+  title: string;
+  count: number;
+  viewAllHref?: string;
+  viewAllLabel?: string;
+  headers: string[];
+  children: React.ReactNode;
+  emptyMessage: string;
+  empty: boolean;
+  minWidth?: number;
+}) {
+  return (
+    <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="flex items-center justify-between gap-4 border-b border-slate-200 px-4 py-4 sm:px-6">
+        <div>
+          <h2 className="font-semibold text-slate-950">{title}</h2>
+          <p className="mt-0.5 text-sm text-slate-500">{count} {count === 1 ? 'item' : 'items'}</p>
+        </div>
+        {viewAllHref && (
+          <Link href={viewAllHref} className="text-sm font-semibold text-slate-600 hover:text-slate-950">
+            {viewAllLabel ?? 'View all'}
+          </Link>
+        )}
+      </div>
+      <div className="overflow-x-auto">
+        <Table style={{ minWidth }}>
+          <TableHeader className="bg-slate-50">
+            <TableRow className="border-slate-200 hover:bg-slate-50">
+              {headers.map((header) => (
+                <TableHead key={header} className="font-semibold text-slate-600 last:text-right">
+                  {header}
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {empty ? (
+              <TableRow>
+                <TableCell colSpan={headers.length} className="h-28 text-center text-slate-500">
+                  {emptyMessage}
+                </TableCell>
+              </TableRow>
+            ) : children}
+          </TableBody>
+        </Table>
+      </div>
+    </section>
+  );
+}
+
+function EventTable({ title, events, queue }: { title: string; events: AdminEvent[]; queue: EventQueue }) {
+  return (
+    <OverviewTable
+      title={title}
+      count={events.length}
+      headers={['Recipient', 'Delivery', 'Location', 'Budget', queue === 'to_order' ? 'Timing' : 'Status', 'Actions']}
+      empty={events.length === 0}
+      emptyMessage="No events currently in this queue."
+      minWidth={900}
+    >
+      {events.map((event) => {
+        const days = daysUntil(event.delivery_date);
+        const location = [event.recipient_suburb, event.recipient_city].filter(Boolean).join(', ') || '—';
+        const timing = days < 0
+          ? `${Math.abs(days)} days overdue`
+          : days === 0 ? 'Today' : `In ${days} day${days === 1 ? '' : 's'}`;
+
+        return (
+          <TableRow key={event.id} className="border-slate-100 hover:bg-slate-50">
+            <TableCell>
+              <div className="font-medium text-slate-900">
+                {personName(event.recipient_first_name, event.recipient_last_name)}
+              </div>
+              <div className="text-xs text-slate-500">Order #{event.order_id}</div>
+            </TableCell>
+            <TableCell className="text-slate-700">{formatDeliveryDate(event.delivery_date)}</TableCell>
+            <TableCell className="text-slate-600">{location}</TableCell>
+            <TableCell className="font-semibold text-slate-950">{formatAmount(event.budget)}</TableCell>
+            <TableCell className={queue === 'to_order' && days <= 3 ? 'font-semibold text-red-600' : 'text-slate-600'}>
+              {queue === 'to_order' ? timing : queue === 'ordered' ? 'Ordered' : 'Delivered'}
+            </TableCell>
+            <TableCell>
+              <div className="flex justify-end gap-2">
+                <ViewLink href={`/dashboard/admin/events/${event.id}`} />
+                {queue === 'to_order' && (
+                  <PrimaryLink href={`/dashboard/admin/events/${event.id}/mark-ordered`}>Place order</PrimaryLink>
+                )}
+                {queue === 'ordered' && (
+                  <PrimaryLink href={`/dashboard/admin/events/${event.id}/mark-delivered`}>Confirm delivery</PrimaryLink>
+                )}
+              </div>
+            </TableCell>
+          </TableRow>
+        );
+      })}
+    </OverviewTable>
+  );
+}
+
+export default function AdminDashboardPage() {
   const [dashboard, setDashboard] = useState<AdminDashboard | null>(null);
   const [pendingPartners, setPendingPartners] = useState<AdminPartner[]>([]);
   const [pendingPayouts, setPendingPayouts] = useState<AdminCommission[]>([]);
@@ -135,79 +168,96 @@ const AdminDashboardPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     Promise.all([getAdminDashboard(), getPendingPartners(), getAdminCommissions({ status: 'pending' })])
-      .then(([dash, partners, payouts]) => {
-        setDashboard(dash);
+      .then(([nextDashboard, partners, payouts]) => {
+        if (cancelled) return;
+        setDashboard(nextDashboard);
         setPendingPartners(partners);
         setPendingPayouts(payouts);
+        setError(null);
       })
-      .catch((e) => setError(errorMessage(e)))
-      .finally(() => setLoading(false));
+      .catch((reason) => {
+        if (!cancelled) setError(errorMessage(reason));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
   }, []);
 
   return (
-    <div style={{ backgroundColor: 'var(--surface-beige)' }} className="min-h-screen py-0 md:py-12 px-0 md:px-4">
-      <div className="container mx-auto max-w-4xl">
-        <UnifiedSummaryCard
-          title="Admin Dashboard"
-          description="Manage upcoming deliveries — place orders and confirm deliveries."
-        >
-          {loading ? (
-            <div className="py-12 flex items-center justify-center">
-              <Loader2 className="h-8 w-8 animate-spin text-black/20" />
-              <p className="ml-4 text-black/40">Loading task queue...</p>
-            </div>
-          ) : error ? (
-            <div className="py-12 text-center text-red-600 text-sm">{error}</div>
-          ) : dashboard ? (
-            <>
-              <SummarySection label={`Pending Payouts (${pendingPayouts.length})`}>
-                {pendingPayouts.length === 0 ? (
-                  <p className="text-sm text-black/40 italic">No pending commissions.</p>
-                ) : (
-                  <div className="flex flex-col">
-                    {pendingPayouts.slice(0, 5).map((c) => (
-                      <PendingPayoutRow key={c.id} commission={c} />
-                    ))}
-                  </div>
-                )}
-                <div className="mt-3">
-                  <Link
-                    href="/dashboard/admin/payouts"
-                    className="text-xs font-semibold text-black/40 hover:text-black underline underline-offset-4 transition-colors"
-                  >
-                    See all payouts
-                  </Link>
-                </div>
-              </SummarySection>
-              <SummarySection label={`Partner Requests (${pendingPartners.length})`}>
-                {pendingPartners.length === 0 ? (
-                  <p className="text-sm text-black/40 italic">No pending partner requests.</p>
-                ) : (
-                  <div className="flex flex-col">
-                    {pendingPartners.map((partner) => (
-                      <PartnerRequestRow key={partner.id} partner={partner} />
-                    ))}
-                  </div>
-                )}
-                <div className="mt-3">
-                  <Link
-                    href="/dashboard/admin/partners"
-                    className="text-xs font-semibold text-black/40 hover:text-black underline underline-offset-4 transition-colors"
-                  >
-                    See all partners
-                  </Link>
-                </div>
-              </SummarySection>
-              <QueueSection title="To Order" events={dashboard.to_order} section="to_order" />
-              <QueueSection title="Ordered" events={dashboard.ordered} section="ordered" />
-              <QueueSection title="Delivered" events={dashboard.delivered} section="delivered" />
-            </>
-          ) : null}
-        </UnifiedSummaryCard>
+    <div className="p-4 md:p-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-black">Admin dashboard</h1>
+        <p className="mt-1 text-sm text-slate-500">Review pending work and manage upcoming deliveries.</p>
       </div>
+
+      {loading ? (
+        <section className="flex h-48 items-center justify-center rounded-xl border border-slate-200 bg-white shadow-sm">
+          <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+          <span className="ml-3 text-sm text-slate-500">Loading overview…</span>
+        </section>
+      ) : error ? (
+        <section className="rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">{error}</section>
+      ) : dashboard ? (
+        <div className="space-y-6">
+          <OverviewTable
+            title="Pending payouts"
+            count={pendingPayouts.length}
+            viewAllHref="/dashboard/admin/payouts"
+            viewAllLabel="View all payouts"
+            headers={['Partner', 'Type', 'Amount', 'Created', 'Action']}
+            empty={pendingPayouts.length === 0}
+            emptyMessage="No pending commissions."
+          >
+            {pendingPayouts.slice(0, 5).map((commission) => (
+              <TableRow key={commission.id} className="border-slate-100 hover:bg-slate-50">
+                <TableCell className="font-medium text-slate-900">{commission.partner_name || 'Unknown partner'}</TableCell>
+                <TableCell className="capitalize text-slate-700">{commission.commission_type}</TableCell>
+                <TableCell className="font-semibold text-slate-950">{formatAmount(commission.amount)}</TableCell>
+                <TableCell className="text-slate-600">{formatAdminDate(commission.created_at)}</TableCell>
+                <TableCell className="text-right">
+                  <ViewLink href={`/dashboard/admin/payouts/${commission.id}`} />
+                </TableCell>
+              </TableRow>
+            ))}
+          </OverviewTable>
+
+          <OverviewTable
+            title="Partner requests"
+            count={pendingPartners.length}
+            viewAllHref="/dashboard/admin/partners"
+            viewAllLabel="View all partners"
+            headers={['Business', 'Contact', 'Type', 'Applied', 'Action']}
+            empty={pendingPartners.length === 0}
+            emptyMessage="No pending partner requests."
+          >
+            {pendingPartners.map((partner) => (
+              <TableRow key={partner.id} className="border-slate-100 hover:bg-slate-50">
+                <TableCell className="font-medium text-slate-900">
+                  {partner.business_name || personName(partner.first_name, partner.last_name)}
+                </TableCell>
+                <TableCell>
+                  <div className="text-slate-700">{personName(partner.first_name, partner.last_name)}</div>
+                  <div className="text-xs text-slate-500">{partner.email}</div>
+                </TableCell>
+                <TableCell className="text-slate-700">
+                  {partner.partner_type === 'delivery' ? 'Delivery (florist)' : 'Referral'}
+                </TableCell>
+                <TableCell className="text-slate-600">{formatAdminDate(partner.created_at)}</TableCell>
+                <TableCell className="text-right">
+                  <ViewLink href={`/dashboard/admin/partners/${partner.id}`} />
+                </TableCell>
+              </TableRow>
+            ))}
+          </OverviewTable>
+
+          <EventTable title="To order" events={dashboard.to_order} queue="to_order" />
+          <EventTable title="Ordered" events={dashboard.ordered} queue="ordered" />
+          <EventTable title="Delivered" events={dashboard.delivered} queue="delivered" />
+        </div>
+      ) : null}
     </div>
   );
-};
-
-export default AdminDashboardPage;
+}

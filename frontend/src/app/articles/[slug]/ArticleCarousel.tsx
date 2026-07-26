@@ -22,10 +22,10 @@ export const ArticleCarousel = ({ exclude, showAll = false }: ArticleCarouselPro
   }
 
   return (
-    <div className="w-full py-12 bg-primary">
+    <div className="w-full bg-[var(--color2)] py-12">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold tracking-tight text-center text-primary-foreground mb-2">From the FutureFlower Blog</h2>
-        <p className="text-lg text-primary-foreground text-center mb-8">
+        <h2 className="mb-2 text-center text-3xl font-bold tracking-tight text-black">From the FutureFlower Blog</h2>
+        <p className="mb-8 text-center text-lg text-black">
           Insights and guides for long-term floral planning.
         </p>
         <div className="flex overflow-x-auto space-x-6 pb-4">

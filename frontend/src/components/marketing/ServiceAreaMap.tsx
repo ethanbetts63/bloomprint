@@ -74,7 +74,7 @@ const ServiceAreaMap = ({
       <label className="text-sm font-medium">Service Area</label>
       <p className="text-sm text-muted-foreground">Drop a pin on your store location and set the radius you're willing to deliver within. You'll only receive delivery requests for orders within this area.</p>
       <div className="h-[300px] rounded-lg overflow-hidden border relative z-0">
-        <MapContainer center={[20, 0]} zoom={1} style={{ height: '100%', width: '100%' }}>
+        <MapContainer center={[-25.2744, 133.7751]} zoom={4} style={{ height: '100%', width: '100%' }}>
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -108,12 +108,13 @@ const ServiceAreaMap = ({
           <span className="text-sm text-muted-foreground">{radiusKm} km</span>
         </div>
         <Slider
+          aria-label="Delivery radius in kilometres"
           value={[radiusKm]}
           min={1}
           max={500}
           step={1}
           onValueChange={(value) => onRadiusChange(value[0])}
-          className="[&_[data-slot=slider-range]]:bg-black [&_[data-slot=slider-thumb]]:border-black"
+          className="[&_[data-slot=slider-track]]:bg-slate-200 [&_[data-slot=slider-range]]:bg-slate-900 [&_[data-slot=slider-thumb]]:border-slate-900"
         />
       </div>
     </div>

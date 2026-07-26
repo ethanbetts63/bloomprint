@@ -193,13 +193,13 @@ export default function AdminDataTable<T>({
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow>
+                <TableRow className="hover:bg-slate-50">
                   <TableCell colSpan={colCount} className="h-48 text-center">
                     <Spinner className="mx-auto h-6 w-6" />
                   </TableCell>
                 </TableRow>
               ) : rows.length === 0 ? (
-                <TableRow>
+                <TableRow className="hover:bg-slate-50">
                   <TableCell colSpan={colCount} className="h-48 text-center text-slate-500">
                     <Search className="mx-auto mb-3 h-5 w-5 text-slate-400" />
                     <p className="font-medium text-slate-700">{emptyMessage}</p>

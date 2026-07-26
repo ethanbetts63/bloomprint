@@ -30,7 +30,7 @@ const nav: DashboardNavSection[] = [
 export default function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <AdminGuard>
-      <DashboardShell role="admin" brandTitle="FutureFlower" brandSubtitle="Admin" nav={nav}>
+      <DashboardShell role="admin" brandTitle="Dashboard" brandSubtitle="Admin" nav={nav}>
         {children}
       </DashboardShell>
     </AdminGuard>
