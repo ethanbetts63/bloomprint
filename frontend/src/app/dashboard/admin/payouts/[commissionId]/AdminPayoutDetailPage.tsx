@@ -18,7 +18,7 @@ import type { AdminCommission } from '@/types/AdminCommission';
 
 const STATUS_MESSAGE: Partial<Record<AdminCommission['status'], string>> = {
   processing: 'Stripe transfer initiated — awaiting confirmation from Stripe.',
-  paid: 'Payout confirmed — funds have been transferred to the partner.',
+  paid: 'Payout confirmed — funds have been transferred to the florist or affiliate.',
   denied: 'This commission has been denied and will not be paid out.',
 };
 
@@ -62,7 +62,7 @@ export default function AdminPayoutDetailPage() {
       <Button
         disabled={submitting || !commission.stripe_connect_onboarding_complete}
         onClick={() => updateCommission('approve')}
-        title={!commission.stripe_connect_onboarding_complete ? 'Partner has not completed Stripe onboarding' : undefined}
+        title={!commission.stripe_connect_onboarding_complete ? 'This account has not completed Stripe onboarding' : undefined}
       >
         {submitting ? <Spinner className="h-4 w-4 text-current" /> : 'Approve'}
       </Button>
@@ -80,12 +80,12 @@ export default function AdminPayoutDetailPage() {
       <AdminDetailSection title="Commission details" className="xl:col-span-2">
         <AdminDetailGrid className="lg:grid-cols-3">
           <AdminDetailField
-            label="Partner"
+            label="Account"
             value={commission.partner_id
-              ? <AdminInlineLink href={`/dashboard/admin/partners/${commission.partner_id}`}>{commission.partner_name || 'View partner'}</AdminInlineLink>
+              ? <AdminInlineLink href={`/dashboard/admin/partners/${commission.partner_id}`}>{commission.partner_name || 'View account'}</AdminInlineLink>
               : commission.partner_name}
           />
-          <AdminDetailField label="Partner type" value={commission.partner_type === 'delivery' ? 'Delivery (florist)' : 'Referral'} />
+          <AdminDetailField label="Account type" value={commission.partner_type === 'delivery' ? 'Florist' : 'Affiliate'} />
           <AdminDetailField label="Commission type" value={commission.commission_type === 'fulfillment' ? 'Fulfillment' : 'Referral'} />
           <AdminDetailField label="Amount" value={formatDashboardCurrency(commission.amount)} />
           <AdminDetailField label="Status" value={<DashboardStatusPill status={commission.status} />} />

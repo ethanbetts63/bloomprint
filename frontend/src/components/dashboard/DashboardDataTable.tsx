@@ -13,12 +13,13 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
+import { formatDashboardDateOnly } from './DashboardData';
 
 // ── Shared helpers ──────────────────────────────────────────────────────────
 
 export function formatDashboardTableDate(dtStr: string | null): string {
   if (!dtStr) return '—';
-  return new Date(dtStr).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+  return formatDashboardDateOnly(dtStr);
 }
 
 // Standard-coloured filter dropdown. The app theme sets --popover to a green and
@@ -94,6 +95,8 @@ export interface DashboardPagination {
 
 interface DashboardDataTableProps<T> {
   title: string;
+  titleAction?: React.ReactNode;
+  pageToolbar?: React.ReactNode;
   filterSummary?: React.ReactNode;
   filters?: React.ReactNode;
   legend?: React.ReactNode;
@@ -115,7 +118,7 @@ interface DashboardDataTableProps<T> {
 // ── Component ───────────────────────────────────────────────────────────────
 
 export default function DashboardDataTable<T>({
-  title, filterSummary, filters, legend, onClearFilters, showClear = false,
+  title, titleAction, pageToolbar, filterSummary, filters, legend, onClearFilters, showClear = false,
   columns, rows, rowKey, loading, emptyMessage = 'Nothing matches these filters.',
   minWidth = 820, sort, onSort, onRowClick, rowClassName, pagination,
 }: DashboardDataTableProps<T>) {
@@ -123,7 +126,11 @@ export default function DashboardDataTable<T>({
 
   return (
     <div className="p-4 md:p-6">
-      <h1 className="mb-4 text-2xl font-bold text-black">{title}</h1>
+      <div className="mb-4 flex items-center justify-between gap-4">
+        <h1 className="text-2xl font-bold text-black">{title}</h1>
+        {titleAction}
+      </div>
+      {pageToolbar && <div className="mb-4">{pageToolbar}</div>}
 
       <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
         {/* Filter bar */}

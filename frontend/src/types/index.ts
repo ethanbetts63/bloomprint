@@ -34,7 +34,7 @@ export type { OrderStructureData } from './OrderStructureData';
 export type { OrderStructureEditorProps } from './OrderStructureEditorProps';
 export type { OrderStructureFormProps } from './OrderStructureFormProps';
 export type {
-  Partner,
+  DashboardAccount,
   DiscountCode,
   CommissionSummary,
   Commission,
@@ -42,17 +42,18 @@ export type {
   PayoutSummary,
   DiscountCodeValidation,
   DiscountValidationResult,
-  PartnerRegistrationData,
-  PartnerUpdateData,
-} from './Partner';
+  FloristAffiliateRegistrationData,
+  BusinessDetailsUpdate,
+} from './BusinessAccount';
 export type { DeliveryRequestDetail } from './DeliveryRequest';
 export type { Payout, PayoutDetail, PayoutLineItem } from './Payout';
+export type { Paginated } from './Paginated';
 export type { AdminEvent } from './AdminEvent';
 export type { AdminUser } from './AdminUser';
 export type { AdminUserPlan } from './AdminUserPlan';
 export type { AdminUserDetail } from './AdminUserDetail';
 export type { AdminDashboard } from './AdminDashboard';
-export type { AdminPartner } from './AdminPartner';
+export type { AdminBusinessAccount } from './AdminBusinessAccount';
 export type { AdminCommission } from './AdminCommission';
 export type { AdminPlan } from './AdminPlan';
 export type { AdminPlanEvent } from './AdminPlanEvent';
@@ -68,10 +69,9 @@ export type { ComparisonBarChartProps } from './ComparisonBarChartProps';
 export type { BadgeProps } from './BadgeProps';
 export type { ValuePropsAffiliatesProps } from './ValuePropsAffiliatesProps';
 export type { SummarySectionProps } from './SummarySectionProps';
-export type { AdminGuardProps } from './AdminGuardProps';
 export type { ServiceAreaMapProps } from './ServiceAreaMapProps';
 export type { ProtectedRouteProps } from './ProtectedRouteProps';
-export type { BecomePartnerButtonProps } from './BecomePartnerButtonProps';
+export type { SignupButtonProps } from './SignupButtonProps';
 export type { ValuePropsAProps } from './ValuePropsAProps';
 export type { DiscountCodeInputProps } from './DiscountCodeInputProps';
 export type { OrderTotalSummaryProps } from './OrderTotalSummaryProps';

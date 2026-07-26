@@ -14,7 +14,7 @@ class PartnerDashboardView(APIView):
             partner = Partner.objects.get(user=request.user)
         except Partner.DoesNotExist:
             return Response(
-                {"error": "You are not registered as a partner."},
+                {"error": "No florist or affiliate account was found."},
                 status=status.HTTP_404_NOT_FOUND
             )
 

@@ -2,7 +2,7 @@ from django.urls import path
 from partners.views import (
     PartnerRegistrationView,
     PartnerDashboardView,
-    PartnerCommissionListView,
+    CommissionListView,
     PartnerUpdateView,
     DeliveryRequestDetailView,
     DeliveryRequestRespondView,
@@ -22,15 +22,15 @@ from partners.views import (
     AdminCommissionDetailView,
     AdminApproveCommissionView,
     AdminDenyCommissionView,
-    DiscountCodeCreateView,
+    AffiliateDiscountCodeListCreateView,
 )
 
 urlpatterns = [
     path('register/', PartnerRegistrationView.as_view(), name='partner-register'),
     path('dashboard/', PartnerDashboardView.as_view(), name='partner-dashboard'),
-    path('commissions/', PartnerCommissionListView.as_view(), name='partner-commission-list'),
+    path('commissions/', CommissionListView.as_view(), name='commission-list'),
     path('update/', PartnerUpdateView.as_view(), name='partner-update'),
-    path('discount-codes/', DiscountCodeCreateView.as_view(), name='discount-code-create'),
+    path('discount-codes/', AffiliateDiscountCodeListCreateView.as_view(), name='affiliate-discount-code-list-create'),
 
     path('delivery-requests/', DeliveryRequestListView.as_view(), name='delivery-request-list'),
     path('delivery-requests/<str:token>/details/', DeliveryRequestDetailView.as_view(), name='delivery-request-detail'),

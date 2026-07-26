@@ -9,20 +9,20 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { registerPartner } from '@/api/partners';
+import { registerFloristOrAffiliate } from '@/api/businessAccounts';
 import { acceptTerms } from '@/api';
-import type { PartnerRegistrationData } from '@/types';
+import type { FloristAffiliateRegistrationData } from '@/types';
 import { errorMessage } from '@/lib/errors';
 import { fieldErrorSummary } from '@/api/ApiError';
 
 const ServiceAreaMap = dynamic(() => import('@/components/marketing/ServiceAreaMap'), { ssr: false });
 
-interface PartnerRegistrationFormProps {
-  partnerType: 'delivery' | 'referral';
+interface FloristAffiliateRegistrationFormProps {
+  accountType: 'florist' | 'affiliate';
   className?: string;
 }
 
-const PartnerRegistrationForm = ({ partnerType, className = '' }: PartnerRegistrationFormProps) => {
+const FloristAffiliateRegistrationForm = ({ accountType, className = '' }: FloristAffiliateRegistrationFormProps) => {
   const router = useRouter();
   const formTopRef = useRef<HTMLDivElement>(null);
   const { handleLoginSuccess } = useAuth();
@@ -33,7 +33,7 @@ const PartnerRegistrationForm = ({ partnerType, className = '' }: PartnerRegistr
   const [longitude, setLongitude] = useState<number | null>(null);
   const [radiusKm, setRadiusKm] = useState(10);
 
-  const isDelivery = partnerType === 'delivery';
+  const isDelivery = accountType === 'florist';
 
   const [step, setStep] = useState<1 | 2>(1);
 
@@ -78,7 +78,7 @@ const PartnerRegistrationForm = ({ partnerType, className = '' }: PartnerRegistr
 
     try {
       const { confirm_password, ...formData } = form;
-      const data: PartnerRegistrationData = {
+      const data: FloristAffiliateRegistrationData = {
         ...formData,
         partner_type: isDelivery ? 'delivery' : 'non_delivery',
         ...(isDelivery && {
@@ -88,10 +88,10 @@ const PartnerRegistrationForm = ({ partnerType, className = '' }: PartnerRegistr
         }),
       };
 
-      await registerPartner(data);
+      await registerFloristOrAffiliate(data);
       await handleLoginSuccess();
       await acceptTerms(isDelivery ? 'florist' : 'affiliate');
-      router.push('/dashboard/partner');
+      router.push(isDelivery ? '/dashboard/florist' : '/dashboard/affiliate');
     } catch (error) {
       const description = fieldErrorSummary(error);
       toast.error('Registration failed', {
@@ -133,7 +133,7 @@ const PartnerRegistrationForm = ({ partnerType, className = '' }: PartnerRegistr
       <div className="border-b border-black/10 pb-4">
         <div className="flex items-center justify-between gap-4">
           <h2 className="break-words text-2xl font-bold text-black font-playfair-display">
-            {isDelivery ? 'Become a delivery partner' : 'Become a referral partner'}
+            {isDelivery ? 'Create your florist account' : 'Create your affiliate account'}
           </h2>
           {isDelivery && (
             <span className="shrink-0 text-xs font-semibold uppercase tracking-[0.12em] text-black/50">
@@ -280,7 +280,7 @@ const PartnerRegistrationForm = ({ partnerType, className = '' }: PartnerRegistr
               className="flex w-full items-center justify-between rounded-lg bg-black px-5 py-4 text-left text-white transition hover:bg-black/85 disabled:cursor-not-allowed disabled:opacity-70"
             >
               <span className="block text-sm font-semibold">
-                {isSubmitting ? 'Setting up…' : `Create ${isDelivery ? 'delivery' : 'referral'} partner account`}
+                {isSubmitting ? 'Setting up…' : `Create ${isDelivery ? 'florist' : 'affiliate'} account`}
               </span>
               {isSubmitting ? (
                 <Loader2 className="h-5 w-5 animate-spin text-white/70" />
@@ -295,4 +295,4 @@ const PartnerRegistrationForm = ({ partnerType, className = '' }: PartnerRegistr
   );
 };
 
-export default PartnerRegistrationForm;
+export default FloristAffiliateRegistrationForm;

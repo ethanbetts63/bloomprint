@@ -1,11 +1,12 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from users.roles import get_user_role
 
 User = get_user_model()
 
 
 class AdminUserDetailSerializer(serializers.ModelSerializer):
-    is_partner = serializers.SerializerMethodField()
+    role = serializers.SerializerMethodField()
     referred_by = serializers.SerializerMethodField()
     plans = serializers.SerializerMethodField()
 
@@ -22,13 +23,13 @@ class AdminUserDetailSerializer(serializers.ModelSerializer):
             'date_joined',
             'stripe_customer_id',
             'deleted_at',
-            'is_partner',
+            'role',
             'referred_by',
             'plans',
         ]
 
-    def get_is_partner(self, obj):
-        return hasattr(obj, 'partner_profile')
+    def get_role(self, obj):
+        return get_user_role(obj)
 
     def get_referred_by(self, obj):
         if not obj.referred_by_partner:

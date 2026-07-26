@@ -18,15 +18,15 @@ class TestAdminUserSerializer:
         assert 'is_staff' in data
         assert 'date_joined' in data
 
-    def test_is_partner_false_for_regular_user(self):
+    def test_role_customer_for_regular_user(self):
         user = UserFactory()
         data = AdminUserSerializer(user).data
-        assert data['is_partner'] is False
+        assert data['role'] == 'customer'
 
-    def test_is_partner_true_for_user_with_partner_profile(self):
-        partner = PartnerFactory()
+    def test_role_florist_for_delivery_account(self):
+        partner = PartnerFactory(partner_type='delivery')
         data = AdminUserSerializer(partner.user).data
-        assert data['is_partner'] is True
+        assert data['role'] == 'florist'
 
     def test_plan_count_is_zero_users_no_longer_own_orders(self):
         # Orders are no longer owned by a User; customer identity lives on the

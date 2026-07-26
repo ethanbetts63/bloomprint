@@ -1,14 +1,14 @@
 
 import Image from 'next/image';
 import { LandingHero } from '@/components/marketing/LandingHero';
-import PartnerRegistrationForm from '@/components/marketing/PartnerRegistrationForm';
+import FloristAffiliateRegistrationForm from '@/components/marketing/FloristAffiliateRegistrationForm';
 
 import deliveryImage from '@/assets/delivery.webp';
 
 export const HeroAffiliatesPage = () => {
   return (
     <LandingHero
-      formId="partner-signup"
+      formId="business-signup"
       heading="Turn your influence into flowers."
       eyebrow={
         <p className="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-black/60 shadow-sm">
@@ -17,7 +17,7 @@ export const HeroAffiliatesPage = () => {
         </p>
       }
       description="Give your audience $5 off custom flowers from a local florist, and earn $10 for every new customer you send. Simple!"
-      form={<PartnerRegistrationForm partnerType="referral" />}
+      form={<FloristAffiliateRegistrationForm accountType="affiliate" />}
       image={
         <div className="relative min-h-[420px] overflow-hidden bg-black lg:min-h-[560px] lg:rounded-xl">
           <Image

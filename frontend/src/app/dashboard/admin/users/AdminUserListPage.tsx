@@ -22,7 +22,8 @@ const ACCOUNT_OPTIONS = [
   { value: 'all', label: 'All accounts' },
   { value: 'admin', label: 'Admins' },
   { value: 'staff', label: 'Staff' },
-  { value: 'partner', label: 'Partners' },
+  { value: 'florist', label: 'Florists' },
+  { value: 'affiliate', label: 'Affiliates' },
   { value: 'inactive', label: 'Inactive' },
 ];
 
@@ -31,7 +32,7 @@ const fullName = (user: AdminUser) => `${user.first_name} ${user.last_name}`.tri
 function matchesAccount(user: AdminUser, account: string): boolean {
   if (account === 'admin') return user.is_superuser;
   if (account === 'staff') return user.is_staff && !user.is_superuser;
-  if (account === 'partner') return user.is_partner;
+  if (account === 'florist' || account === 'affiliate') return user.role === account;
   if (account === 'inactive') return !user.is_active;
   return true;
 }
@@ -48,7 +49,8 @@ function rowStyle(user: AdminUser): string {
   if (!user.is_active) return 'bg-rose-50 hover:bg-rose-100';
   if (user.is_superuser) return 'bg-violet-50 hover:bg-violet-100';
   if (user.is_staff) return 'bg-sky-50 hover:bg-sky-100';
-  if (user.is_partner) return 'bg-emerald-50 hover:bg-emerald-100';
+  if (user.role === 'florist') return 'bg-emerald-50 hover:bg-emerald-100';
+  if (user.role === 'affiliate') return 'bg-violet-50 hover:bg-violet-100';
   return 'hover:bg-slate-50';
 }
 
@@ -125,9 +127,10 @@ export default function AdminUserListPage() {
         <div className="flex flex-wrap gap-1">
           {user.is_superuser && <DashboardTableStatusPill className="bg-violet-100 text-violet-800">Admin</DashboardTableStatusPill>}
           {user.is_staff && !user.is_superuser && <DashboardTableStatusPill className="bg-sky-100 text-sky-800">Staff</DashboardTableStatusPill>}
-          {user.is_partner && <DashboardTableStatusPill className="bg-emerald-100 text-emerald-800">Partner</DashboardTableStatusPill>}
+          {user.role === 'florist' && <DashboardTableStatusPill className="bg-emerald-100 text-emerald-800">Florist</DashboardTableStatusPill>}
+          {user.role === 'affiliate' && <DashboardTableStatusPill className="bg-violet-100 text-violet-800">Affiliate</DashboardTableStatusPill>}
           {!user.is_active && <DashboardTableStatusPill className="bg-rose-100 text-rose-700">Inactive</DashboardTableStatusPill>}
-          {!user.is_staff && !user.is_partner && user.is_active && <span className="text-sm text-slate-500">Standard</span>}
+          {!user.is_staff && user.role === 'customer' && user.is_active && <span className="text-sm text-slate-500">Standard</span>}
         </div>
       ),
     },
@@ -165,7 +168,8 @@ export default function AdminUserListPage() {
       <span className="font-medium text-slate-600">Row colour:</span>
       <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm bg-violet-300" /> Admin</span>
       <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm bg-sky-300" /> Staff</span>
-      <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm bg-emerald-300" /> Partner</span>
+      <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm bg-emerald-300" /> Florist</span>
+      <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm bg-violet-300" /> Affiliate</span>
       <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm bg-rose-300" /> Inactive</span>
     </>
   );

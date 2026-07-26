@@ -1,6 +1,6 @@
 
 import { Check } from 'lucide-react';
-import { BecomePartnerButton } from '@/app/florists/BecomePartnerButton';
+import { SignupButton } from '@/app/florists/SignupButton';
 
 const customerBenefits = [
   'A florist designs from their budget and preferences — not a warehouse catalog.',
@@ -69,7 +69,7 @@ export const WhyFutureFlowerAffiliatesSection = () => {
           </p>
 
           <div className="mt-8">
-            <BecomePartnerButton />
+            <SignupButton />
           </div>
         </div>
       </div>

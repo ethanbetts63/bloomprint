@@ -11,7 +11,7 @@ export interface AdminUserDetail {
   date_joined: string;
   stripe_customer_id: string | null;
   deleted_at: string | null;
-  is_partner: boolean;
+  role: import('./UserProfile').UserRole;
   referred_by: string | null;
   plans: AdminUserPlan[];
 }

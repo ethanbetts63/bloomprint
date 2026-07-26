@@ -5,10 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { getStripeConnectStatus } from '@/api/partners';
+import { getStripeConnectStatus } from '@/api/businessAccounts';
+import { useAuth } from '@/context/AuthContext';
+import { roleHome } from '@/lib/roleHome';
 
 const StripeConnectReturnPage = () => {
   const router = useRouter();
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [isComplete, setIsComplete] = useState(false);
 
@@ -57,7 +60,7 @@ const StripeConnectReturnPage = () => {
                   ? 'Your Stripe account is set up. You can now receive payouts.'
                   : 'Your Stripe onboarding is not yet complete. Please try again from your dashboard.'}
               </p>
-              <Button onClick={() => router.push('/dashboard/partner')}>
+              <Button onClick={() => router.push(user ? roleHome(user.role) : '/login')}>
                 Go to Dashboard
               </Button>
             </CardContent>

@@ -1,6 +1,6 @@
-export interface Partner {
+export interface DashboardAccount {
   id: number;
-  partner_type: 'non_delivery' | 'delivery';
+  account_type: 'florist' | 'affiliate';
   status: 'pending' | 'active' | 'suspended';
   business_name: string;
   phone: string;
@@ -10,10 +10,8 @@ export interface Partner {
   state: string;
   postcode: string;
   country: string;
-  discount_codes: DiscountCode[];
   commission_summary: CommissionSummary;
-  recent_commissions: Commission[];
-  delivery_requests: DeliveryRequestSummary[];
+  discount_code_summary: { active_codes: number; total_uses: number };
   latitude: number | null;
   longitude: number | null;
   service_radius_km: number;
@@ -73,7 +71,7 @@ export interface DiscountCodeValidation {
 
 export type DiscountValidationResult = DiscountCodeValidation;
 
-export interface PartnerUpdateData {
+export interface BusinessDetailsUpdate {
   business_name?: string;
   phone?: string;
   street_address?: string;
@@ -87,7 +85,7 @@ export interface PartnerUpdateData {
   service_radius_km?: number;
 }
 
-export interface PartnerRegistrationData {
+export interface FloristAffiliateRegistrationData {
   email: string;
   password: string;
   first_name: string;

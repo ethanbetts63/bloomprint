@@ -1,6 +1,6 @@
 
 import Image from 'next/image';
-import { BecomePartnerButton } from '@/app/florists/BecomePartnerButton';
+import { SignupButton } from '@/app/florists/SignupButton';
 import floristImage from '@/assets/florist-1280w.webp';
 
 const angles = [
@@ -44,7 +44,7 @@ export const ContentIdeasSection = () => {
           </div>
 
           <div className="mt-8">
-            <BecomePartnerButton />
+            <SignupButton />
           </div>
         </div>
 

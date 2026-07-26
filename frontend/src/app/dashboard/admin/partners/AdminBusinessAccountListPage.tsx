@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
-import { getAdminPartners } from '@/api/admin';
+import { getAdminBusinessAccounts } from '@/api/admin';
 import DashboardDataTable, {
   DashboardFilterSelect,
   DashboardTableStatusPill,
@@ -14,28 +14,24 @@ import DashboardDataTable, {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { errorMessage } from '@/lib/errors';
-import type { AdminPartner } from '@/types/AdminPartner';
+import type { AdminBusinessAccount } from '@/types/AdminBusinessAccount';
+import { DASHBOARD_STATUS_STYLES } from '@/components/dashboard/DashboardData';
 
 const PAGE_SIZE = 50;
 
-const STATUS_STYLE: Record<string, { row: string; pill: string; swatch: string; label: string }> = {
-  pending: { row: 'bg-amber-50 hover:bg-amber-100', pill: 'bg-amber-100 text-amber-800', swatch: 'bg-amber-300', label: 'Pending' },
-  active: { row: 'bg-emerald-50 hover:bg-emerald-100', pill: 'bg-emerald-100 text-emerald-800', swatch: 'bg-emerald-300', label: 'Active' },
-  suspended: { row: 'bg-slate-100 hover:bg-slate-200', pill: 'bg-slate-200 text-slate-700', swatch: 'bg-slate-400', label: 'Suspended' },
-  denied: { row: 'bg-rose-50 hover:bg-rose-100', pill: 'bg-rose-100 text-rose-700', swatch: 'bg-rose-300', label: 'Denied' },
-};
+const STATUS_STYLE = DASHBOARD_STATUS_STYLES;
 const STATUS_ORDER = ['pending', 'active', 'suspended', 'denied'];
 const STATUS_OPTIONS = [
   { value: 'all', label: 'All statuses' },
   ...STATUS_ORDER.map((status) => ({ value: status, label: STATUS_STYLE[status].label })),
 ];
 
-const partnerName = (partner: AdminPartner) =>
+const partnerName = (partner: AdminBusinessAccount) =>
   partner.business_name || `${partner.first_name} ${partner.last_name}`.trim() || '—';
-const contactName = (partner: AdminPartner) => `${partner.first_name} ${partner.last_name}`.trim() || '—';
-const partnerType = (partner: AdminPartner) => (partner.partner_type === 'delivery' ? 'Delivery (Florist)' : 'Referral');
+const contactName = (partner: AdminBusinessAccount) => `${partner.first_name} ${partner.last_name}`.trim() || '—';
+const partnerType = (partner: AdminBusinessAccount) => (partner.partner_type === 'delivery' ? 'Florist' : 'Affiliate');
 
-function comparePartners(a: AdminPartner, b: AdminPartner, field: string): number {
+function comparePartners(a: AdminBusinessAccount, b: AdminBusinessAccount, field: string): number {
   if (field === 'business') return partnerName(a).localeCompare(partnerName(b));
   if (field === 'contact') return contactName(a).localeCompare(contactName(b));
   if (field === 'type') return a.partner_type.localeCompare(b.partner_type);
@@ -44,9 +40,9 @@ function comparePartners(a: AdminPartner, b: AdminPartner, field: string): numbe
   return 0;
 }
 
-export default function AdminPartnerListPage() {
+export default function AdminBusinessAccountListPage() {
   const router = useRouter();
-  const [partners, setPartners] = useState<AdminPartner[]>([]);
+  const [partners, setPartners] = useState<AdminBusinessAccount[]>([]);
   const [status, setStatus] = useState('all');
   const [query, setQuery] = useState('');
   const [search, setSearch] = useState('');
@@ -57,7 +53,7 @@ export default function AdminPartnerListPage() {
 
   useEffect(() => {
     let cancelled = false;
-    getAdminPartners(status === 'all' ? undefined : status)
+    getAdminBusinessAccounts(status === 'all' ? undefined : status)
       .then((result) => {
         if (cancelled) return;
         setPartners(result);
@@ -113,7 +109,7 @@ export default function AdminPartnerListPage() {
   };
   const showClear = status !== 'all' || search !== '' || sort?.field !== 'created_at' || sort?.dir !== 'desc';
 
-  const columns: DashboardColumn<AdminPartner>[] = [
+  const columns: DashboardColumn<AdminBusinessAccount>[] = [
     {
       key: 'business', header: 'Business', sortable: true,
       render: (partner) => <span className="font-medium text-slate-900">{partnerName(partner)}</span>,
@@ -143,7 +139,7 @@ export default function AdminPartnerListPage() {
         value={status}
         onValueChange={(value) => { setLoading(true); setStatus(value); setPage(1); }}
         options={STATUS_OPTIONS}
-        ariaLabel="Filter partners by status"
+        ariaLabel="Filter florists and affiliates by status"
       />
       <form className="sm:col-span-1 lg:col-span-2" onSubmit={submitSearch}>
         <div className="flex gap-2">
@@ -151,7 +147,7 @@ export default function AdminPartnerListPage() {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search business, contact or email"
-            aria-label="Search partners"
+            aria-label="Search florists and affiliates"
             className="border-slate-300 bg-white text-slate-900 placeholder:text-slate-400"
           />
           <Button type="submit" variant="outline" className="shrink-0 border-slate-300 bg-white text-slate-900 hover:bg-slate-100 hover:text-slate-950">
@@ -178,8 +174,8 @@ export default function AdminPartnerListPage() {
     <>
       {error && <p className="px-4 pt-4 text-sm text-red-600 md:px-6">{error}</p>}
       <DashboardDataTable
-        title="Partners"
-        filterSummary={`${total.toLocaleString('en-AU')} ${total === 1 ? 'partner' : 'partners'} matching this view`}
+        title="Florists & affiliates"
+        filterSummary={`${total.toLocaleString('en-AU')} ${total === 1 ? 'account' : 'accounts'} matching this view`}
         filters={filters}
         legend={legend}
         showClear={showClear}
@@ -188,7 +184,7 @@ export default function AdminPartnerListPage() {
         rows={rows}
         rowKey={(partner) => partner.id}
         loading={loading}
-        emptyMessage="No partners match these filters."
+        emptyMessage="No florists or affiliates match these filters."
         sort={sort}
         onSort={toggleSort}
         onRowClick={(partner) => router.push(`/dashboard/admin/partners/${partner.id}`)}

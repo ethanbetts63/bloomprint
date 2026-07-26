@@ -1,19 +1,22 @@
 "use client";
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { initiateStripeConnectOnboarding } from '@/api/partners';
+import { initiateStripeConnectOnboarding } from '@/api/businessAccounts';
 import { Spinner } from '@/components/ui/spinner';
+import { useAuth } from '@/context/AuthContext';
+import { roleHome } from '@/lib/roleHome';
 
 const StripeConnectOnboardingPage = () => {
   const router = useRouter();
+  const { user } = useAuth();
 
   useEffect(() => {
     initiateStripeConnectOnboarding()
       .then((data) => {
         window.location.href = data.url;
       })
-      .catch(() => router.push('/dashboard/partner'));
-  }, [router]);
+      .catch(() => router.push(user ? roleHome(user.role) : '/login'));
+  }, [router, user]);
 
   return (
     <>

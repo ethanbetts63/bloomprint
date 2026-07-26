@@ -1,7 +1,7 @@
 import { authedFetch } from './apiClient';
 import type { AdminDashboard } from '@/types/AdminDashboard';
 import type { AdminEvent } from '@/types/AdminEvent';
-import type { AdminPartner } from '@/types/AdminPartner';
+import type { AdminBusinessAccount } from '@/types/AdminBusinessAccount';
 import type { AdminPlan } from '@/types/AdminPlan';
 import type { AdminPlanDetail } from '@/types/AdminPlanDetail';
 import type { AdminUser } from '@/types/AdminUser';
@@ -11,6 +11,7 @@ import type { MarkDeliveredPayload } from '@/types/MarkDeliveredPayload';
 import type { AdminCommission } from '@/types/AdminCommission';
 import type { PayCommissionResult } from '@/types/PayCommissionResult';
 import type { CommissionActionResult } from '@/types/CommissionActionResult';
+import type { Paginated } from '@/types/Paginated';
 
 export type { PayCommissionResult, CommissionActionResult };
 
@@ -50,34 +51,34 @@ export async function markEventDelivered(id: number, payload: MarkDeliveredPaylo
   return res.json();
 }
 
-export async function getPendingPartners(): Promise<AdminPartner[]> {
+export async function getPendingBusinessAccounts(): Promise<AdminBusinessAccount[]> {
   const res = await authedFetch('/api/partners/admin/pending/');
   if (!res.ok) throw new Error('Failed to fetch pending partners');
   return res.json();
 }
 
-export async function getAdminPartners(status?: string): Promise<AdminPartner[]> {
+export async function getAdminBusinessAccounts(status?: string): Promise<AdminBusinessAccount[]> {
   const url = status ? `/api/partners/admin/list/?status=${status}` : '/api/partners/admin/list/';
   const res = await authedFetch(url);
   if (!res.ok) throw new Error('Failed to fetch partners');
   return res.json();
 }
 
-export async function getAdminPartner(id: number): Promise<AdminPartner> {
+export async function getAdminBusinessAccount(id: number): Promise<AdminBusinessAccount> {
   const res = await authedFetch(`/api/partners/admin/${id}/`);
-  if (!res.ok) throw new Error('Failed to fetch partner');
+  if (!res.ok) throw new Error('Failed to fetch florist or affiliate');
   return res.json();
 }
 
-export async function approvePartner(id: number): Promise<AdminPartner> {
+export async function approveBusinessAccount(id: number): Promise<AdminBusinessAccount> {
   const res = await authedFetch(`/api/partners/admin/${id}/approve/`, { method: 'POST' });
-  if (!res.ok) throw new Error('Failed to approve partner');
+  if (!res.ok) throw new Error('Failed to approve account');
   return res.json();
 }
 
-export async function denyPartner(id: number): Promise<AdminPartner> {
+export async function denyBusinessAccount(id: number): Promise<AdminBusinessAccount> {
   const res = await authedFetch(`/api/partners/admin/${id}/deny/`, { method: 'POST' });
-  if (!res.ok) throw new Error('Failed to deny partner');
+  if (!res.ok) throw new Error('Failed to deny account');
   return res.json();
 }
 
@@ -154,13 +155,6 @@ export async function getAdminPlans(params: { status?: string; plan_type?: strin
   const res = await authedFetch(`/api/data/admin/plans/${query ? `?${query}` : ''}`);
   if (!res.ok) throw new Error('Failed to fetch plans');
   return res.json();
-}
-
-export interface Paginated<T> {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: T[];
 }
 
 export interface AdminOrderListParams {

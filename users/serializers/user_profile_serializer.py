@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from users.roles import get_user_role
 
 User = get_user_model()
 
@@ -8,7 +9,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
     Serializer for the User model, focused on profile data that a
     user is allowed to view and edit.
     """
-    is_partner = serializers.SerializerMethodField()
     role = serializers.SerializerMethodField()
 
     class Meta:
@@ -21,7 +21,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'last_name',
             'is_staff',
             'is_superuser',
-            'is_partner',
             'role',
         ]
         read_only_fields = [
@@ -29,24 +28,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'id',
             'is_staff',
             'is_superuser',
-            'is_partner',
             'role',
         ]
 
-    def get_is_partner(self, obj):
-        return hasattr(obj, 'partner_profile')
-
     def get_role(self, obj):
-        """
-        The single source of truth for which dashboard a user lands on.
-        Admin wins over a partner profile; florists deliver, affiliates refer.
-        """
-        if obj.is_staff or obj.is_superuser:
-            return 'admin'
-        partner = getattr(obj, 'partner_profile', None)
-        if partner is not None:
-            return 'florist' if partner.partner_type == 'delivery' else 'affiliate'
-        return 'customer'
+        return get_user_role(obj)
 
     def validate_email(self, value):
         """

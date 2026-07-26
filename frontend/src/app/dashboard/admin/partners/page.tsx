@@ -1,5 +1,5 @@
-import AdminPartnerListPage from '@/app/dashboard/admin/partners/AdminPartnerListPage';
+import AdminBusinessAccountListPage from '@/app/dashboard/admin/partners/AdminBusinessAccountListPage';
 
 export default function Page() {
-  return <AdminPartnerListPage />;
+  return <AdminBusinessAccountListPage />;
 }

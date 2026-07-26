@@ -15,16 +15,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { errorMessage } from '@/lib/errors';
 import type { AdminCommission } from '@/types/AdminCommission';
+import { DASHBOARD_STATUS_STYLES } from '@/components/dashboard/DashboardData';
 
 const PAGE_SIZE = 50;
 
-const STATUS_STYLE: Record<string, { row: string; pill: string; swatch: string; label: string }> = {
-  pending: { row: 'bg-amber-50 hover:bg-amber-100', pill: 'bg-amber-100 text-amber-800', swatch: 'bg-amber-300', label: 'Pending' },
-  approved: { row: 'bg-sky-50 hover:bg-sky-100', pill: 'bg-sky-100 text-sky-800', swatch: 'bg-sky-300', label: 'Approved' },
-  processing: { row: 'bg-violet-50 hover:bg-violet-100', pill: 'bg-violet-100 text-violet-800', swatch: 'bg-violet-300', label: 'Processing' },
-  paid: { row: 'bg-emerald-50 hover:bg-emerald-100', pill: 'bg-emerald-100 text-emerald-800', swatch: 'bg-emerald-300', label: 'Paid' },
-  denied: { row: 'bg-rose-50 hover:bg-rose-100', pill: 'bg-rose-100 text-rose-700', swatch: 'bg-rose-300', label: 'Denied' },
-};
+const STATUS_STYLE = DASHBOARD_STATUS_STYLES;
 const STATUS_ORDER = ['pending', 'approved', 'processing', 'paid', 'denied'];
 const STATUS_OPTIONS = [
   { value: 'all', label: 'All statuses' },
@@ -36,7 +31,7 @@ const TYPE_OPTIONS = [
   { value: 'fulfillment', label: 'Fulfillment' },
 ];
 
-const partnerName = (commission: AdminCommission) => commission.partner_name || `Partner #${commission.partner_id ?? '—'}`;
+const partnerName = (commission: AdminCommission) => commission.partner_name || `Account #${commission.partner_id ?? '—'}`;
 const commissionType = (commission: AdminCommission) => commission.commission_type === 'fulfillment' ? 'Fulfillment' : 'Referral';
 const amount = (commission: AdminCommission) => `$${Number(commission.amount).toFixed(2)}`;
 
@@ -125,7 +120,7 @@ export default function AdminPayoutListPage() {
 
   const columns: DashboardColumn<AdminCommission>[] = [
     {
-      key: 'partner', header: 'Partner', sortable: true,
+      key: 'partner', header: 'Account', sortable: true,
       render: (commission) => <span className="font-medium text-slate-900">{partnerName(commission)}</span>,
     },
     { key: 'type', header: 'Type', sortable: true, cellClassName: 'text-slate-700', render: commissionType },
@@ -159,7 +154,7 @@ export default function AdminPayoutListPage() {
           <Input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search partner, event or note"
+            placeholder="Search account, event or note"
             aria-label="Search payouts"
             className="border-slate-300 bg-white text-slate-900 placeholder:text-slate-400"
           />

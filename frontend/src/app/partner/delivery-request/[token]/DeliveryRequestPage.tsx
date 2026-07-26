@@ -7,7 +7,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, XCircle, MapPin, Calendar, DollarSign } from 'lucide-react';
 import { toast } from 'sonner';
-import { getDeliveryRequestByToken, respondToDeliveryRequest, markDeliveryComplete } from '@/api/partners';
+import { getDeliveryRequestByToken, respondToDeliveryRequest, markDeliveryComplete } from '@/api/businessAccounts';
 import type { DeliveryRequestDetail } from '@/types';
 import { errorMessage } from '@/lib/errors';
 

@@ -13,6 +13,24 @@ class TestDeliveryRequestViews:
     def setup_method(self):
         self.client = APIClient()
 
+    def test_list_is_paginated_scoped_and_filtered_for_florist(self):
+        florist = PartnerFactory(partner_type='delivery')
+        matching = DeliveryRequestFactory(partner=florist, status='accepted', event__order__recipient_first_name='Alice', event__order__recipient_last_name='Flower')
+        DeliveryRequestFactory(partner=florist, status='pending')
+        DeliveryRequestFactory(partner=PartnerFactory(partner_type='delivery'), status='accepted')
+        self.client.force_authenticate(user=florist.user)
+
+        response = self.client.get('/api/partners/delivery-requests/?status=accepted&search=alice&ordering=recipient')
+
+        assert response.status_code == 200
+        assert response.data['count'] == 1
+        assert response.data['results'][0]['id'] == matching.id
+
+    def test_delivery_list_rejects_affiliate(self):
+        affiliate = PartnerFactory(partner_type='non_delivery')
+        self.client.force_authenticate(user=affiliate.user)
+        assert self.client.get('/api/partners/delivery-requests/').status_code == 404
+
     def test_detail_view_success(self):
         dr = DeliveryRequestFactory()
         url = f"/api/partners/delivery-requests/{dr.token}/details/"

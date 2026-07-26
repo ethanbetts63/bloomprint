@@ -35,7 +35,7 @@ export default function AdminUserDetailPage() {
   const roles = [
     user.is_superuser ? 'admin' : null,
     user.is_staff && !user.is_superuser ? 'staff' : null,
-    user.is_partner ? 'partner' : null,
+    user.role === 'florist' ? 'florist' : user.role === 'affiliate' ? 'affiliate' : null,
   ].filter((role): role is string => Boolean(role));
   if (roles.length === 0) roles.push('customer');
 

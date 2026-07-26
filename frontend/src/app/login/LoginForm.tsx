@@ -54,7 +54,7 @@ export function LoginForm({
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
                 <div className="flex flex-col items-center gap-2 text-center">
-                  <h1 className="text-2xl font-bold">Partner and staff access</h1>
+                  <h1 className="text-2xl font-bold">Florist, affiliate and staff access</h1>
                   <p className="text-muted-foreground text-balance text-sm">
                     Sign in to your FutureFlower business account
                   </p>

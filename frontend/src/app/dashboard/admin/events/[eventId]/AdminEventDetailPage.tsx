@@ -9,16 +9,14 @@ import {
   AdminDetailSection, AdminInlineLink,
 } from '@/components/dashboard/AdminDetail';
 import {
-  DashboardStatusPill, dashboardLabel, formatDashboardCurrency,
+  DashboardStatusPill, dashboardLabel, formatDashboardCurrency, formatDashboardDateOnly,
 } from '@/components/dashboard/DashboardData';
 import { Button } from '@/components/ui/button';
 import { errorMessage } from '@/lib/errors';
 import type { AdminEvent } from '@/types/AdminEvent';
 
 function formatDeliveryDate(value: string): string {
-  return new Date(`${value}T00:00:00`).toLocaleDateString('en-AU', {
-    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
-  });
+  return formatDashboardDateOnly(value, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 function formatDateTime(value: string): string {

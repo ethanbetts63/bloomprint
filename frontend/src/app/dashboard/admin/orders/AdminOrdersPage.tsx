@@ -14,16 +14,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { errorMessage } from '@/lib/errors';
 import type { AdminPlan } from '@/types/AdminPlan';
+import { DASHBOARD_STATUS_STYLES } from '@/components/dashboard/DashboardData';
 
 const PAGE_SIZE = 50;
 
-const STATUS_STYLE: Record<string, { row: string; swatch: string; label: string }> = {
-  active: { row: 'bg-emerald-50 hover:bg-emerald-100', swatch: 'bg-emerald-300', label: 'Active' },
-  pending_payment: { row: 'bg-amber-50 hover:bg-amber-100', swatch: 'bg-amber-300', label: 'Pending payment' },
-  completed: { row: 'bg-sky-50 hover:bg-sky-100', swatch: 'bg-sky-300', label: 'Completed' },
-  refunded: { row: 'bg-rose-50 hover:bg-rose-100', swatch: 'bg-rose-300', label: 'Refunded' },
-  cancelled: { row: 'bg-slate-100 hover:bg-slate-200', swatch: 'bg-slate-400', label: 'Cancelled' },
-};
+const STATUS_STYLE = DASHBOARD_STATUS_STYLES;
 
 const STATUS_ORDER = ['active', 'pending_payment', 'completed', 'refunded', 'cancelled'];
 const STATUS_OPTIONS = [

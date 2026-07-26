@@ -18,7 +18,19 @@ class TestPayoutViews:
         
         response = self.client.get('/api/partners/payouts/')
         assert response.status_code == 200
-        assert len(response.data) == 2
+        assert response.data['count'] == 2
+        assert len(response.data['results']) == 2
+
+    def test_payout_list_filters_searches_and_orders_on_server(self):
+        partner = PartnerFactory(user=self.user)
+        matching = PayoutFactory(partner=partner, payout_type='commission', status='completed', note='July referral', amount=Decimal('150.00'))
+        PayoutFactory(partner=partner, payout_type='fulfillment', status='pending', note='Other')
+
+        response = self.client.get('/api/partners/payouts/?status=completed&payout_type=commission&search=july&ordering=amount')
+
+        assert response.status_code == 200
+        assert response.data['count'] == 1
+        assert response.data['results'][0]['id'] == matching.id
 
     def test_payout_detail_success(self):
         partner = PartnerFactory(user=self.user)

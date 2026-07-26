@@ -7,7 +7,7 @@ from users.tests.factories.user_factory import UserFactory
 
 
 @pytest.mark.django_db
-class TestDiscountCodeCreateView:
+class TestAffiliateDiscountCodeListCreateView:
     def setup_method(self):
         self.client = APIClient()
         self.user = UserFactory()
@@ -20,6 +20,17 @@ class TestDiscountCodeCreateView:
         assert response.status_code == 201
         assert 'BLOOMSTUDIO' in response.data['code']
         assert DiscountCode.objects.filter(partner=self.partner).count() == 1
+
+    def test_list_is_paginated_scoped_filtered_and_ordered(self):
+        matching = DiscountCodeFactory(partner=self.partner, code='SPRING-5', is_active=True)
+        DiscountCodeFactory(partner=self.partner, code='WINTER-5', is_active=False)
+        DiscountCodeFactory(code='SPRING-OTHER-5')
+
+        response = self.client.get(f'{self.url}?status=active&search=spring&ordering=code')
+
+        assert response.status_code == 200
+        assert response.data['count'] == 1
+        assert response.data['results'][0]['id'] == matching.id
 
     def test_create_with_custom_name(self):
         response = self.client.post(self.url, {'name': 'podcast'}, format='json')
@@ -56,6 +67,11 @@ class TestDiscountCodeCreateView:
 
         assert response.status_code == 403
         assert DiscountCode.objects.filter(partner=florist).count() == 0
+
+    def test_delivery_partner_cannot_list_discount_codes(self):
+        florist = PartnerFactory(partner_type='delivery')
+        self.client.force_authenticate(user=florist.user)
+        assert self.client.get(self.url).status_code == 403
 
     def test_collision_gets_counter_suffix(self):
         first = self.client.post(self.url, {'name': 'vip'}, format='json')

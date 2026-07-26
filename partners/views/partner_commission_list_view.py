@@ -1,20 +1,54 @@
-from rest_framework import status
+from django.db.models import Q
+from rest_framework.generics import ListAPIView
+from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from partners.models import Partner
+from partners.pagination import DashboardPagination
 from partners.serializers.partner_dashboard_serializer import CommissionSerializer
 
 
-class PartnerCommissionListView(APIView):
+ORDERING_MAP = {
+    'id': ('id',),
+    'commission_type': ('commission_type',),
+    'amount': ('amount',),
+    'status': ('status',),
+    'created_at': ('created_at',),
+}
+
+
+class CommissionListView(ListAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = CommissionSerializer
+    pagination_class = DashboardPagination
 
-    def get(self, request):
+    def get_queryset(self):
         try:
-            partner = Partner.objects.get(user=request.user)
+            account = Partner.objects.get(user=self.request.user)
         except Partner.DoesNotExist:
-            return Response({"error": "Not a partner."}, status=status.HTTP_404_NOT_FOUND)
+            raise NotFound('No florist or affiliate account was found.')
 
-        commissions = partner.commissions.order_by('-created_at')
-        return Response(CommissionSerializer(commissions, many=True).data)
+        params = self.request.query_params
+        queryset = account.commissions.all()
+
+        status_filter = params.get('status', '').strip()
+        if status_filter:
+            queryset = queryset.filter(status__in=[value.strip() for value in status_filter.split(',') if value.strip()])
+
+        commission_type = params.get('commission_type', '').strip()
+        if commission_type:
+            queryset = queryset.filter(commission_type=commission_type)
+
+        search = params.get('search', '').strip()
+        if search:
+            query = Q(note__icontains=search) | Q(commission_type__icontains=search)
+            if search.isdigit():
+                query |= Q(id=int(search))
+            queryset = queryset.filter(query)
+
+        ordering = params.get('ordering', '').strip() or '-created_at'
+        descending = ordering.startswith('-')
+        fields = ORDERING_MAP.get(ordering.lstrip('-'), ('created_at',))
+        if descending:
+            fields = tuple(f'-{field}' for field in fields)
+        return queryset.order_by(*fields, '-id')

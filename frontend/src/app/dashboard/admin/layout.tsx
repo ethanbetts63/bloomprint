@@ -2,7 +2,6 @@
 
 import { LayoutDashboard, ClipboardList, CalendarRange, Users, Store, Wallet } from 'lucide-react';
 import DashboardShell, { type DashboardNavSection } from '@/components/dashboard/DashboardShell';
-import AdminGuard from '@/components/dashboard/AdminGuard';
 
 const nav: DashboardNavSection[] = [
   {
@@ -21,7 +20,7 @@ const nav: DashboardNavSection[] = [
     label: 'People',
     items: [
       { href: '/dashboard/admin/users', label: 'Users', icon: Users },
-      { href: '/dashboard/admin/partners', label: 'Partners', icon: Store },
+      { href: '/dashboard/admin/partners', label: 'Florists & affiliates', icon: Store },
       { href: '/dashboard/admin/payouts', label: 'Payouts', icon: Wallet },
     ],
   },
@@ -29,10 +28,8 @@ const nav: DashboardNavSection[] = [
 
 export default function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <AdminGuard>
-      <DashboardShell role="admin" brandTitle="Dashboard" brandSubtitle="Admin" nav={nav}>
-        {children}
-      </DashboardShell>
-    </AdminGuard>
+    <DashboardShell role="admin" brandTitle="Dashboard" brandSubtitle="Admin" nav={nav}>
+      {children}
+    </DashboardShell>
   );
 }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { approvePartner, denyPartner, getAdminPartner, payCommission } from '@/api/admin';
+import { approveBusinessAccount, denyBusinessAccount, getAdminBusinessAccount, payCommission } from '@/api/admin';
 import {
   AdminDetailError, AdminDetailField, AdminDetailGrid, AdminDetailLoading, AdminDetailPage,
   AdminDetailSection, AdminDetailTable, AdminInlineLink,
@@ -16,12 +16,12 @@ import { Spinner } from '@/components/ui/spinner';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { errorMessage } from '@/lib/errors';
 import type { AdminCommission } from '@/types/AdminCommission';
-import type { AdminPartner } from '@/types/AdminPartner';
+import type { AdminBusinessAccount } from '@/types/AdminBusinessAccount';
 
-export default function AdminPartnerDetailPage() {
+export default function AdminBusinessAccountDetailPage() {
   const partnerId = useParams<{ partnerId: string }>().partnerId;
   const router = useRouter();
-  const [partner, setPartner] = useState<AdminPartner | null>(null);
+  const [partner, setPartner] = useState<AdminBusinessAccount | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [payingId, setPayingId] = useState<number | null>(null);
@@ -29,7 +29,7 @@ export default function AdminPartnerDetailPage() {
 
   useEffect(() => {
     if (!partnerId) return;
-    getAdminPartner(Number(partnerId))
+    getAdminBusinessAccount(Number(partnerId))
       .then((result) => { setPartner(result); setError(null); })
       .catch((reason) => setError(errorMessage(reason)))
       .finally(() => setLoading(false));
@@ -39,12 +39,12 @@ export default function AdminPartnerDetailPage() {
     if (!partner) return;
     setSubmitting(true);
     try {
-      if (action === 'approve') await approvePartner(partner.id);
-      else await denyPartner(partner.id);
+      if (action === 'approve') await approveBusinessAccount(partner.id);
+      else await denyBusinessAccount(partner.id);
       toast.success(`${partner.business_name || partner.first_name} ${action === 'approve' ? 'approved' : 'denied'}.`);
       router.push('/dashboard/admin');
     } catch {
-      toast.error(`Failed to ${action} partner.`);
+      toast.error(`Failed to ${action} account.`);
       setSubmitting(false);
     }
   }
@@ -55,7 +55,7 @@ export default function AdminPartnerDetailPage() {
     try {
       await payCommission(partner.id, commission.id);
       toast.success(`Paid ${formatDashboardCurrency(commission.amount)} to ${partner.business_name || partner.first_name}.`);
-      setPartner(await getAdminPartner(partner.id));
+      setPartner(await getAdminBusinessAccount(partner.id));
     } catch (reason) {
       toast.error(errorMessage(reason) || 'Failed to pay commission.');
     } finally {
@@ -64,7 +64,7 @@ export default function AdminPartnerDetailPage() {
   }
 
   if (loading) return <AdminDetailLoading />;
-  if (error || !partner) return <AdminDetailError message={error ?? 'Partner not found.'} backHref="/dashboard/admin/partners" />;
+  if (error || !partner) return <AdminDetailError message={error ?? 'Florist or affiliate not found.'} backHref="/dashboard/admin/partners" />;
 
   const isDelivery = partner.partner_type === 'delivery';
   const commissions = partner.commissions ?? [];
@@ -83,15 +83,15 @@ export default function AdminPartnerDetailPage() {
   return (
     <AdminDetailPage
       title={displayName}
-      description={`${isDelivery ? 'Delivery (florist)' : 'Referral'} · Applied ${formatDashboardDateLong(partner.created_at)}`}
+      description={`${isDelivery ? 'Florist' : 'Affiliate'} · Applied ${formatDashboardDateLong(partner.created_at)}`}
       backHref="/dashboard/admin/partners"
       backLabel="Back to partners"
       actions={actions}
     >
-      <AdminDetailSection title="Partner details" className={isDelivery ? undefined : 'xl:col-span-2'}>
+      <AdminDetailSection title={isDelivery ? 'Florist details' : 'Affiliate details'} className={isDelivery ? undefined : 'xl:col-span-2'}>
         <AdminDetailGrid>
           <AdminDetailField label="Business name" value={partner.business_name} />
-          <AdminDetailField label="Partner type" value={isDelivery ? 'Delivery (florist)' : 'Referral'} />
+          <AdminDetailField label="Account type" value={isDelivery ? 'Florist' : 'Affiliate'} />
           <AdminDetailField label="First name" value={partner.first_name} />
           <AdminDetailField label="Last name" value={partner.last_name} />
           <AdminDetailField label="Email" value={partner.email} />
@@ -124,7 +124,7 @@ export default function AdminPartnerDetailPage() {
         <AdminDetailTable
           headers={['Type', 'Event', 'Amount', 'Status', 'Created', 'Action']}
           empty={commissions.length === 0}
-          emptyMessage="This partner has no commissions."
+          emptyMessage="This account has no commissions."
           minWidth={860}
         >
           {commissions.map((commission) => (
@@ -146,7 +146,7 @@ export default function AdminPartnerDetailPage() {
                     size="sm"
                     disabled={payingId === commission.id || !partner.stripe_connect_onboarding_complete}
                     onClick={() => handlePay(commission)}
-                    title={!partner.stripe_connect_onboarding_complete ? 'Partner has not completed Stripe onboarding' : undefined}
+                    title={!partner.stripe_connect_onboarding_complete ? 'This account has not completed Stripe onboarding' : undefined}
                   >
                     {payingId === commission.id ? <Spinner className="h-3.5 w-3.5 text-current" /> : 'Pay out'}
                   </Button>

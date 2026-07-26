@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
-import { getAdminCommissions, getAdminDashboard, getPendingPartners } from '@/api/admin';
+import { getAdminCommissions, getAdminDashboard, getPendingBusinessAccounts } from '@/api/admin';
 import { formatDashboardTableDate } from '@/components/dashboard/DashboardDataTable';
 import DashboardOverviewTable, {
   DashboardPrimaryLink as PrimaryLink,
@@ -13,14 +13,13 @@ import { errorMessage } from '@/lib/errors';
 import type { AdminCommission } from '@/types/AdminCommission';
 import type { AdminDashboard } from '@/types/AdminDashboard';
 import type { AdminEvent } from '@/types/AdminEvent';
-import type { AdminPartner } from '@/types/AdminPartner';
+import type { AdminBusinessAccount } from '@/types/AdminBusinessAccount';
+import { formatDashboardDateOnly } from '@/components/dashboard/DashboardData';
 
 type EventQueue = 'to_order' | 'ordered' | 'delivered';
 
 function formatDeliveryDate(dateString: string): string {
-  return new Date(`${dateString}T00:00:00`).toLocaleDateString('en-AU', {
-    day: 'numeric', month: 'short', year: 'numeric',
-  });
+  return formatDashboardDateOnly(dateString);
 }
 
 function daysUntil(dateString: string): number {
@@ -89,14 +88,14 @@ function EventTable({ title, events, queue }: { title: string; events: AdminEven
 
 export default function AdminDashboardPage() {
   const [dashboard, setDashboard] = useState<AdminDashboard | null>(null);
-  const [pendingPartners, setPendingPartners] = useState<AdminPartner[]>([]);
+  const [pendingPartners, setPendingPartners] = useState<AdminBusinessAccount[]>([]);
   const [pendingPayouts, setPendingPayouts] = useState<AdminCommission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([getAdminDashboard(), getPendingPartners(), getAdminCommissions({ status: 'pending' })])
+    Promise.all([getAdminDashboard(), getPendingBusinessAccounts(), getAdminCommissions({ status: 'pending' })])
       .then(([nextDashboard, partners, payouts]) => {
         if (cancelled) return;
         setDashboard(nextDashboard);
@@ -134,13 +133,13 @@ export default function AdminDashboardPage() {
             count={pendingPayouts.length}
             viewAllHref="/dashboard/admin/payouts"
             viewAllLabel="View all payouts"
-            headers={['Partner', 'Type', 'Amount', 'Created', 'Action']}
+            headers={['Account', 'Type', 'Amount', 'Created', 'Action']}
             empty={pendingPayouts.length === 0}
             emptyMessage="No pending commissions."
           >
             {pendingPayouts.slice(0, 5).map((commission) => (
               <TableRow key={commission.id} className="border-slate-100 hover:bg-slate-50">
-                <TableCell className="font-medium text-slate-900">{commission.partner_name || 'Unknown partner'}</TableCell>
+                <TableCell className="font-medium text-slate-900">{commission.partner_name || 'Unknown account'}</TableCell>
                 <TableCell className="capitalize text-slate-700">{commission.commission_type}</TableCell>
                 <TableCell className="font-semibold text-slate-950">{formatAmount(commission.amount)}</TableCell>
                 <TableCell className="text-slate-600">{formatDashboardTableDate(commission.created_at)}</TableCell>
@@ -152,13 +151,13 @@ export default function AdminDashboardPage() {
           </DashboardOverviewTable>
 
           <DashboardOverviewTable
-            title="Partner requests"
+            title="Florist & affiliate applications"
             count={pendingPartners.length}
             viewAllHref="/dashboard/admin/partners"
-            viewAllLabel="View all partners"
+            viewAllLabel="View all accounts"
             headers={['Business', 'Contact', 'Type', 'Applied', 'Action']}
             empty={pendingPartners.length === 0}
-            emptyMessage="No pending partner requests."
+            emptyMessage="No pending florist or affiliate applications."
           >
             {pendingPartners.map((partner) => (
               <TableRow key={partner.id} className="border-slate-100 hover:bg-slate-50">
@@ -170,7 +169,7 @@ export default function AdminDashboardPage() {
                   <div className="text-xs text-slate-500">{partner.email}</div>
                 </TableCell>
                 <TableCell className="text-slate-700">
-                  {partner.partner_type === 'delivery' ? 'Delivery (florist)' : 'Referral'}
+                  {partner.partner_type === 'delivery' ? 'Florist' : 'Affiliate'}
                 </TableCell>
                 <TableCell className="text-slate-600">{formatDashboardTableDate(partner.created_at)}</TableCell>
                 <TableCell className="text-right">

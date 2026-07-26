@@ -14,21 +14,21 @@ def test_admin_user_detail_serializer_basic():
     serializer = AdminUserDetailSerializer(user)
     data = serializer.data
     assert data['email'] == user.email
-    assert data['is_partner'] is False
+    assert data['role'] == 'customer'
     assert data['referred_by'] is None
     assert data['plans'] == []
 
 @pytest.mark.django_db
-def test_admin_user_detail_serializer_is_partner():
+def test_admin_user_detail_serializer_affiliate_role():
     """
     Test that is_partner returns True if user has a partner profile.
     """
-    partner = PartnerFactory()
+    partner = PartnerFactory(partner_type='non_delivery')
     user = partner.user
     
     serializer = AdminUserDetailSerializer(user)
     data = serializer.data
-    assert data['is_partner'] is True
+    assert data['role'] == 'affiliate'
 
 @pytest.mark.django_db
 def test_admin_user_detail_serializer_referred_by():

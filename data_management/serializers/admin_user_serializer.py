@@ -1,11 +1,12 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from users.roles import get_user_role
 
 User = get_user_model()
 
 
 class AdminUserSerializer(serializers.ModelSerializer):
-    is_partner = serializers.SerializerMethodField()
+    role = serializers.SerializerMethodField()
     plan_count = serializers.SerializerMethodField()
     referred_by = serializers.SerializerMethodField()
 
@@ -20,13 +21,13 @@ class AdminUserSerializer(serializers.ModelSerializer):
             'is_superuser',
             'is_active',
             'date_joined',
-            'is_partner',
+            'role',
             'plan_count',
             'referred_by',
         ]
 
-    def get_is_partner(self, obj):
-        return hasattr(obj, 'partner_profile')
+    def get_role(self, obj):
+        return get_user_role(obj)
 
     def get_plan_count(self, obj):
         # Orders are no longer owned by a User; customer identity lives on the

@@ -9,7 +9,7 @@ class PayoutFactory(DjangoModelFactory):
         model = Payout
 
     partner = factory.SubFactory(PartnerFactory)
-    payout_type = 'referral'
+    payout_type = 'commission'
     amount = factory.Faker('pydecimal', left_digits=3, right_digits=2, min_value=10, max_value=500)
     status = 'pending'
     period_start = factory.LazyFunction(lambda: timezone.now().date())

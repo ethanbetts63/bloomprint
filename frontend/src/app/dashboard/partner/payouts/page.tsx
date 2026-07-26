@@ -1,5 +1,2 @@
-import PayoutsPage from '@/app/dashboard/partner/payouts/PayoutsPage';
-
-export default function Page() {
-  return <PayoutsPage />;
-}
+import LegacyBusinessDashboardRedirect from '@/components/dashboard/LegacyBusinessDashboardRedirect';
+export default function Page() { return <LegacyBusinessDashboardRedirect suffix="/payouts" />; }

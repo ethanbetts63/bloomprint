@@ -1,6 +1,6 @@
 import type { AdminCommission } from './AdminCommission';
 
-export interface AdminPartner {
+export interface AdminBusinessAccount {
   id: number;
   business_name: string;
   partner_type: 'non_delivery' | 'delivery';

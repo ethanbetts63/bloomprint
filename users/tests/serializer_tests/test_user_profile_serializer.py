@@ -18,23 +18,20 @@ def test_user_profile_serializer():
         'last_name': user.last_name,
         'is_staff': False,
         'is_superuser': False,
-        'is_partner': False,
         'role': 'customer',
         }
     assert serializer.data == expected_data
 
 
 @pytest.mark.django_db
-def test_user_profile_serializer_is_partner_true():
-    """
-    Tests that is_partner returns True if the user has a partner profile.
-    """
+def test_user_profile_serializer_uses_role_instead_of_partner_flag():
     from partners.tests.factories.partner_factory import PartnerFactory
     partner = PartnerFactory()
     user = partner.user
 
     serializer = UserProfileSerializer(instance=user)
-    assert serializer.data['is_partner'] is True
+    assert serializer.data['role'] in ('florist', 'affiliate')
+    assert 'is_partner' not in serializer.data
 
 
 @pytest.mark.django_db

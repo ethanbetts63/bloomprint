@@ -1,5 +1,2 @@
-import BusinessDetailsPage from '@/app/dashboard/partner/details/BusinessDetailsPage';
-
-export default function Page() {
-  return <BusinessDetailsPage />;
-}
+import LegacyBusinessDashboardRedirect from '@/components/dashboard/LegacyBusinessDashboardRedirect';
+export default function Page() { return <LegacyBusinessDashboardRedirect suffix="/details" />; }

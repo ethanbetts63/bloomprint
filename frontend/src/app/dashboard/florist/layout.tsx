@@ -1,6 +1,6 @@
 'use client';
 
-import { BadgeDollarSign, LayoutDashboard, Truck } from 'lucide-react';
+import { BadgeDollarSign, Building2, LayoutDashboard, Truck, Wallet } from 'lucide-react';
 import DashboardShell, { type DashboardNavSection } from '@/components/dashboard/DashboardShell';
 
 const nav: DashboardNavSection[] = [
@@ -16,6 +16,10 @@ const nav: DashboardNavSection[] = [
       { href: '/dashboard/florist/commissions', label: 'Commissions', icon: BadgeDollarSign },
     ],
   },
+  { label: 'Account', items: [
+    { href: '/dashboard/florist/payouts', label: 'Payouts', icon: Wallet },
+    { href: '/dashboard/florist/details', label: 'Business details', icon: Building2 },
+  ] },
 ];
 
 export default function FloristDashboardLayout({ children }: { children: React.ReactNode }) {

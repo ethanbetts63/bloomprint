@@ -1,34 +1,59 @@
+from django.db.models import Q
+from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import NotFound
 from partners.models import Partner, Payout, PayoutLineItem
+from partners.pagination import DashboardPagination
+from partners.serializers.payout_list_serializer import PayoutListSerializer
 
 
-class PayoutListView(APIView):
+PAYOUT_ORDERING_MAP = {
+    'id': ('id',),
+    'payout_type': ('payout_type',),
+    'amount': ('amount',),
+    'status': ('status',),
+    'created_at': ('created_at',),
+}
+
+
+class PayoutListView(ListAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = PayoutListSerializer
+    pagination_class = DashboardPagination
 
-    def get(self, request):
+    def get_queryset(self):
         try:
-            partner = Partner.objects.get(user=request.user)
+            account = Partner.objects.get(user=self.request.user)
         except Partner.DoesNotExist:
-            return Response({"error": "Not a partner."}, status=status.HTTP_404_NOT_FOUND)
+            raise NotFound('No florist or affiliate account was found.')
 
-        payouts = Payout.objects.filter(partner=partner).order_by('-created_at')
-        data = []
-        for p in payouts:
-            data.append({
-                'id': p.id,
-                'payout_type': p.payout_type,
-                'amount': str(p.amount),
-                'currency': p.currency,
-                'status': p.status,
-                'period_start': p.period_start,
-                'period_end': p.period_end,
-                'created_at': p.created_at,
-            })
+        params = self.request.query_params
+        queryset = Payout.objects.filter(partner=account)
 
-        return Response(data)
+        status_filter = params.get('status', '').strip()
+        if status_filter:
+            queryset = queryset.filter(status__in=[value.strip() for value in status_filter.split(',') if value.strip()])
+
+        payout_type = params.get('payout_type', '').strip()
+        if payout_type:
+            queryset = queryset.filter(payout_type=payout_type)
+
+        search = params.get('search', '').strip()
+        if search:
+            query = Q(currency__icontains=search) | Q(note__icontains=search)
+            if search.isdigit():
+                query |= Q(id=int(search))
+            queryset = queryset.filter(query)
+
+        ordering = params.get('ordering', '').strip() or '-created_at'
+        descending = ordering.startswith('-')
+        fields = PAYOUT_ORDERING_MAP.get(ordering.lstrip('-'), ('created_at',))
+        if descending:
+            fields = tuple(f'-{field}' for field in fields)
+        return queryset.order_by(*fields, '-id')
 
 
 class PayoutDetailView(APIView):
@@ -38,7 +63,7 @@ class PayoutDetailView(APIView):
         try:
             partner = Partner.objects.get(user=request.user)
         except Partner.DoesNotExist:
-            return Response({"error": "Not a partner."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "No florist or affiliate account was found."}, status=status.HTTP_404_NOT_FOUND)
 
         try:
             payout = Payout.objects.get(id=payout_id, partner=partner)

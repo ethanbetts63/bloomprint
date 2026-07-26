@@ -1,19 +1,52 @@
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework.generics import ListAPIView
+from rest_framework.exceptions import NotFound, PermissionDenied
+from django.db.models import Count
 
 from partners.models import DiscountCode, Partner
+from partners.pagination import DashboardPagination
+from partners.serializers.partner_dashboard_serializer import DiscountCodeSerializer
 
 
-class DiscountCodeCreateView(APIView):
+class AffiliateDiscountCodeListCreateView(ListAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = DiscountCodeSerializer
+    pagination_class = DashboardPagination
+
+    def get_account(self):
+        try:
+            account = Partner.objects.get(user=self.request.user)
+        except Partner.DoesNotExist:
+            raise NotFound('No affiliate account was found.')
+        if account.partner_type != 'non_delivery':
+            raise PermissionDenied('Discount codes are only available to affiliates.')
+        return account
+
+    def get_queryset(self):
+        account = self.get_account()
+        params = self.request.query_params
+        queryset = account.discount_codes.annotate(usage_count=Count('usages'))
+        status_filter = params.get('status', '').strip()
+        if status_filter in ('active', 'inactive'):
+            queryset = queryset.filter(is_active=status_filter == 'active')
+        search = params.get('search', '').strip()
+        if search:
+            queryset = queryset.filter(code__icontains=search)
+        ordering = params.get('ordering', '').strip() or '-created_at'
+        ordering_map = {
+            'code': 'code', 'discount_amount': 'discount_amount', 'total_uses': 'usage_count',
+            'status': 'is_active', 'created_at': 'created_at',
+        }
+        field = ordering_map.get(ordering.lstrip('-'), 'created_at')
+        return queryset.order_by(f'-{field}' if ordering.startswith('-') else field, '-id')
 
     def post(self, request):
         try:
             partner = Partner.objects.get(user=request.user)
         except Partner.DoesNotExist:
-            return Response({'error': 'Not a partner.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'No affiliate account was found.'}, status=status.HTTP_404_NOT_FOUND)
 
         if partner.partner_type != 'non_delivery':
             return Response(

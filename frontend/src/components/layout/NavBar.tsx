@@ -17,14 +17,9 @@ const MENU_LINK =
 
 type MenuItem = { href: string; label: string };
 
-const PARTNER_LINKS: MenuItem[] = [
-  { href: '/dashboard/partner/details', label: 'Business Details' },
-  { href: '/dashboard/partner/payouts', label: 'Payouts' },
-];
-
 const ADMIN_LINKS: MenuItem[] = [
   { href: '/dashboard/admin', label: 'Admin Dashboard' },
-  { href: '/dashboard/admin/partners', label: 'Admin Partner List' },
+  { href: '/dashboard/admin/partners', label: 'Admin Florists & Affiliates' },
   { href: '/dashboard/admin/plans', label: 'Admin Plan List' },
   { href: '/dashboard/admin/users', label: 'Admin User List' },
   { href: '/dashboard/admin/payouts', label: 'Admin Payouts' },
@@ -50,14 +45,23 @@ const NavBar = () => {
 
   const menuItems: MenuItem[] = isAuthenticated
     ? [
-        ...(user?.is_partner ? [
+        ...(user?.role === 'florist' || user?.role === 'affiliate' ? [
           {
-            href: user.role === 'florist' || user.role === 'affiliate' ? roleHome(user.role) : '/dashboard/partner',
+            href: roleHome(user.role),
             label: user.role === 'florist'
               ? 'Florist Dashboard'
-              : user.role === 'affiliate' ? 'Affiliate Dashboard' : 'Business Dashboard',
+              : 'Affiliate Dashboard',
           },
-          ...PARTNER_LINKS,
+          ...(user.role === 'florist' ? [
+            { href: '/dashboard/florist/deliveries', label: 'Deliveries' },
+            { href: '/dashboard/florist/commissions', label: 'Commissions' },
+            { href: '/dashboard/florist/payouts', label: 'Payouts' },
+          ] : user.role === 'affiliate' ? [
+            { href: '/dashboard/affiliate/discount-codes', label: 'Discount Codes' },
+            { href: '/dashboard/affiliate/commissions', label: 'Commissions' },
+            { href: '/dashboard/affiliate/payouts', label: 'Payouts' },
+          ] : []),
+          { href: `/dashboard/${user.role}/details`, label: 'Business Details' },
         ] : []),
         ...(user?.is_staff || user?.is_superuser ? ADMIN_LINKS : []),
       ]

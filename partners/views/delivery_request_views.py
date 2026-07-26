@@ -6,6 +6,12 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from partners.models import Partner, DeliveryRequest, Commission
 from partners.utils.commission_utils import get_referral_commission_amount
 from decimal import Decimal
+from django.db.models import Q
+from rest_framework.exceptions import NotFound
+from rest_framework.generics import ListAPIView
+
+from partners.pagination import DashboardPagination
+from partners.serializers.delivery_request_list_serializer import DeliveryRequestListSerializer
 
 
 class DeliveryRequestDetailView(APIView):
@@ -98,34 +104,50 @@ class DeliveryRequestRespondView(APIView):
         return Response({"status": "declined"})
 
 
-class DeliveryRequestListView(APIView):
+DELIVERY_ORDERING_MAP = {
+    'recipient': ('event__order__recipient_last_name', 'event__order__recipient_first_name'),
+    'delivery_date': ('event__delivery_date',),
+    'budget': ('event__order__budget',),
+    'status': ('status',),
+    'expires_at': ('expires_at',),
+    'created_at': ('created_at',),
+}
+
+
+class DeliveryRequestListView(ListAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = DeliveryRequestListSerializer
+    pagination_class = DashboardPagination
 
-    def get(self, request):
+    def get_queryset(self):
         try:
-            partner = Partner.objects.get(user=request.user)
+            florist = Partner.objects.get(user=self.request.user, partner_type='delivery')
         except Partner.DoesNotExist:
-            return Response({"error": "Not a partner."}, status=status.HTTP_404_NOT_FOUND)
+            raise NotFound('No florist account was found.')
 
-        requests = DeliveryRequest.objects.filter(
-            partner=partner
-        ).select_related('event', 'event__order').order_by('-created_at')
+        params = self.request.query_params
+        queryset = DeliveryRequest.objects.filter(partner=florist).select_related('event', 'event__order')
 
-        data = []
-        for dr in requests:
-            order = dr.event.order
-            data.append({
-                'id': dr.id,
-                'token': dr.token,
-                'status': dr.status,
-                'delivery_date': dr.event.delivery_date,
-                'recipient_name': getattr(order, 'recipient_name', ''),
-                'budget': str(getattr(order, 'budget', 0)),
-                'expires_at': dr.expires_at,
-                'created_at': dr.created_at,
-            })
+        status_filter = params.get('status', '').strip()
+        if status_filter:
+            queryset = queryset.filter(status__in=[value.strip() for value in status_filter.split(',') if value.strip()])
 
-        return Response(data)
+        search = params.get('search', '').strip()
+        if search:
+            query = (
+                Q(event__order__recipient_first_name__icontains=search)
+                | Q(event__order__recipient_last_name__icontains=search)
+            )
+            if search.isdigit():
+                query |= Q(event_id=int(search))
+            queryset = queryset.filter(query)
+
+        ordering = params.get('ordering', '').strip() or '-created_at'
+        descending = ordering.startswith('-')
+        fields = DELIVERY_ORDERING_MAP.get(ordering.lstrip('-'), ('created_at',))
+        if descending:
+            fields = tuple(f'-{field}' for field in fields)
+        return queryset.order_by(*fields, '-id')
 
 
 class DeliveryRequestMarkDeliveredView(APIView):

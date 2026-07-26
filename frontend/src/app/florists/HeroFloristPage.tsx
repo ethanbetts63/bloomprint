@@ -1,14 +1,14 @@
 
 import Image from 'next/image';
 import { LandingHero } from '@/components/marketing/LandingHero';
-import PartnerRegistrationForm from '@/components/marketing/PartnerRegistrationForm';
+import FloristAffiliateRegistrationForm from '@/components/marketing/FloristAffiliateRegistrationForm';
 
 import deliveryImage from '@/assets/delivery.webp';
 
 export const HeroFloristPage = () => {
   return (
     <LandingHero
-      formId="partner-signup"
+      formId="business-signup"
       heading={
         <>
           Orders on <em>your</em> terms.
@@ -21,7 +21,7 @@ export const HeroFloristPage = () => {
         </p>
       }
       description="We send you fully paid local orders. Take the ones you want, design them from the stock you have, and deliver under your own brand. Free to join."
-      form={<PartnerRegistrationForm partnerType="delivery" />}
+      form={<FloristAffiliateRegistrationForm accountType="florist" />}
       image={
         <div className="relative min-h-[420px] overflow-hidden bg-black lg:min-h-[560px] lg:rounded-xl">
           <Image

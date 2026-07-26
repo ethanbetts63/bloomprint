@@ -1,6 +1,6 @@
 from .partner_registration_view import PartnerRegistrationView
 from .partner_dashboard_view import PartnerDashboardView
-from .partner_commission_list_view import PartnerCommissionListView
+from .partner_commission_list_view import CommissionListView
 from .partner_update_view import PartnerUpdateView
 from .delivery_request_views import (
     DeliveryRequestDetailView,
@@ -23,4 +23,4 @@ from .admin_commission_list_view import AdminCommissionListView
 from .admin_commission_detail_view import AdminCommissionDetailView
 from .admin_approve_commission_view import AdminApproveCommissionView
 from .admin_deny_commission_view import AdminDenyCommissionView
-from .discount_code_views import DiscountCodeCreateView
+from .discount_code_views import AffiliateDiscountCodeListCreateView

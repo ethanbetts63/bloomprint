@@ -66,8 +66,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem('hasSession');
     try {
       await api.logoutUser();
-    } catch {
-    }
+            } catch {
+                // A failed refresh is handled below by clearing authentication state.
+            }
     setUser(null);
     if (onLogoutSuccess) {
       onLogoutSuccess();

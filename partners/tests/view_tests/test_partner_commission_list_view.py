@@ -22,7 +22,19 @@ class TestPartnerCommissionListView:
         response = self.client.get('/api/partners/commissions/')
 
         assert response.status_code == 200
-        assert [item['id'] for item in response.data] == [newer.id, older.id]
+        assert response.data['count'] == 2
+        assert [item['id'] for item in response.data['results']] == [newer.id, older.id]
+
+    def test_filters_searches_and_orders_on_server(self):
+        partner = PartnerFactory()
+        matching = CommissionFactory(partner=partner, status='approved', amount='12.00', note='Special referral')
+        CommissionFactory(partner=partner, status='pending', note='Other')
+        self.client.force_authenticate(user=partner.user)
+
+        response = self.client.get('/api/partners/commissions/?status=approved&search=special&ordering=amount')
+
+        assert response.status_code == 200
+        assert [item['id'] for item in response.data['results']] == [matching.id]
 
     def test_non_partner_returns_404(self):
         self.client.force_authenticate(user=UserFactory())

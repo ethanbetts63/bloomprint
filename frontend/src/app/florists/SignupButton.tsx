@@ -1,10 +1,10 @@
 "use client";
 
-import type { BecomePartnerButtonProps } from '@/types/BecomePartnerButtonProps';
+import type { SignupButtonProps } from '@/types/SignupButtonProps';
 
-export const BecomePartnerButton = ({ className = '' }: BecomePartnerButtonProps) => {
+export const SignupButton = ({ className = '' }: SignupButtonProps) => {
   const scrollToForm = () => {
-    document.getElementById('partner-signup')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('business-signup')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   return (

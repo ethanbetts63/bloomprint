@@ -7,7 +7,7 @@ export interface AdminUser {
   is_superuser: boolean;
   is_active: boolean;
   date_joined: string;
-  is_partner: boolean;
+  role: import('./UserProfile').UserRole;
   plan_count: number;
   referred_by: string | null;
 }

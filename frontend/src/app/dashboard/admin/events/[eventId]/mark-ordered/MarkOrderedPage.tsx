@@ -10,6 +10,7 @@ import UnifiedSummaryCard from '@/components/order/UnifiedSummaryCard';
 import SummarySection from '@/components/SummarySection';
 import FlowBackButton from '@/components/order/FlowBackButton';
 import { errorMessage } from '@/lib/errors';
+import { formatDashboardDateLong } from '@/components/dashboard/DashboardData';
 
 function toLocalDatetimeInputValue(date: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0');
@@ -17,7 +18,7 @@ function toLocalDatetimeInputValue(date: Date): string {
 }
 
 function formatDate(dtStr: string): string {
-  return new Date(dtStr + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
+  return formatDashboardDateLong(dtStr);
 }
 
 const MarkOrderedPage = () => {

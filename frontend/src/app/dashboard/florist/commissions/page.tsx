@@ -1,5 +1,5 @@
-import FloristCommissionsPage from '@/app/dashboard/florist/commissions/FloristCommissionsPage';
+import DashboardCommissionsPage from '@/components/dashboard/DashboardCommissionsPage';
 
 export default function Page() {
-  return <FloristCommissionsPage />;
+  return <DashboardCommissionsPage accountType="florist" />;
 }

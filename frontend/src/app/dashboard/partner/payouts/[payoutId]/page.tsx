@@ -1,5 +1,2 @@
-import PayoutDetailPage from '@/app/dashboard/partner/payouts/[payoutId]/PayoutDetailPage';
-
-export default function Page() {
-  return <PayoutDetailPage />;
-}
+import LegacyBusinessDashboardRedirect from '@/components/dashboard/LegacyBusinessDashboardRedirect';
+export default async function Page({ params }: { params: Promise<{ payoutId: string }> }) { const { payoutId } = await params; return <LegacyBusinessDashboardRedirect suffix={`/payouts/${payoutId}`} />; }
