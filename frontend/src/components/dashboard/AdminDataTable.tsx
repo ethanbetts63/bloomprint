@@ -37,16 +37,19 @@ export function FilterSelect({
     <Select value={value} onValueChange={onValueChange}>
       <SelectTrigger
         aria-label={ariaLabel}
-        className={cn('w-full border-slate-300 bg-white text-slate-900', className)}
+        className={cn(
+          'w-full border-slate-300 bg-white text-slate-900 shadow-sm hover:bg-slate-50 focus-visible:border-slate-400 focus-visible:ring-slate-300/50 [&_svg]:text-slate-500',
+          className,
+        )}
       >
         <SelectValue />
       </SelectTrigger>
-      <SelectContent className="border-slate-200 bg-white text-slate-900">
+      <SelectContent position="popper" className="border-slate-200 bg-white text-slate-900 shadow-lg">
         {options.map((o) => (
           <SelectItem
             key={o.value}
             value={o.value}
-            className="text-slate-900 focus:bg-slate-100 focus:text-slate-900 data-[state=checked]:bg-slate-100"
+            className="text-slate-900 focus:bg-slate-100 focus:text-slate-950 data-[state=checked]:bg-slate-100 [&_svg]:text-slate-600"
           >
             {o.label}
           </SelectItem>

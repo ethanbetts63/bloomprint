@@ -1,161 +1,218 @@
-"use client";
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
+'use client';
+
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Search } from 'lucide-react';
 import { getAdminCommissions } from '@/api/admin';
-import type { AdminCommission } from '@/types/AdminCommission';
-import { Loader2 } from 'lucide-react';
-import UnifiedSummaryCard from '@/components/order/UnifiedSummaryCard';
-import SummarySection from '@/components/SummarySection';
+import AdminDataTable, {
+  FilterSelect,
+  StatusPill,
+  formatAdminDate,
+  type AdminColumn,
+  type SortState,
+} from '@/components/dashboard/AdminDataTable';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { errorMessage } from '@/lib/errors';
+import type { AdminCommission } from '@/types/AdminCommission';
 
-type StatusFilter = 'all' | 'pending' | 'approved' | 'processing' | 'paid' | 'denied';
-type TypeFilter = 'all' | 'referral' | 'fulfillment';
+const PAGE_SIZE = 50;
 
-const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
-  { value: 'all', label: 'All' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'approved', label: 'Approved' },
-  { value: 'processing', label: 'Processing' },
-  { value: 'paid', label: 'Paid' },
-  { value: 'denied', label: 'Denied' },
+const STATUS_STYLE: Record<string, { row: string; pill: string; swatch: string; label: string }> = {
+  pending: { row: 'bg-amber-50 hover:bg-amber-100', pill: 'bg-amber-100 text-amber-800', swatch: 'bg-amber-300', label: 'Pending' },
+  approved: { row: 'bg-sky-50 hover:bg-sky-100', pill: 'bg-sky-100 text-sky-800', swatch: 'bg-sky-300', label: 'Approved' },
+  processing: { row: 'bg-violet-50 hover:bg-violet-100', pill: 'bg-violet-100 text-violet-800', swatch: 'bg-violet-300', label: 'Processing' },
+  paid: { row: 'bg-emerald-50 hover:bg-emerald-100', pill: 'bg-emerald-100 text-emerald-800', swatch: 'bg-emerald-300', label: 'Paid' },
+  denied: { row: 'bg-rose-50 hover:bg-rose-100', pill: 'bg-rose-100 text-rose-700', swatch: 'bg-rose-300', label: 'Denied' },
+};
+const STATUS_ORDER = ['pending', 'approved', 'processing', 'paid', 'denied'];
+const STATUS_OPTIONS = [
+  { value: 'all', label: 'All statuses' },
+  ...STATUS_ORDER.map((status) => ({ value: status, label: STATUS_STYLE[status].label })),
 ];
-
-const TYPE_FILTERS: { value: TypeFilter; label: string }[] = [
-  { value: 'all', label: 'All' },
+const TYPE_OPTIONS = [
+  { value: 'all', label: 'All types' },
   { value: 'referral', label: 'Referral' },
   { value: 'fulfillment', label: 'Fulfillment' },
 ];
 
-const STATUS_STYLES: Record<string, string> = {
-  pending: 'bg-amber-100 text-amber-800',
-  approved: 'bg-blue-100 text-blue-800',
-  processing: 'bg-purple-100 text-purple-800',
-  paid: 'bg-green-100 text-green-800',
-  denied: 'bg-red-100 text-red-700',
-};
+const partnerName = (commission: AdminCommission) => commission.partner_name || `Partner #${commission.partner_id ?? '—'}`;
+const commissionType = (commission: AdminCommission) => commission.commission_type === 'fulfillment' ? 'Fulfillment' : 'Referral';
+const amount = (commission: AdminCommission) => `$${Number(commission.amount).toFixed(2)}`;
 
-const StatusBadge = ({ status }: { status: string }) => (
-  <span className={`px-2 py-0.5 rounded-full text-xs font-semibold capitalize ${STATUS_STYLES[status] ?? 'bg-gray-100 text-gray-600'}`}>
-    {status}
-  </span>
-);
-
-function formatDate(dtStr: string): string {
-  return new Date(dtStr).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+function compareCommissions(a: AdminCommission, b: AdminCommission, field: string): number {
+  if (field === 'partner') return partnerName(a).localeCompare(partnerName(b));
+  if (field === 'type') return a.commission_type.localeCompare(b.commission_type);
+  if (field === 'amount') return Number(a.amount) - Number(b.amount);
+  if (field === 'status') return a.status.localeCompare(b.status);
+  if (field === 'event') return (a.event ?? 0) - (b.event ?? 0);
+  if (field === 'created_at') return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+  return 0;
 }
 
-function formatAmount(amount: string): string {
-  return `$${parseFloat(amount).toFixed(2)}`;
-}
-
-const CommissionRow = ({ commission }: { commission: AdminCommission }) => (
-  <div className="flex justify-between items-center gap-4 py-3 border-b border-black/5 last:border-0">
-    <div className="flex-1 min-w-0">
-      <div className="flex items-center gap-2 flex-wrap">
-        <p className="font-semibold text-black truncate">{commission.partner_name}</p>
-        <StatusBadge status={commission.status} />
-      </div>
-      <p className="text-sm text-black/60">
-        {commission.commission_type === 'fulfillment' ? 'Fulfillment' : 'Referral'}
-        {' · '}
-        {formatAmount(commission.amount)}
-        {' · '}
-        {formatDate(commission.created_at)}
-      </p>
-    </div>
-    <Link
-      href={`/dashboard/admin/payouts/${commission.id}`}
-      className="text-xs px-3 py-1.5 rounded border border-black/20 hover:bg-black/5 text-center text-black/70 flex-shrink-0"
-    >
-      View
-    </Link>
-  </div>
-);
-
-const AdminPayoutListPage = () => {
+export default function AdminPayoutListPage() {
+  const router = useRouter();
   const [commissions, setCommissions] = useState<AdminCommission[]>([]);
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
-  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
+  const [status, setStatus] = useState('all');
+  const [type, setType] = useState('all');
+  const [query, setQuery] = useState('');
+  const [search, setSearch] = useState('');
+  const [sort, setSort] = useState<SortState | null>({ field: 'created_at', dir: 'desc' });
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     getAdminCommissions({
-      status: statusFilter === 'all' ? undefined : statusFilter,
-      commission_type: typeFilter === 'all' ? undefined : typeFilter,
+      status: status === 'all' ? undefined : status,
+      commission_type: type === 'all' ? undefined : type,
     })
-      .then((result) => { if (!cancelled) { setCommissions(result); setError(null); } })
-      .catch((e) => { if (!cancelled) setError(errorMessage(e)); })
+      .then((result) => {
+        if (cancelled) return;
+        setCommissions(result);
+        setError(null);
+      })
+      .catch((reason) => {
+        if (cancelled) return;
+        setCommissions([]);
+        setError(errorMessage(reason));
+      })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [statusFilter, typeFilter]);
+  }, [status, type]);
+
+  const filtered = useMemo(() => {
+    const needle = search.toLowerCase();
+    if (!needle) return commissions;
+    return commissions.filter((commission) => [
+      commission.partner_name,
+      commission.note,
+      commission.partner_id ? String(commission.partner_id) : '',
+      commission.event ? String(commission.event) : '',
+    ].some((value) => value?.toLowerCase().includes(needle)));
+  }, [commissions, search]);
+  const sorted = useMemo(() => {
+    if (!sort) return filtered;
+    const multiplier = sort.dir === 'asc' ? 1 : -1;
+    return [...filtered].sort((a, b) => compareCommissions(a, b, sort.field) * multiplier);
+  }, [filtered, sort]);
+  const total = sorted.length;
+  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const rows = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const submitSearch = (event: React.FormEvent) => {
+    event.preventDefault();
+    setSearch(query.trim());
+    setPage(1);
+  };
+  const toggleSort = (field: string) => {
+    setPage(1);
+    setSort((previous) => (previous?.field === field
+      ? { field, dir: previous.dir === 'asc' ? 'desc' : 'asc' }
+      : { field, dir: field === 'created_at' ? 'desc' : 'asc' }));
+  };
+  const clearFilters = () => {
+    if (status !== 'all' || type !== 'all') setLoading(true);
+    setStatus('all');
+    setType('all');
+    setQuery('');
+    setSearch('');
+    setSort({ field: 'created_at', dir: 'desc' });
+    setPage(1);
+  };
+  const showClear = status !== 'all' || type !== 'all' || search !== '' || sort?.field !== 'created_at' || sort?.dir !== 'desc';
+
+  const columns: AdminColumn<AdminCommission>[] = [
+    {
+      key: 'partner', header: 'Partner', sortable: true,
+      render: (commission) => <span className="font-medium text-slate-900">{partnerName(commission)}</span>,
+    },
+    { key: 'type', header: 'Type', sortable: true, cellClassName: 'text-slate-700', render: commissionType },
+    { key: 'amount', header: 'Amount', sortable: true, align: 'right', cellClassName: 'font-semibold text-slate-950', render: amount },
+    {
+      key: 'status', header: 'Status', sortable: true,
+      render: (commission) => (
+        <StatusPill className={STATUS_STYLE[commission.status]?.pill}>{STATUS_STYLE[commission.status]?.label ?? commission.status}</StatusPill>
+      ),
+    },
+    { key: 'event', header: 'Event', sortable: true, cellClassName: 'font-mono text-sm text-slate-600', render: (commission) => commission.event ? `#${commission.event}` : '—' },
+    { key: 'created_at', header: 'Created', sortable: true, cellClassName: 'text-sm text-slate-600', render: (commission) => formatAdminDate(commission.created_at) },
+  ];
+
+  const filters = (
+    <>
+      <FilterSelect
+        value={status}
+        onValueChange={(value) => { setLoading(true); setStatus(value); setPage(1); }}
+        options={STATUS_OPTIONS}
+        ariaLabel="Filter payouts by status"
+      />
+      <FilterSelect
+        value={type}
+        onValueChange={(value) => { setLoading(true); setType(value); setPage(1); }}
+        options={TYPE_OPTIONS}
+        ariaLabel="Filter payouts by type"
+      />
+      <form onSubmit={submitSearch}>
+        <div className="flex gap-2">
+          <Input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search partner, event or note"
+            aria-label="Search payouts"
+            className="border-slate-300 bg-white text-slate-900 placeholder:text-slate-400"
+          />
+          <Button type="submit" variant="outline" className="shrink-0 border-slate-300 bg-white text-slate-900 hover:bg-slate-100 hover:text-slate-950">
+            <Search className="mr-1.5 h-4 w-4" /> Search
+          </Button>
+        </div>
+      </form>
+    </>
+  );
+
+  const legend = (
+    <>
+      <span className="font-medium text-slate-600">Row colour:</span>
+      {STATUS_ORDER.map((item) => (
+        <span key={item} className="inline-flex items-center gap-1.5">
+          <span className={`h-3 w-3 rounded-sm ${STATUS_STYLE[item].swatch}`} />
+          {STATUS_STYLE[item].label}
+        </span>
+      ))}
+    </>
+  );
 
   return (
-    <div style={{ backgroundColor: 'var(--color4)' }} className="min-h-screen py-0 md:py-12 px-0 md:px-4">
-      <div className="container mx-auto max-w-4xl">
-        <UnifiedSummaryCard
-          title="Commissions & Payouts"
-          description="All partner commissions across every status."
-        >
-          <SummarySection label="Filter by Status">
-            <div className="flex flex-wrap gap-2 mt-1">
-              {STATUS_FILTERS.map(({ value, label }) => (
-                <button
-                  key={value}
-                  onClick={() => setStatusFilter(value)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-colors ${
-                    statusFilter === value
-                      ? 'bg-black text-white'
-                      : 'bg-black/5 text-black/60 hover:bg-black/10'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </SummarySection>
-
-          <SummarySection label="Filter by Type">
-            <div className="flex flex-wrap gap-2 mt-1">
-              {TYPE_FILTERS.map(({ value, label }) => (
-                <button
-                  key={value}
-                  onClick={() => setTypeFilter(value)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-colors ${
-                    typeFilter === value
-                      ? 'bg-black text-white'
-                      : 'bg-black/5 text-black/60 hover:bg-black/10'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </SummarySection>
-
-          <SummarySection label={`Results (${commissions.length})`}>
-            {loading ? (
-              <div className="py-8 flex items-center justify-center gap-3">
-                <Loader2 className="h-5 w-5 animate-spin text-black/20" />
-                <span className="text-sm text-black/40">Loading...</span>
-              </div>
-            ) : error ? (
-              <p className="text-sm text-red-600">{error}</p>
-            ) : commissions.length === 0 ? (
-              <p className="text-sm text-black/40 italic">No commissions found.</p>
-            ) : (
-              <div className="flex flex-col">
-                {commissions.map((c) => (
-                  <CommissionRow key={c.id} commission={c} />
-                ))}
-              </div>
-            )}
-          </SummarySection>
-        </UnifiedSummaryCard>
-      </div>
-    </div>
+    <>
+      {error && <p className="px-4 pt-4 text-sm text-red-600 md:px-6">{error}</p>}
+      <AdminDataTable
+        title="Payouts"
+        filterSummary={`${total.toLocaleString('en-AU')} ${total === 1 ? 'payout' : 'payouts'} matching this view`}
+        filters={filters}
+        legend={legend}
+        showClear={showClear}
+        onClearFilters={clearFilters}
+        columns={columns}
+        rows={rows}
+        rowKey={(commission) => commission.id}
+        loading={loading}
+        emptyMessage="No payouts match these filters."
+        sort={sort}
+        onSort={toggleSort}
+        onRowClick={(commission) => router.push(`/dashboard/admin/payouts/${commission.id}`)}
+        rowClassName={(commission) => STATUS_STYLE[commission.status]?.row ?? 'hover:bg-slate-50'}
+        pagination={{
+          page,
+          pageCount,
+          total,
+          pageSize: PAGE_SIZE,
+          hasPrev: page > 1,
+          hasNext: page < pageCount,
+          onPrev: () => setPage((current) => current - 1),
+          onNext: () => setPage((current) => current + 1),
+        }}
+      />
+    </>
   );
-};
-
-export default AdminPayoutListPage;
+}

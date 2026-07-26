@@ -1,123 +1,209 @@
-"use client";
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
+'use client';
+
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Search } from 'lucide-react';
 import { getAdminPartners } from '@/api/admin';
-import type { AdminPartner } from '@/types/AdminPartner';
-import { Loader2 } from 'lucide-react';
-import UnifiedSummaryCard from '@/components/order/UnifiedSummaryCard';
-import SummarySection from '@/components/SummarySection';
+import AdminDataTable, {
+  FilterSelect,
+  StatusPill,
+  formatAdminDate,
+  type AdminColumn,
+  type SortState,
+} from '@/components/dashboard/AdminDataTable';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { errorMessage } from '@/lib/errors';
+import type { AdminPartner } from '@/types/AdminPartner';
 
-type StatusFilter = 'all' | 'pending' | 'active' | 'suspended' | 'denied';
+const PAGE_SIZE = 50;
 
-const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
-  { value: 'all', label: 'All' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'active', label: 'Active' },
-  { value: 'suspended', label: 'Suspended' },
-  { value: 'denied', label: 'Denied' },
+const STATUS_STYLE: Record<string, { row: string; pill: string; swatch: string; label: string }> = {
+  pending: { row: 'bg-amber-50 hover:bg-amber-100', pill: 'bg-amber-100 text-amber-800', swatch: 'bg-amber-300', label: 'Pending' },
+  active: { row: 'bg-emerald-50 hover:bg-emerald-100', pill: 'bg-emerald-100 text-emerald-800', swatch: 'bg-emerald-300', label: 'Active' },
+  suspended: { row: 'bg-slate-100 hover:bg-slate-200', pill: 'bg-slate-200 text-slate-700', swatch: 'bg-slate-400', label: 'Suspended' },
+  denied: { row: 'bg-rose-50 hover:bg-rose-100', pill: 'bg-rose-100 text-rose-700', swatch: 'bg-rose-300', label: 'Denied' },
+};
+const STATUS_ORDER = ['pending', 'active', 'suspended', 'denied'];
+const STATUS_OPTIONS = [
+  { value: 'all', label: 'All statuses' },
+  ...STATUS_ORDER.map((status) => ({ value: status, label: STATUS_STYLE[status].label })),
 ];
 
-const STATUS_STYLES: Record<string, string> = {
-  pending: 'bg-yellow-100 text-yellow-800',
-  active: 'bg-green-100 text-green-800',
-  suspended: 'bg-gray-100 text-gray-600',
-  denied: 'bg-red-100 text-red-700',
-};
+const partnerName = (partner: AdminPartner) =>
+  partner.business_name || `${partner.first_name} ${partner.last_name}`.trim() || '—';
+const contactName = (partner: AdminPartner) => `${partner.first_name} ${partner.last_name}`.trim() || '—';
+const partnerType = (partner: AdminPartner) => (partner.partner_type === 'delivery' ? 'Delivery (Florist)' : 'Referral');
 
-const StatusBadge = ({ status }: { status: string }) => (
-  <span className={`px-2 py-0.5 rounded-full text-xs font-semibold capitalize ${STATUS_STYLES[status] ?? 'bg-gray-100 text-gray-600'}`}>
-    {status}
-  </span>
-);
+function comparePartners(a: AdminPartner, b: AdminPartner, field: string): number {
+  if (field === 'business') return partnerName(a).localeCompare(partnerName(b));
+  if (field === 'contact') return contactName(a).localeCompare(contactName(b));
+  if (field === 'type') return a.partner_type.localeCompare(b.partner_type);
+  if (field === 'status') return a.status.localeCompare(b.status);
+  if (field === 'created_at') return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+  return 0;
+}
 
-const PartnerRow = ({ partner }: { partner: AdminPartner }) => (
-  <div className="flex justify-between items-center gap-4 py-3 border-b border-black/5 last:border-0">
-    <div className="flex-1 min-w-0">
-      <div className="flex items-center gap-2 flex-wrap">
-        <p className="font-semibold text-black truncate">
-          {partner.business_name || `${partner.first_name} ${partner.last_name}`}
-        </p>
-        <StatusBadge status={partner.status} />
-      </div>
-      <p className="text-sm text-black/60">
-        {partner.partner_type === 'delivery' ? 'Delivery (Florist)' : 'Referral'}
-        {' · '}
-        {partner.first_name} {partner.last_name}
-      </p>
-      <p className="text-sm text-black/40">{partner.email}</p>
-    </div>
-    <Link
-      href={`/dashboard/admin/partners/${partner.id}`}
-      className="text-xs px-3 py-1.5 rounded border border-black/20 hover:bg-black/5 text-center text-black/70 flex-shrink-0"
-    >
-      View
-    </Link>
-  </div>
-);
-
-const AdminPartnerListPage = () => {
+export default function AdminPartnerListPage() {
+  const router = useRouter();
   const [partners, setPartners] = useState<AdminPartner[]>([]);
-  const [activeFilter, setActiveFilter] = useState<StatusFilter>('all');
+  const [status, setStatus] = useState('all');
+  const [query, setQuery] = useState('');
+  const [search, setSearch] = useState('');
+  const [sort, setSort] = useState<SortState | null>({ field: 'created_at', dir: 'desc' });
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    getAdminPartners(activeFilter === 'all' ? undefined : activeFilter)
-      .then((result) => { if (!cancelled) { setPartners(result); setError(null); } })
-      .catch((e) => { if (!cancelled) setError(errorMessage(e)); })
+    getAdminPartners(status === 'all' ? undefined : status)
+      .then((result) => {
+        if (cancelled) return;
+        setPartners(result);
+        setError(null);
+      })
+      .catch((reason) => {
+        if (cancelled) return;
+        setPartners([]);
+        setError(errorMessage(reason));
+      })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [activeFilter]);
+  }, [status]);
+
+  const filtered = useMemo(() => {
+    const needle = search.toLowerCase();
+    if (!needle) return partners;
+    return partners.filter((partner) => [
+      partner.business_name,
+      partner.first_name,
+      partner.last_name,
+      partner.email,
+      partner.phone,
+    ].some((value) => value?.toLowerCase().includes(needle)));
+  }, [partners, search]);
+  const sorted = useMemo(() => {
+    if (!sort) return filtered;
+    const multiplier = sort.dir === 'asc' ? 1 : -1;
+    return [...filtered].sort((a, b) => comparePartners(a, b, sort.field) * multiplier);
+  }, [filtered, sort]);
+  const total = sorted.length;
+  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const rows = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const submitSearch = (event: React.FormEvent) => {
+    event.preventDefault();
+    setSearch(query.trim());
+    setPage(1);
+  };
+  const toggleSort = (field: string) => {
+    setPage(1);
+    setSort((previous) => (previous?.field === field
+      ? { field, dir: previous.dir === 'asc' ? 'desc' : 'asc' }
+      : { field, dir: field === 'created_at' ? 'desc' : 'asc' }));
+  };
+  const clearFilters = () => {
+    if (status !== 'all') setLoading(true);
+    setStatus('all');
+    setQuery('');
+    setSearch('');
+    setSort({ field: 'created_at', dir: 'desc' });
+    setPage(1);
+  };
+  const showClear = status !== 'all' || search !== '' || sort?.field !== 'created_at' || sort?.dir !== 'desc';
+
+  const columns: AdminColumn<AdminPartner>[] = [
+    {
+      key: 'business', header: 'Business', sortable: true,
+      render: (partner) => <span className="font-medium text-slate-900">{partnerName(partner)}</span>,
+    },
+    {
+      key: 'contact', header: 'Contact', sortable: true,
+      render: (partner) => (
+        <>
+          <div className="text-slate-700">{contactName(partner)}</div>
+          <div className="text-xs text-slate-500">{partner.email}</div>
+        </>
+      ),
+    },
+    { key: 'type', header: 'Type', sortable: true, cellClassName: 'text-slate-700', render: partnerType },
+    {
+      key: 'status', header: 'Status', sortable: true,
+      render: (partner) => (
+        <StatusPill className={STATUS_STYLE[partner.status]?.pill}>{STATUS_STYLE[partner.status]?.label ?? partner.status}</StatusPill>
+      ),
+    },
+    { key: 'created_at', header: 'Joined', sortable: true, cellClassName: 'text-sm text-slate-600', render: (partner) => formatAdminDate(partner.created_at) },
+  ];
+
+  const filters = (
+    <>
+      <FilterSelect
+        value={status}
+        onValueChange={(value) => { setLoading(true); setStatus(value); setPage(1); }}
+        options={STATUS_OPTIONS}
+        ariaLabel="Filter partners by status"
+      />
+      <form className="sm:col-span-1 lg:col-span-2" onSubmit={submitSearch}>
+        <div className="flex gap-2">
+          <Input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search business, contact or email"
+            aria-label="Search partners"
+            className="border-slate-300 bg-white text-slate-900 placeholder:text-slate-400"
+          />
+          <Button type="submit" variant="outline" className="shrink-0 border-slate-300 bg-white text-slate-900 hover:bg-slate-100 hover:text-slate-950">
+            <Search className="mr-1.5 h-4 w-4" /> Search
+          </Button>
+        </div>
+      </form>
+    </>
+  );
+
+  const legend = (
+    <>
+      <span className="font-medium text-slate-600">Row colour:</span>
+      {STATUS_ORDER.map((item) => (
+        <span key={item} className="inline-flex items-center gap-1.5">
+          <span className={`h-3 w-3 rounded-sm ${STATUS_STYLE[item].swatch}`} />
+          {STATUS_STYLE[item].label}
+        </span>
+      ))}
+    </>
+  );
 
   return (
-    <div style={{ backgroundColor: 'var(--color4)' }} className="min-h-screen py-0 md:py-12 px-0 md:px-4">
-      <div className="container mx-auto max-w-4xl">
-        <UnifiedSummaryCard
-          title="Partners"
-          description="All registered partners across every status."
-        >
-          <SummarySection label="Filter by Status">
-            <div className="flex flex-wrap gap-2 mt-1">
-              {STATUS_FILTERS.map(({ value, label }) => (
-                <button
-                  key={value}
-                  onClick={() => setActiveFilter(value)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-colors ${
-                    activeFilter === value
-                      ? 'bg-black text-white'
-                      : 'bg-black/5 text-black/60 hover:bg-black/10'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </SummarySection>
-
-          <SummarySection label={`Results (${partners.length})`}>
-            {loading ? (
-              <div className="py-8 flex items-center justify-center gap-3">
-                <Loader2 className="h-5 w-5 animate-spin text-black/20" />
-                <span className="text-sm text-black/40">Loading...</span>
-              </div>
-            ) : error ? (
-              <p className="text-sm text-red-600">{error}</p>
-            ) : partners.length === 0 ? (
-              <p className="text-sm text-black/40 italic">No partners found.</p>
-            ) : (
-              <div className="flex flex-col">
-                {partners.map((partner) => (
-                  <PartnerRow key={partner.id} partner={partner} />
-                ))}
-              </div>
-            )}
-          </SummarySection>
-        </UnifiedSummaryCard>
-      </div>
-    </div>
+    <>
+      {error && <p className="px-4 pt-4 text-sm text-red-600 md:px-6">{error}</p>}
+      <AdminDataTable
+        title="Partners"
+        filterSummary={`${total.toLocaleString('en-AU')} ${total === 1 ? 'partner' : 'partners'} matching this view`}
+        filters={filters}
+        legend={legend}
+        showClear={showClear}
+        onClearFilters={clearFilters}
+        columns={columns}
+        rows={rows}
+        rowKey={(partner) => partner.id}
+        loading={loading}
+        emptyMessage="No partners match these filters."
+        sort={sort}
+        onSort={toggleSort}
+        onRowClick={(partner) => router.push(`/dashboard/admin/partners/${partner.id}`)}
+        rowClassName={(partner) => STATUS_STYLE[partner.status]?.row ?? 'hover:bg-slate-50'}
+        pagination={{
+          page,
+          pageCount,
+          total,
+          pageSize: PAGE_SIZE,
+          hasPrev: page > 1,
+          hasNext: page < pageCount,
+          onPrev: () => setPage((current) => current - 1),
+          onNext: () => setPage((current) => current + 1),
+        }}
+      />
+    </>
   );
-};
-
-export default AdminPartnerListPage;
+}

@@ -2,23 +2,21 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Search, SlidersHorizontal, X,
-} from 'lucide-react';
-import { formatDate } from '@/lib/utils';
+import { Search } from 'lucide-react';
+import { getAdminOrders } from '@/api/admin';
+import AdminDataTable, {
+  FilterSelect,
+  formatAdminDate,
+  type AdminColumn,
+  type SortState,
+} from '@/components/dashboard/AdminDataTable';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Spinner } from '@/components/ui/spinner';
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from '@/components/ui/table';
-import { FilterSelect } from '@/components/dashboard/AdminDataTable';
-import { getAdminOrders } from '@/api/admin';
+import { errorMessage } from '@/lib/errors';
 import type { AdminPlan } from '@/types/AdminPlan';
 
 const PAGE_SIZE = 50;
 
-// Whole-row tint + legend swatch per status (light so text stays readable).
 const STATUS_STYLE: Record<string, { row: string; swatch: string; label: string }> = {
   active: { row: 'bg-emerald-50 hover:bg-emerald-100', swatch: 'bg-emerald-300', label: 'Active' },
   pending_payment: { row: 'bg-amber-50 hover:bg-amber-100', swatch: 'bg-amber-300', label: 'Pending payment' },
@@ -26,8 +24,8 @@ const STATUS_STYLE: Record<string, { row: string; swatch: string; label: string 
   refunded: { row: 'bg-rose-50 hover:bg-rose-100', swatch: 'bg-rose-300', label: 'Refunded' },
   cancelled: { row: 'bg-slate-100 hover:bg-slate-200', swatch: 'bg-slate-400', label: 'Cancelled' },
 };
-const LEGEND_ORDER = ['active', 'pending_payment', 'completed', 'refunded', 'cancelled'];
 
+const STATUS_ORDER = ['active', 'pending_payment', 'completed', 'refunded', 'cancelled'];
 const STATUS_OPTIONS = [
   { value: 'all', label: 'All statuses' },
   { value: 'active,pending_payment', label: 'Live (active + pending)' },
@@ -37,47 +35,16 @@ const STATUS_OPTIONS = [
   { value: 'refunded', label: 'Refunded' },
   { value: 'cancelled', label: 'Cancelled' },
 ];
-
-const PLAN_TYPE_OPTIONS = [
+const TYPE_OPTIONS = [
   { value: 'all', label: 'All types' },
   { value: 'one_time', label: 'One-off' },
   { value: 'recurring', label: 'Subscription' },
 ];
 
-const statusLabel = (v: string) => STATUS_STYLE[v]?.label ?? v.replace(/_/g, ' ');
-const typeLabel = (v: string) => (v === 'recurring' ? 'Subscription' : 'One-off');
-const customerName = (o: AdminPlan) =>
-  `${o.customer_first_name ?? ''} ${o.customer_last_name ?? ''}`.trim() || '—';
-
-type SortField = 'customer_name' | 'total' | 'status' | 'created_at';
-interface Sort { field: SortField; dir: 'asc' | 'desc'; }
-
-function SortHeader({
-  field, children, align = 'left', sort, onSort,
-}: {
-  field: SortField;
-  children: React.ReactNode;
-  align?: 'left' | 'right';
-  sort: Sort | null;
-  onSort: (f: SortField) => void;
-}) {
-  const active = sort?.field === field;
-  return (
-    <TableHead className={align === 'right' ? 'text-right' : ''}>
-      <button
-        onClick={() => onSort(field)}
-        className={`inline-flex items-center gap-1.5 font-semibold text-slate-600 hover:text-slate-950 ${align === 'right' ? 'justify-end' : ''}`}
-      >
-        {children}
-        {active ? (
-          sort!.dir === 'asc' ? <ArrowUp className="h-3.5 w-3.5" /> : <ArrowDown className="h-3.5 w-3.5" />
-        ) : (
-          <ArrowUpDown className="h-3.5 w-3.5 text-slate-400" />
-        )}
-      </button>
-    </TableHead>
-  );
-}
+const customerName = (order: AdminPlan) =>
+  `${order.customer_first_name ?? ''} ${order.customer_last_name ?? ''}`.trim() || '—';
+const statusLabel = (status: string) => STATUS_STYLE[status]?.label ?? status.replace(/_/g, ' ');
+const typeLabel = (type: string) => (type === 'recurring' ? 'Subscription' : 'One-off');
 
 export default function AdminOrdersPage() {
   const router = useRouter();
@@ -87,13 +54,14 @@ export default function AdminOrdersPage() {
   const [hasNext, setHasNext] = useState(false);
   const [status, setStatus] = useState('all');
   const [planType, setPlanType] = useState('all');
-  const [q, setQ] = useState('');
+  const [query, setQuery] = useState('');
   const [search, setSearch] = useState('');
-  const [sort, setSort] = useState<Sort | null>(null); // null → backend default (newest first)
+  const [sort, setSort] = useState<SortState | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setLoading(true);
+    let cancelled = false;
     getAdminOrders({
       status: status === 'all' ? undefined : status,
       plan_type: planType === 'all' ? undefined : planType,
@@ -102,160 +70,153 @@ export default function AdminOrdersPage() {
       page,
       page_size: PAGE_SIZE,
     })
-      .then((res) => {
-        setOrders(res.results);
-        setCount(res.count);
-        setHasNext(res.next !== null);
+      .then((result) => {
+        if (cancelled) return;
+        setOrders(result.results);
+        setCount(result.count);
+        setHasNext(result.next !== null);
+        setError(null);
       })
-      .catch(() => setOrders([]))
-      .finally(() => setLoading(false));
+      .catch((reason) => {
+        if (cancelled) return;
+        setOrders([]);
+        setCount(0);
+        setHasNext(false);
+        setError(errorMessage(reason));
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [status, planType, search, sort, page]);
 
-  const submitSearch = (e: React.FormEvent) => { e.preventDefault(); setSearch(q.trim()); setPage(1); };
-  const toggleSort = (field: SortField) => {
+  const submitSearch = (event: React.FormEvent) => {
+    event.preventDefault();
+    const nextSearch = query.trim();
+    if (nextSearch !== search || page !== 1) setLoading(true);
+    setSearch(nextSearch);
     setPage(1);
-    setSort((prev) => (prev?.field === field
-      ? { field, dir: prev.dir === 'asc' ? 'desc' : 'asc' }
+  };
+  const toggleSort = (field: string) => {
+    setLoading(true);
+    setPage(1);
+    setSort((previous) => (previous?.field === field
+      ? { field, dir: previous.dir === 'asc' ? 'desc' : 'asc' }
       : { field, dir: field === 'created_at' ? 'desc' : 'asc' }));
   };
   const clearFilters = () => {
-    setStatus('all'); setPlanType('all'); setQ(''); setSearch(''); setSort(null); setPage(1);
+    setLoading(true);
+    setStatus('all');
+    setPlanType('all');
+    setQuery('');
+    setSearch('');
+    setSort(null);
+    setPage(1);
   };
   const activeFilters =
     (status !== 'all' ? 1 : 0) + (planType !== 'all' ? 1 : 0) + (search ? 1 : 0) + (sort ? 1 : 0);
   const pageCount = Math.max(1, Math.ceil(count / PAGE_SIZE));
 
+  const columns: AdminColumn<AdminPlan>[] = [
+    {
+      key: 'id', header: 'Order',
+      render: (order) => <span className="font-mono font-semibold text-slate-950">#{order.id}</span>,
+    },
+    {
+      key: 'customer_name', header: 'Customer', sortable: true,
+      render: (order) => (
+        <>
+          <div className="font-medium text-slate-900">{customerName(order)}</div>
+          <div className="text-xs text-slate-500">{order.customer_email || '—'}</div>
+        </>
+      ),
+    },
+    { key: 'plan_type', header: 'Type', cellClassName: 'text-slate-700', render: (order) => typeLabel(order.plan_type) },
+    {
+      key: 'total', header: 'Total', sortable: true, align: 'right',
+      cellClassName: 'font-semibold text-slate-950', render: (order) => `$${order.total_amount}`,
+    },
+    {
+      key: 'status', header: 'Status', sortable: true,
+      cellClassName: 'text-sm font-medium text-slate-700', render: (order) => statusLabel(order.status),
+    },
+    {
+      key: 'created_at', header: 'Date', sortable: true,
+      cellClassName: 'text-sm text-slate-600', render: (order) => formatAdminDate(order.created_at),
+    },
+  ];
+
+  const filters = (
+    <>
+      <FilterSelect
+        value={status}
+        onValueChange={(value) => { setLoading(true); setStatus(value); setPage(1); }}
+        options={STATUS_OPTIONS}
+        ariaLabel="Filter by status"
+      />
+      <FilterSelect
+        value={planType}
+        onValueChange={(value) => { setLoading(true); setPlanType(value); setPage(1); }}
+        options={TYPE_OPTIONS}
+        ariaLabel="Filter by type"
+      />
+      <form className="sm:col-span-2 lg:col-span-1" onSubmit={submitSearch}>
+        <div className="flex gap-2">
+          <Input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search name, email or recipient"
+            aria-label="Search orders"
+            className="border-slate-300 bg-white text-slate-900 placeholder:text-slate-400"
+          />
+          <Button type="submit" variant="outline" className="shrink-0 border-slate-300 bg-white text-slate-900 hover:bg-slate-100 hover:text-slate-950">
+            <Search className="mr-1.5 h-4 w-4" /> Search
+          </Button>
+        </div>
+      </form>
+    </>
+  );
+
+  const legend = (
+    <>
+      <span className="font-medium text-slate-600">Row colour:</span>
+      {STATUS_ORDER.map((item) => (
+        <span key={item} className="inline-flex items-center gap-1.5">
+          <span className={`inline-block h-3 w-3 rounded-sm ${STATUS_STYLE[item].swatch}`} />
+          {STATUS_STYLE[item].label}
+        </span>
+      ))}
+    </>
+  );
+
   return (
-    <div className="p-4 md:p-6">
-      <h1 className="mb-4 text-2xl font-bold text-black">Orders</h1>
-
-      <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        {/* Filter bar */}
-        <div className="border-b border-slate-200 bg-slate-50/70 px-4 py-4 sm:px-6">
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-            <div>
-              <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-                <SlidersHorizontal className="h-4 w-4" /> Order filters
-              </div>
-              <p className="mt-1 text-sm text-slate-500">
-                {count.toLocaleString('en-AU')} {count === 1 ? 'order' : 'orders'} matching this view
-              </p>
-            </div>
-            {activeFilters > 0 && (
-              <Button variant="ghost" size="sm" onClick={clearFilters} className="self-start text-slate-600">
-                <X className="mr-1 h-3.5 w-3.5" /> Clear filters
-              </Button>
-            )}
-          </div>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <FilterSelect
-              value={status}
-              onValueChange={(v) => { setStatus(v); setPage(1); }}
-              options={STATUS_OPTIONS}
-              ariaLabel="Filter by status"
-            />
-            <FilterSelect
-              value={planType}
-              onValueChange={(v) => { setPlanType(v); setPage(1); }}
-              options={PLAN_TYPE_OPTIONS}
-              ariaLabel="Filter by type"
-            />
-            <form className="sm:col-span-2 lg:col-span-1" onSubmit={submitSearch}>
-              <div className="flex gap-2">
-                <Input
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  placeholder="Search name, email or recipient"
-                  aria-label="Search orders"
-                  className="bg-white"
-                />
-                <Button type="submit" variant="outline" className="shrink-0 border-slate-300 bg-white text-slate-900 hover:bg-slate-100">
-                  <Search className="mr-1.5 h-4 w-4" /> Search
-                </Button>
-              </div>
-            </form>
-          </div>
-
-          {/* Colour key */}
-          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-slate-500">
-            <span className="font-medium text-slate-600">Row colour:</span>
-            {LEGEND_ORDER.map((s) => (
-              <span key={s} className="inline-flex items-center gap-1.5">
-                <span className={`inline-block h-3 w-3 rounded-sm ${STATUS_STYLE[s].swatch}`} />
-                {STATUS_STYLE[s].label}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <Table className="min-w-[820px]">
-            <TableHeader className="bg-slate-50">
-              <TableRow className="border-slate-200 hover:bg-slate-50">
-                <TableHead className="font-semibold text-slate-600">Order</TableHead>
-                <SortHeader field="customer_name" sort={sort} onSort={toggleSort}>Customer</SortHeader>
-                <TableHead className="font-semibold text-slate-600">Type</TableHead>
-                <SortHeader field="total" align="right" sort={sort} onSort={toggleSort}>Total</SortHeader>
-                <SortHeader field="status" sort={sort} onSort={toggleSort}>Status</SortHeader>
-                <SortHeader field="created_at" sort={sort} onSort={toggleSort}>Date</SortHeader>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow><TableCell colSpan={6} className="h-48 text-center"><Spinner className="mx-auto h-6 w-6" /></TableCell></TableRow>
-              ) : orders.length === 0 ? (
-                <TableRow><TableCell colSpan={6} className="h-48 text-center text-slate-500">
-                  <Search className="mx-auto mb-3 h-5 w-5 text-slate-400" />
-                  <p className="font-medium text-slate-700">No orders match these filters.</p>
-                  {activeFilters > 0 && <Button variant="link" size="sm" onClick={clearFilters}>Clear filters</Button>}
-                </TableCell></TableRow>
-              ) : (
-                orders.map((o) => {
-                  const st = STATUS_STYLE[o.status] ?? { row: 'hover:bg-slate-50', swatch: '', label: o.status };
-                  return (
-                    <TableRow
-                      key={o.id}
-                      className={`cursor-pointer border-slate-100 ${st.row}`}
-                      onClick={() => router.push(`/dashboard/admin/plans/${o.id}`)}
-                    >
-                      <TableCell>
-                        <div className="font-mono font-semibold text-slate-950">#{o.id}</div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="font-medium text-slate-900">{customerName(o)}</div>
-                        <div className="text-xs text-slate-500">{o.customer_email ?? '—'}</div>
-                      </TableCell>
-                      <TableCell className="text-slate-700">{typeLabel(o.plan_type)}</TableCell>
-                      <TableCell className="text-right font-semibold text-slate-950">${o.total_amount}</TableCell>
-                      <TableCell className="text-sm font-medium text-slate-700">{statusLabel(o.status)}</TableCell>
-                      <TableCell className="text-sm text-slate-600">{formatDate(o.created_at)}</TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
-            </TableBody>
-          </Table>
-        </div>
-
-        {/* Footer */}
-        <footer className="flex flex-col gap-3 border-t border-slate-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <p className="text-sm text-slate-500">
-            {count ? (page - 1) * PAGE_SIZE + 1 : 0}–{Math.min(page * PAGE_SIZE, count)} of {count.toLocaleString('en-AU')}
-          </p>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" disabled={page <= 1 || loading} onClick={() => setPage((p) => p - 1)}
-              className="border-slate-300 bg-white text-slate-900 hover:bg-slate-100 hover:text-slate-950 disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-400">
-              <ChevronLeft className="mr-1 h-4 w-4" /> Previous
-            </Button>
-            <span className="min-w-20 text-center text-sm text-slate-600">Page {page} of {pageCount}</span>
-            <Button variant="outline" size="sm" disabled={!hasNext || loading} onClick={() => setPage((p) => p + 1)}
-              className="border-slate-300 bg-white text-slate-900 hover:bg-slate-100 hover:text-slate-950 disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-400">
-              Next <ChevronRight className="ml-1 h-4 w-4" />
-            </Button>
-          </div>
-        </footer>
-      </section>
-    </div>
+    <>
+      {error && <p className="px-4 pt-4 text-sm text-red-600 md:px-6">{error}</p>}
+      <AdminDataTable
+        title="Orders"
+        filterSummary={`${count.toLocaleString('en-AU')} ${count === 1 ? 'order' : 'orders'} matching this view`}
+        filters={filters}
+        legend={legend}
+        showClear={activeFilters > 0}
+        onClearFilters={clearFilters}
+        columns={columns}
+        rows={orders}
+        rowKey={(order) => order.id}
+        loading={loading}
+        emptyMessage="No orders match these filters."
+        sort={sort}
+        onSort={toggleSort}
+        onRowClick={(order) => router.push(`/dashboard/admin/plans/${order.id}`)}
+        rowClassName={(order) => STATUS_STYLE[order.status]?.row ?? 'hover:bg-slate-50'}
+        pagination={{
+          page,
+          pageCount,
+          total: count,
+          pageSize: PAGE_SIZE,
+          hasPrev: page > 1,
+          hasNext,
+          onPrev: () => { setLoading(true); setPage((current) => current - 1); },
+          onNext: () => { setLoading(true); setPage((current) => current + 1); },
+        }}
+      />
+    </>
   );
 }

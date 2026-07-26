@@ -69,7 +69,6 @@ export default function AdminPlanListPage() {
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
     getAdminPlans({
       status: status === 'all' ? undefined : status,
       plan_type: planType === 'all' ? undefined : planType,
@@ -97,8 +96,15 @@ export default function AdminPlanListPage() {
       ? { field, dir: prev.dir === 'asc' ? 'desc' : 'asc' }
       : { field, dir: field === 'created_at' ? 'desc' : 'asc' }));
   };
-  const submitSearch = (e: React.FormEvent) => { e.preventDefault(); setSearch(q.trim()); setPage(1); };
+  const submitSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const nextSearch = q.trim();
+    if (nextSearch !== search) setLoading(true);
+    setSearch(nextSearch);
+    setPage(1);
+  };
   const clearFilters = () => {
+    if (status !== 'all' || planType !== 'all' || search !== '') setLoading(true);
     setStatus('all'); setPlanType('all'); setQ(''); setSearch(''); setSort(null); setPage(1);
   };
   const activeFilters =
@@ -132,12 +138,12 @@ export default function AdminPlanListPage() {
 
   const filters = (
     <>
-      <FilterSelect value={status} onValueChange={(v) => { setStatus(v); setPage(1); }} options={STATUS_OPTIONS} ariaLabel="Filter by status" />
-      <FilterSelect value={planType} onValueChange={(v) => { setPlanType(v); setPage(1); }} options={TYPE_OPTIONS} ariaLabel="Filter by type" />
+      <FilterSelect value={status} onValueChange={(v) => { setLoading(true); setStatus(v); setPage(1); }} options={STATUS_OPTIONS} ariaLabel="Filter by status" />
+      <FilterSelect value={planType} onValueChange={(v) => { setLoading(true); setPlanType(v); setPage(1); }} options={TYPE_OPTIONS} ariaLabel="Filter by type" />
       <form className="sm:col-span-2 lg:col-span-1" onSubmit={submitSearch}>
         <div className="flex gap-2">
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, email or recipient" aria-label="Search plans" className="bg-white" />
-          <Button type="submit" variant="outline" className="shrink-0 border-slate-300 bg-white text-slate-900 hover:bg-slate-100">
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, email or recipient" aria-label="Search plans" className="border-slate-300 bg-white text-slate-900 placeholder:text-slate-400" />
+          <Button type="submit" variant="outline" className="shrink-0 border-slate-300 bg-white text-slate-900 hover:bg-slate-100 hover:text-slate-950">
             <Search className="mr-1.5 h-4 w-4" /> Search
           </Button>
         </div>

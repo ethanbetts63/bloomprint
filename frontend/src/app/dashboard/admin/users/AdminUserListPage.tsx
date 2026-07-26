@@ -1,204 +1,205 @@
-"use client";
-import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
+'use client';
+
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Search } from 'lucide-react';
 import { getAdminUsers } from '@/api/admin';
-import type { AdminUser } from '@/types/AdminUser';
-import { Loader2, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
-import UnifiedSummaryCard from '@/components/order/UnifiedSummaryCard';
-import SummarySection from '@/components/SummarySection';
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableHead,
-  TableRow,
-  TableCell,
-} from '@/components/ui/table';
+import AdminDataTable, {
+  FilterSelect,
+  StatusPill,
+  formatAdminDate,
+  type AdminColumn,
+  type SortState,
+} from '@/components/dashboard/AdminDataTable';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { errorMessage } from '@/lib/errors';
+import type { AdminUser } from '@/types/AdminUser';
 
-type SortKey = 'name' | 'email' | 'plans' | 'joined';
-type SortDir = 'asc' | 'desc';
+const PAGE_SIZE = 50;
 
-function formatDate(dtStr: string): string {
-  return new Date(dtStr).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+const ACCOUNT_OPTIONS = [
+  { value: 'all', label: 'All accounts' },
+  { value: 'admin', label: 'Admins' },
+  { value: 'staff', label: 'Staff' },
+  { value: 'partner', label: 'Partners' },
+  { value: 'inactive', label: 'Inactive' },
+];
+
+const fullName = (user: AdminUser) => `${user.first_name} ${user.last_name}`.trim() || '—';
+
+function matchesAccount(user: AdminUser, account: string): boolean {
+  if (account === 'admin') return user.is_superuser;
+  if (account === 'staff') return user.is_staff && !user.is_superuser;
+  if (account === 'partner') return user.is_partner;
+  if (account === 'inactive') return !user.is_active;
+  return true;
 }
 
-function sortUsers(users: AdminUser[], key: SortKey, dir: SortDir): AdminUser[] {
-  const mul = dir === 'asc' ? 1 : -1;
-  return [...users].sort((a, b) => {
-    if (key === 'name') {
-      const av = `${a.last_name} ${a.first_name}`.toLowerCase();
-      const bv = `${b.last_name} ${b.first_name}`.toLowerCase();
-      return av.localeCompare(bv) * mul;
-    }
-    if (key === 'email') {
-      return a.email.localeCompare(b.email) * mul;
-    }
-    if (key === 'plans') {
-      return (a.plan_count - b.plan_count) * mul;
-    }
-    if (key === 'joined') {
-      return (new Date(a.date_joined).getTime() - new Date(b.date_joined).getTime()) * mul;
-    }
-    return 0;
-  });
+function compareUsers(a: AdminUser, b: AdminUser, field: string): number {
+  if (field === 'name') return fullName(a).localeCompare(fullName(b));
+  if (field === 'email') return a.email.localeCompare(b.email);
+  if (field === 'plans') return a.plan_count - b.plan_count;
+  if (field === 'joined') return new Date(a.date_joined).getTime() - new Date(b.date_joined).getTime();
+  return 0;
 }
 
-const SortIcon = ({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; sortDir: SortDir }) => {
-  if (col !== sortKey) return <ChevronsUpDown className="inline h-3 w-3 ml-1 text-black/20" />;
-  return sortDir === 'asc'
-    ? <ChevronUp className="inline h-3 w-3 ml-1" />
-    : <ChevronDown className="inline h-3 w-3 ml-1" />;
-};
+function rowStyle(user: AdminUser): string {
+  if (!user.is_active) return 'bg-rose-50 hover:bg-rose-100';
+  if (user.is_superuser) return 'bg-violet-50 hover:bg-violet-100';
+  if (user.is_staff) return 'bg-sky-50 hover:bg-sky-100';
+  if (user.is_partner) return 'bg-emerald-50 hover:bg-emerald-100';
+  return 'hover:bg-slate-50';
+}
 
-const AdminUserListPage = () => {
+export default function AdminUserListPage() {
+  const router = useRouter();
   const [users, setUsers] = useState<AdminUser[]>([]);
-  const [searchInput, setSearchInput] = useState('');
-  const [activeSearch, setActiveSearch] = useState('');
-  const [sortKey, setSortKey] = useState<SortKey>('joined');
-  const [sortDir, setSortDir] = useState<SortDir>('desc');
+  const [account, setAccount] = useState('all');
+  const [query, setQuery] = useState('');
+  const [search, setSearch] = useState('');
+  const [sort, setSort] = useState<SortState | null>({ field: 'joined', dir: 'desc' });
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => setActiveSearch(searchInput), 400);
-    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
-  }, [searchInput]);
 
   useEffect(() => {
     let cancelled = false;
-    getAdminUsers(activeSearch || undefined)
-      .then((result) => { if (!cancelled) { setUsers(result); setError(null); } })
-      .catch((e) => { if (!cancelled) setError(errorMessage(e)); })
+    getAdminUsers(search || undefined)
+      .then((result) => {
+        if (cancelled) return;
+        setUsers(result);
+        setError(null);
+      })
+      .catch((reason) => {
+        if (cancelled) return;
+        setUsers([]);
+        setError(errorMessage(reason));
+      })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [activeSearch]);
+  }, [search]);
 
-  function handleSort(col: SortKey) {
-    if (col === sortKey) {
-      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortKey(col);
-      setSortDir('asc');
-    }
-  }
+  const filtered = useMemo(() => users.filter((user) => matchesAccount(user, account)), [users, account]);
+  const sorted = useMemo(() => {
+    if (!sort) return filtered;
+    const multiplier = sort.dir === 'asc' ? 1 : -1;
+    return [...filtered].sort((a, b) => compareUsers(a, b, sort.field) * multiplier);
+  }, [filtered, sort]);
+  const total = sorted.length;
+  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const rows = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  const sorted = sortUsers(users, sortKey, sortDir);
+  const submitSearch = (event: React.FormEvent) => {
+    event.preventDefault();
+    const nextSearch = query.trim();
+    if (nextSearch !== search) setLoading(true);
+    setSearch(nextSearch);
+    setPage(1);
+  };
+  const toggleSort = (field: string) => {
+    setPage(1);
+    setSort((previous) => (previous?.field === field
+      ? { field, dir: previous.dir === 'asc' ? 'desc' : 'asc' }
+      : { field, dir: field === 'joined' ? 'desc' : 'asc' }));
+  };
+  const clearFilters = () => {
+    setLoading(search !== '');
+    setAccount('all');
+    setQuery('');
+    setSearch('');
+    setSort({ field: 'joined', dir: 'desc' });
+    setPage(1);
+  };
+  const showClear = account !== 'all' || search !== '' || sort?.field !== 'joined' || sort?.dir !== 'desc';
+
+  const columns: AdminColumn<AdminUser>[] = [
+    {
+      key: 'name', header: 'Name', sortable: true,
+      render: (user) => <span className="font-medium text-slate-900">{fullName(user)}</span>,
+    },
+    { key: 'email', header: 'Email', sortable: true, cellClassName: 'text-sm text-slate-600', render: (user) => user.email },
+    {
+      key: 'account', header: 'Account',
+      render: (user) => (
+        <div className="flex flex-wrap gap-1">
+          {user.is_superuser && <StatusPill className="bg-violet-100 text-violet-800">Admin</StatusPill>}
+          {user.is_staff && !user.is_superuser && <StatusPill className="bg-sky-100 text-sky-800">Staff</StatusPill>}
+          {user.is_partner && <StatusPill className="bg-emerald-100 text-emerald-800">Partner</StatusPill>}
+          {!user.is_active && <StatusPill className="bg-rose-100 text-rose-700">Inactive</StatusPill>}
+          {!user.is_staff && !user.is_partner && user.is_active && <span className="text-sm text-slate-500">Standard</span>}
+        </div>
+      ),
+    },
+    { key: 'plans', header: 'Plans', sortable: true, align: 'right', cellClassName: 'text-slate-700', render: (user) => user.plan_count },
+    { key: 'joined', header: 'Joined', sortable: true, cellClassName: 'text-sm text-slate-600', render: (user) => formatAdminDate(user.date_joined) },
+  ];
+
+  const filters = (
+    <>
+      <FilterSelect
+        value={account}
+        onValueChange={(value) => { setAccount(value); setPage(1); }}
+        options={ACCOUNT_OPTIONS}
+        ariaLabel="Filter by account type"
+      />
+      <form className="sm:col-span-1 lg:col-span-2" onSubmit={submitSearch}>
+        <div className="flex gap-2">
+          <Input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search name or email"
+            aria-label="Search users"
+            className="border-slate-300 bg-white text-slate-900 placeholder:text-slate-400"
+          />
+          <Button type="submit" variant="outline" className="shrink-0 border-slate-300 bg-white text-slate-900 hover:bg-slate-100 hover:text-slate-950">
+            <Search className="mr-1.5 h-4 w-4" /> Search
+          </Button>
+        </div>
+      </form>
+    </>
+  );
+
+  const legend = (
+    <>
+      <span className="font-medium text-slate-600">Row colour:</span>
+      <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm bg-violet-300" /> Admin</span>
+      <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm bg-sky-300" /> Staff</span>
+      <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm bg-emerald-300" /> Partner</span>
+      <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm bg-rose-300" /> Inactive</span>
+    </>
+  );
 
   return (
-    <div style={{ backgroundColor: 'var(--color4)' }} className="min-h-screen py-0 md:py-12 px-0 md:px-4">
-      <div className="container mx-auto max-w-5xl">
-        <UnifiedSummaryCard
-          title="Users"
-          description="All registered user accounts."
-        >
-          <SummarySection label="Search">
-            <input
-              type="text"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Name or email…"
-              className="w-full sm:max-w-sm px-3 py-2 text-sm border border-black/15 rounded-lg bg-white placeholder:text-black/30 focus:outline-none focus:ring-1 focus:ring-black/20"
-            />
-          </SummarySection>
-
-          <SummarySection label={`Results (${users.length})`}>
-            {loading ? (
-              <div className="py-8 flex items-center justify-center gap-3">
-                <Loader2 className="h-5 w-5 animate-spin text-black/20" />
-                <span className="text-sm text-black/40">Loading…</span>
-              </div>
-            ) : error ? (
-              <p className="text-sm text-red-600">{error}</p>
-            ) : sorted.length === 0 ? (
-              <p className="text-sm text-black/40 italic">No users found.</p>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-black/5">
-                    <TableHead
-                      className="cursor-pointer select-none text-xs font-bold tracking-[0.15em] uppercase text-black/50"
-                      onClick={() => handleSort('name')}
-                    >
-                      Name <SortIcon col="name" sortKey={sortKey} sortDir={sortDir} />
-                    </TableHead>
-                    <TableHead
-                      className="cursor-pointer select-none text-xs font-bold tracking-[0.15em] uppercase text-black/50"
-                      onClick={() => handleSort('email')}
-                    >
-                      Email <SortIcon col="email" sortKey={sortKey} sortDir={sortDir} />
-                    </TableHead>
-                    <TableHead className="text-xs font-bold tracking-[0.15em] uppercase text-black/50">
-                      Tags
-                    </TableHead>
-                    <TableHead
-                      className="cursor-pointer select-none text-xs font-bold tracking-[0.15em] uppercase text-black/50 text-right"
-                      onClick={() => handleSort('plans')}
-                    >
-                      Plans <SortIcon col="plans" sortKey={sortKey} sortDir={sortDir} />
-                    </TableHead>
-                    <TableHead
-                      className="cursor-pointer select-none text-xs font-bold tracking-[0.15em] uppercase text-black/50"
-                      onClick={() => handleSort('joined')}
-                    >
-                      Joined <SortIcon col="joined" sortKey={sortKey} sortDir={sortDir} />
-                    </TableHead>
-                    <TableHead />
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sorted.map((user) => (
-                    <TableRow key={user.id} className="border-black/5">
-                      <TableCell>
-                        <p className="font-semibold text-black text-sm">
-                          {user.first_name} {user.last_name}
-                        </p>
-                      </TableCell>
-                      <TableCell className="text-sm text-black/60">
-                        {user.email}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {user.is_superuser && (
-                            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">Admin</span>
-                          )}
-                          {user.is_staff && !user.is_superuser && (
-                            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">Staff</span>
-                          )}
-                          {user.is_partner && (
-                            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800">Partner</span>
-                          )}
-                          {!user.is_active && (
-                            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">Inactive</span>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-sm text-black text-right">
-                        {user.plan_count}
-                      </TableCell>
-                      <TableCell className="text-sm text-black/50">
-                        {formatDate(user.date_joined)}
-                      </TableCell>
-                      <TableCell>
-                        <Link
-                          href={`/dashboard/admin/users/${user.id}`}
-                          className="text-xs px-3 py-1.5 rounded border border-black/20 hover:bg-black/5 text-black/70 whitespace-nowrap"
-                        >
-                          View
-                        </Link>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </SummarySection>
-        </UnifiedSummaryCard>
-      </div>
-    </div>
+    <>
+      {error && <p className="px-4 pt-4 text-sm text-red-600 md:px-6">{error}</p>}
+      <AdminDataTable
+        title="Users"
+        filterSummary={`${total.toLocaleString('en-AU')} ${total === 1 ? 'user' : 'users'} matching this view`}
+        filters={filters}
+        legend={legend}
+        showClear={showClear}
+        onClearFilters={clearFilters}
+        columns={columns}
+        rows={rows}
+        rowKey={(user) => user.id}
+        loading={loading}
+        emptyMessage="No users match these filters."
+        sort={sort}
+        onSort={toggleSort}
+        onRowClick={(user) => router.push(`/dashboard/admin/users/${user.id}`)}
+        rowClassName={rowStyle}
+        pagination={{
+          page,
+          pageCount,
+          total,
+          pageSize: PAGE_SIZE,
+          hasPrev: page > 1,
+          hasNext: page < pageCount,
+          onPrev: () => setPage((current) => current - 1),
+          onNext: () => setPage((current) => current + 1),
+        }}
+      />
+    </>
   );
-};
-
-export default AdminUserListPage;
+}
