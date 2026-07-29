@@ -1,7 +1,7 @@
 import pytest
 from data_management.serializers.admin_user_serializer import AdminUserSerializer
 from users.tests.factories.user_factory import UserFactory
-from partners.tests.factories.partner_factory import PartnerFactory
+from partners.tests.factories.business_account_factory import BusinessAccountFactory
 from events.tests.factories.order_factory import OrderFactory
 
 
@@ -24,7 +24,7 @@ class TestAdminUserSerializer:
         assert data['role'] == 'customer'
 
     def test_role_florist_for_delivery_account(self):
-        partner = PartnerFactory(partner_type='delivery')
+        partner = BusinessAccountFactory(account_type='florist')
         data = AdminUserSerializer(partner.user).data
         assert data['role'] == 'florist'
 
@@ -41,14 +41,14 @@ class TestAdminUserSerializer:
         assert data['referred_by'] is None
 
     def test_referred_by_returns_business_name(self):
-        partner = PartnerFactory(business_name='Floral Co')
-        user = UserFactory(referred_by_partner=partner)
+        partner = BusinessAccountFactory(business_name='Floral Co')
+        user = UserFactory(referred_by_affiliate=partner)
         data = AdminUserSerializer(user).data
         assert data['referred_by'] == 'Floral Co'
 
     def test_referred_by_returns_name_when_no_business_name(self):
         partner_user = UserFactory(first_name='Alice', last_name='Smith')
-        partner = PartnerFactory(user=partner_user, business_name='')
-        user = UserFactory(referred_by_partner=partner)
+        partner = BusinessAccountFactory(user=partner_user, business_name='')
+        user = UserFactory(referred_by_affiliate=partner)
         data = AdminUserSerializer(user).data
         assert 'Alice' in data['referred_by']

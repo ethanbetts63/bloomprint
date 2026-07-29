@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import NotFound
-from partners.models import Partner, Payout, PayoutLineItem
-from partners.pagination import DashboardPagination
+from partners.models import BusinessAccount, Payout, PayoutLineItem
+from config.pagination import DashboardPagination
 from partners.serializers.payout_list_serializer import PayoutListSerializer
 
 
@@ -26,12 +26,12 @@ class PayoutListView(ListAPIView):
 
     def get_queryset(self):
         try:
-            account = Partner.objects.get(user=self.request.user)
-        except Partner.DoesNotExist:
+            account = BusinessAccount.objects.get(user=self.request.user)
+        except BusinessAccount.DoesNotExist:
             raise NotFound('No florist or affiliate account was found.')
 
         params = self.request.query_params
-        queryset = Payout.objects.filter(partner=account)
+        queryset = Payout.objects.filter(business_account=account)
 
         status_filter = params.get('status', '').strip()
         if status_filter:
@@ -61,12 +61,12 @@ class PayoutDetailView(APIView):
 
     def get(self, request, payout_id):
         try:
-            partner = Partner.objects.get(user=request.user)
-        except Partner.DoesNotExist:
+            account = BusinessAccount.objects.get(user=request.user)
+        except BusinessAccount.DoesNotExist:
             return Response({"error": "No florist or affiliate account was found."}, status=status.HTTP_404_NOT_FOUND)
 
         try:
-            payout = Payout.objects.get(id=payout_id, partner=partner)
+            payout = Payout.objects.get(id=payout_id, business_account=account)
         except Payout.DoesNotExist:
             return Response({"error": "Payout not found."}, status=status.HTTP_404_NOT_FOUND)
 

@@ -4,7 +4,7 @@ from django.db import models
 class Notification(models.Model):
     RECIPIENT_TYPE_CHOICES = (
         ('admin', 'Admin'),
-        ('partner', 'Partner'),
+        ('business_account', 'Business account'),
         ('customer', 'Customer'),
     )
     CHANNEL_CHOICES = (
@@ -19,8 +19,8 @@ class Notification(models.Model):
     )
 
     recipient_type = models.CharField(max_length=20, choices=RECIPIENT_TYPE_CHOICES)
-    recipient_partner = models.ForeignKey(
-        'partners.Partner',
+    recipient_business_account = models.ForeignKey(
+        'partners.BusinessAccount',
         null=True, blank=True,
         on_delete=models.SET_NULL,
         related_name='notifications',

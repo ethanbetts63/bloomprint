@@ -13,7 +13,7 @@ class AdminUserDetailView(APIView):
 
     def get(self, request, pk):
         try:
-            user = User.objects.select_related('referred_by_partner__user').get(pk=pk)
+            user = User.objects.select_related('referred_by_affiliate__user').get(pk=pk)
         except User.DoesNotExist:
             return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
 

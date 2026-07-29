@@ -3,7 +3,7 @@ import type { AdminCommission } from './AdminCommission';
 export interface AdminBusinessAccount {
   id: number;
   business_name: string;
-  partner_type: 'non_delivery' | 'delivery';
+  account_type: 'affiliate' | 'florist';
   status: 'pending' | 'active' | 'suspended' | 'denied';
   phone: string;
   street_address: string;

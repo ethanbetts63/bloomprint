@@ -1,32 +1,28 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Plus, Search } from 'lucide-react';
 import { createAffiliateDiscountCode, getAffiliateDiscountCodes } from '@/api/businessAccounts';
 import { DashboardStatusPill, formatDashboardCurrency } from '@/components/dashboard/DashboardData';
 import DashboardDataTable, { DashboardFilterSelect, formatDashboardTableDate, type DashboardColumn } from '@/components/dashboard/DashboardDataTable';
 import { useDashboardTableQuery } from '@/components/dashboard/useDashboardTableQuery';
+import { usePaginatedDashboardData } from '@/components/dashboard/usePaginatedDashboardData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { errorMessage } from '@/lib/errors';
-import type { DiscountCode, Paginated } from '@/types';
+import type { DiscountCode } from '@/types';
 
 const PAGE_SIZE = 50;
 const STATUS_OPTIONS = [{ value: 'all', label: 'All statuses' }, { value: 'active', label: 'Active' }, { value: 'inactive', label: 'Inactive' }];
 
 export default function AffiliateDiscountCodesPage() {
   const table = useDashboardTableQuery();
-  const [data, setData] = useState<Paginated<DiscountCode>>({ count: 0, next: null, previous: null, results: [] });
-  const [loading, setLoading] = useState(true); const [error, setError] = useState<string | null>(null);
   const [revision, setRevision] = useState(0);
   const [creating, setCreating] = useState(false); const [name, setName] = useState(''); const [saving, setSaving] = useState(false); const [createError, setCreateError] = useState<string | null>(null);
-  const load = useCallback(() => {
-    let cancelled = false; setLoading(true);
-    getAffiliateDiscountCodes({ status: table.status, search: table.search, ordering: table.ordering, page: table.page, pageSize: PAGE_SIZE })
-      .then((result) => { if (!cancelled) { setData(result); setError(null); } }).catch((reason) => { if (!cancelled) setError(errorMessage(reason)); }).finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, [table.ordering, table.page, table.search, table.status]);
-  useEffect(() => load(), [load, revision]);
+  const { data, loading, error } = usePaginatedDashboardData(getAffiliateDiscountCodes, {
+    status: table.status, search: table.search, ordering: table.ordering,
+    page: table.page, pageSize: PAGE_SIZE,
+  }, revision);
   const columns: DashboardColumn<DiscountCode>[] = [
     { key: 'code', header: 'Code', sortable: true, cellClassName: 'font-mono font-semibold tracking-wide text-slate-950', render: (item) => item.code },
     { key: 'discount_amount', header: 'Discount', sortable: true, align: 'right', cellClassName: 'font-semibold text-slate-950', render: (item) => formatDashboardCurrency(item.discount_amount) },

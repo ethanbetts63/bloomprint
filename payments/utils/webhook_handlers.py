@@ -275,20 +275,20 @@ def handle_subscription_deleted(subscription):
 def handle_account_updated(account):
     """
     Handles the account.updated event from Stripe for Connect accounts.
-    Marks the partner as onboarding complete when payouts are enabled.
+    Marks the business account as onboarding complete when payouts are enabled.
     """
     account_id = account.get('id')
     if not account_id:
         return
 
     if account.get('payouts_enabled'):
-        from partners.models import Partner
-        updated = Partner.objects.filter(
+        from partners.models import BusinessAccount
+        updated = BusinessAccount.objects.filter(
             stripe_connect_account_id=account_id,
             stripe_connect_onboarding_complete=False,
         ).update(stripe_connect_onboarding_complete=True)
         if updated:
-            print(f"Partner with Stripe account {account_id} marked as onboarding complete.")
+            print(f"Business account with Stripe account {account_id} marked as onboarding complete.")
         else:
             print(f"account.updated for {account_id}: already complete or not found.")
 

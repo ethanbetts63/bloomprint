@@ -1,16 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
 import { getDashboardPayouts } from '@/api/businessAccounts';
 import { DASHBOARD_STATUS_STYLES, DashboardStatusPill, formatDashboardCurrency, formatDashboardDateOnly } from './DashboardData';
 import DashboardDataTable, { DashboardFilterSelect, formatDashboardTableDate, type DashboardColumn } from './DashboardDataTable';
 import { useDashboardTableQuery } from './useDashboardTableQuery';
+import { usePaginatedDashboardData } from './usePaginatedDashboardData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { errorMessage } from '@/lib/errors';
-import type { Paginated, Payout } from '@/types';
+import type { Payout } from '@/types';
 
 const PAGE_SIZE = 50;
 const STATUS_ORDER = ['pending', 'processing', 'completed', 'failed'] as const;
@@ -20,13 +19,10 @@ const payoutType = (value: Payout['payout_type']) => value === 'commission' ? 'C
 
 export default function DashboardPayoutsPage({ accountType }: { accountType: 'florist' | 'affiliate' }) {
   const router = useRouter(); const table = useDashboardTableQuery();
-  const [data, setData] = useState<Paginated<Payout>>({ count: 0, next: null, previous: null, results: [] });
-  const [loading, setLoading] = useState(true); const [error, setError] = useState<string | null>(null);
-  useEffect(() => { let cancelled = false;
-    getDashboardPayouts({ status: table.status, payoutType: table.kind, search: table.search, ordering: table.ordering, page: table.page, pageSize: PAGE_SIZE })
-      .then((result) => { if (!cancelled) { setData(result); setError(null); } }).catch((reason) => { if (!cancelled) setError(errorMessage(reason)); }).finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, [table.kind, table.ordering, table.page, table.search, table.status]);
+  const { data, loading, error } = usePaginatedDashboardData(getDashboardPayouts, {
+    status: table.status, payoutType: table.kind, search: table.search,
+    ordering: table.ordering, page: table.page, pageSize: PAGE_SIZE,
+  });
   const columns: DashboardColumn<Payout>[] = [
     { key: 'id', header: 'Payout', sortable: true, render: (item) => <span className="font-mono font-semibold text-slate-950">#{item.id}</span> },
     { key: 'payout_type', header: 'Type', sortable: true, cellClassName: 'font-medium text-slate-900', render: (item) => payoutType(item.payout_type) },

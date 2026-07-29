@@ -191,7 +191,7 @@ export function getRouteMetadata(path: string): Metadata {
   }
 
   // Default deny: anything not in the registry above — checkout, the dashboard,
-  // partner pages, the ordering flow — is noindexed. Adding a route to
+  // account pages and the ordering flow are noindexed. Adding a route to
   // publicRoutes is the deliberate act that makes it indexable.
   //
   // There used to be a noindexPrefixes list checked here, but both branches

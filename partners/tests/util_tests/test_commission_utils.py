@@ -2,7 +2,7 @@ import pytest
 from decimal import Decimal
 from partners.utils.commission_utils import process_referral_commission, get_referral_commission_amount
 from partners.models import Commission
-from partners.tests.factories.partner_factory import PartnerFactory
+from partners.tests.factories.business_account_factory import BusinessAccountFactory
 from users.tests.factories.user_factory import UserFactory
 from payments.tests.factories.payment_factory import PaymentFactory
 from events.tests.factories.order_factory import OrderFactory
@@ -10,24 +10,24 @@ from events.tests.factories.order_factory import OrderFactory
 @pytest.mark.django_db
 class TestCommissionUtils:
     def test_process_referral_commission_success(self):
-        partner = PartnerFactory(partner_type='non_delivery')
+        partner = BusinessAccountFactory(account_type='affiliate')
         plan = OrderFactory(
             billing_mode='one_time', budget=75,
-            referred_by_partner=partner, customer_email='c@example.com',
+            referred_by_affiliate=partner, customer_email='c@example.com',
         )
         payment = PaymentFactory(order=plan, status='succeeded')
 
         process_referral_commission(payment)
 
         commission = Commission.objects.get(payment=payment)
-        assert commission.partner == partner
+        assert commission.business_account == partner
         assert commission.amount == Decimal('5')
         assert commission.commission_type == 'referral'
 
     def test_process_referral_commission_no_partner(self):
         plan = OrderFactory(
             billing_mode='one_time', budget=100,
-            referred_by_partner=None, customer_email='c@example.com',
+            referred_by_affiliate=None, customer_email='c@example.com',
         )
         payment = PaymentFactory(order=plan, status='succeeded')
 
@@ -35,10 +35,10 @@ class TestCommissionUtils:
         assert Commission.objects.count() == 0
 
     def test_process_referral_commission_delivery_partner_skipped(self):
-        partner = PartnerFactory(partner_type='delivery')
+        partner = BusinessAccountFactory(account_type='florist')
         plan = OrderFactory(
             billing_mode='one_time', budget=100,
-            referred_by_partner=partner, customer_email='c@example.com',
+            referred_by_affiliate=partner, customer_email='c@example.com',
         )
         payment = PaymentFactory(order=plan, status='succeeded')
 
@@ -46,10 +46,10 @@ class TestCommissionUtils:
         assert Commission.objects.count() == 0
 
     def test_process_referral_commission_limit_exceeded(self):
-        partner = PartnerFactory(partner_type='non_delivery')
+        partner = BusinessAccountFactory(account_type='affiliate')
         plan = OrderFactory(
             billing_mode='one_time', budget=100,
-            referred_by_partner=partner, customer_email='c@example.com',
+            referred_by_affiliate=partner, customer_email='c@example.com',
         )
 
         # Three previous succeeded payments on orders sharing this email.
@@ -87,10 +87,10 @@ class TestReferralCommissionTiers:
         assert get_referral_commission_amount(Decimal('500')) == Decimal('25')
 
     def test_tiered_commission_applied_to_payment(self):
-        partner = PartnerFactory(partner_type='non_delivery')
+        partner = BusinessAccountFactory(account_type='affiliate')
         plan = OrderFactory(
             billing_mode='one_time', budget=175,
-            referred_by_partner=partner, customer_email='c@example.com',
+            referred_by_affiliate=partner, customer_email='c@example.com',
         )
         payment = PaymentFactory(order=plan, status='succeeded')
 

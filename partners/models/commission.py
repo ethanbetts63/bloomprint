@@ -14,8 +14,8 @@ class Commission(models.Model):
         ('denied', 'Denied'),
     )
 
-    partner = models.ForeignKey(
-        'partners.Partner',
+    business_account = models.ForeignKey(
+        'partners.BusinessAccount',
         on_delete=models.CASCADE,
         related_name='commissions'
     )
@@ -40,4 +40,4 @@ class Commission(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.commission_type} commission ${self.amount} for {self.partner}"
+        return f"{self.commission_type} commission ${self.amount} for {self.business_account}"

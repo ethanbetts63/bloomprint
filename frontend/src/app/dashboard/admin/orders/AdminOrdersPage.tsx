@@ -1,217 +1,36 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
 import { getAdminOrders } from '@/api/admin';
-import DashboardDataTable, {
-  DashboardFilterSelect,
-  formatDashboardTableDate,
-  type DashboardColumn,
-  type SortState,
-} from '@/components/dashboard/DashboardDataTable';
+import { DASHBOARD_STATUS_STYLES } from '@/components/dashboard/DashboardData';
+import DashboardDataTable, { DashboardFilterSelect, formatDashboardTableDate, type DashboardColumn } from '@/components/dashboard/DashboardDataTable';
+import { useDashboardTableQuery } from '@/components/dashboard/useDashboardTableQuery';
+import { usePaginatedDashboardData } from '@/components/dashboard/usePaginatedDashboardData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { errorMessage } from '@/lib/errors';
 import type { AdminPlan } from '@/types/AdminPlan';
-import { DASHBOARD_STATUS_STYLES } from '@/components/dashboard/DashboardData';
 
 const PAGE_SIZE = 50;
-
-const STATUS_STYLE = DASHBOARD_STATUS_STYLES;
-
 const STATUS_ORDER = ['active', 'pending_payment', 'completed', 'refunded', 'cancelled'];
-const STATUS_OPTIONS = [
-  { value: 'all', label: 'All statuses' },
-  { value: 'active,pending_payment', label: 'Live (active + pending)' },
-  { value: 'pending_payment', label: 'Pending payment' },
-  { value: 'active', label: 'Active' },
-  { value: 'completed', label: 'Completed' },
-  { value: 'refunded', label: 'Refunded' },
-  { value: 'cancelled', label: 'Cancelled' },
-];
-const TYPE_OPTIONS = [
-  { value: 'all', label: 'All types' },
-  { value: 'one_time', label: 'One-off' },
-  { value: 'recurring', label: 'Subscription' },
-];
-
-const customerName = (order: AdminPlan) =>
-  `${order.customer_first_name ?? ''} ${order.customer_last_name ?? ''}`.trim() || '—';
-const statusLabel = (status: string) => STATUS_STYLE[status]?.label ?? status.replace(/_/g, ' ');
-const typeLabel = (type: string) => (type === 'recurring' ? 'Subscription' : 'One-off');
+const STATUS_OPTIONS = [{ value: 'all', label: 'All statuses' }, { value: 'active,pending_payment', label: 'Live (active + pending)' }, ...STATUS_ORDER.map((status) => ({ value: status, label: DASHBOARD_STATUS_STYLES[status].label }))];
+const TYPE_OPTIONS = [{ value: 'all', label: 'All types' }, { value: 'one_time', label: 'One-off' }, { value: 'recurring', label: 'Subscription' }];
+const customerName = (item: AdminPlan) => `${item.customer_first_name ?? ''} ${item.customer_last_name ?? ''}`.trim() || '—';
 
 export default function AdminOrdersPage() {
-  const router = useRouter();
-  const [orders, setOrders] = useState<AdminPlan[]>([]);
-  const [count, setCount] = useState(0);
-  const [page, setPage] = useState(1);
-  const [hasNext, setHasNext] = useState(false);
-  const [status, setStatus] = useState('all');
-  const [planType, setPlanType] = useState('all');
-  const [query, setQuery] = useState('');
-  const [search, setSearch] = useState('');
-  const [sort, setSort] = useState<SortState | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    getAdminOrders({
-      status: status === 'all' ? undefined : status,
-      plan_type: planType === 'all' ? undefined : planType,
-      search: search || undefined,
-      ordering: sort ? `${sort.dir === 'desc' ? '-' : ''}${sort.field}` : undefined,
-      page,
-      page_size: PAGE_SIZE,
-    })
-      .then((result) => {
-        if (cancelled) return;
-        setOrders(result.results);
-        setCount(result.count);
-        setHasNext(result.next !== null);
-        setError(null);
-      })
-      .catch((reason) => {
-        if (cancelled) return;
-        setOrders([]);
-        setCount(0);
-        setHasNext(false);
-        setError(errorMessage(reason));
-      })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, [status, planType, search, sort, page]);
-
-  const submitSearch = (event: React.FormEvent) => {
-    event.preventDefault();
-    const nextSearch = query.trim();
-    if (nextSearch !== search || page !== 1) setLoading(true);
-    setSearch(nextSearch);
-    setPage(1);
-  };
-  const toggleSort = (field: string) => {
-    setLoading(true);
-    setPage(1);
-    setSort((previous) => (previous?.field === field
-      ? { field, dir: previous.dir === 'asc' ? 'desc' : 'asc' }
-      : { field, dir: field === 'created_at' ? 'desc' : 'asc' }));
-  };
-  const clearFilters = () => {
-    setLoading(true);
-    setStatus('all');
-    setPlanType('all');
-    setQuery('');
-    setSearch('');
-    setSort(null);
-    setPage(1);
-  };
-  const activeFilters =
-    (status !== 'all' ? 1 : 0) + (planType !== 'all' ? 1 : 0) + (search ? 1 : 0) + (sort ? 1 : 0);
-  const pageCount = Math.max(1, Math.ceil(count / PAGE_SIZE));
-
+  const router = useRouter(); const table = useDashboardTableQuery();
+  const { data, loading, error } = usePaginatedDashboardData(getAdminOrders, { status: table.status, type: table.kind, search: table.search, ordering: table.ordering, page: table.page, pageSize: PAGE_SIZE });
   const columns: DashboardColumn<AdminPlan>[] = [
-    {
-      key: 'id', header: 'Order',
-      render: (order) => <span className="font-mono font-semibold text-slate-950">#{order.id}</span>,
-    },
-    {
-      key: 'customer_name', header: 'Customer', sortable: true,
-      render: (order) => (
-        <>
-          <div className="font-medium text-slate-900">{customerName(order)}</div>
-          <div className="text-xs text-slate-500">{order.customer_email || '—'}</div>
-        </>
-      ),
-    },
-    { key: 'plan_type', header: 'Type', cellClassName: 'text-slate-700', render: (order) => typeLabel(order.plan_type) },
-    {
-      key: 'total', header: 'Total', sortable: true, align: 'right',
-      cellClassName: 'font-semibold text-slate-950', render: (order) => `$${order.total_amount}`,
-    },
-    {
-      key: 'status', header: 'Status', sortable: true,
-      cellClassName: 'text-sm font-medium text-slate-700', render: (order) => statusLabel(order.status),
-    },
-    {
-      key: 'created_at', header: 'Date', sortable: true,
-      cellClassName: 'text-sm text-slate-600', render: (order) => formatDashboardTableDate(order.created_at),
-    },
+    { key: 'id', header: 'Order', render: (item) => <span className="font-mono font-semibold text-slate-950">#{item.id}</span> },
+    { key: 'customer_name', header: 'Customer', sortable: true, render: (item) => <><div className="font-medium text-slate-900">{customerName(item)}</div><div className="text-xs text-slate-500">{item.customer_email || '—'}</div></> },
+    { key: 'plan_type', header: 'Type', cellClassName: 'text-slate-700', render: (item) => item.plan_type === 'recurring' ? 'Subscription' : 'One-off' },
+    { key: 'total', header: 'Total', sortable: true, align: 'right', cellClassName: 'font-semibold text-slate-950', render: (item) => `$${item.total_amount}` },
+    { key: 'status', header: 'Status', sortable: true, cellClassName: 'text-sm font-medium text-slate-700', render: (item) => DASHBOARD_STATUS_STYLES[item.status]?.label ?? item.status.replace(/_/g, ' ') },
+    { key: 'created_at', header: 'Date', sortable: true, cellClassName: 'text-sm text-slate-600', render: (item) => formatDashboardTableDate(item.created_at) },
   ];
-
-  const filters = (
-    <>
-      <DashboardFilterSelect
-        value={status}
-        onValueChange={(value) => { setLoading(true); setStatus(value); setPage(1); }}
-        options={STATUS_OPTIONS}
-        ariaLabel="Filter by status"
-      />
-      <DashboardFilterSelect
-        value={planType}
-        onValueChange={(value) => { setLoading(true); setPlanType(value); setPage(1); }}
-        options={TYPE_OPTIONS}
-        ariaLabel="Filter by type"
-      />
-      <form className="sm:col-span-2 lg:col-span-1" onSubmit={submitSearch}>
-        <div className="flex gap-2">
-          <Input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search name, email or recipient"
-            aria-label="Search orders"
-            className="border-slate-300 bg-white text-slate-900 placeholder:text-slate-400"
-          />
-          <Button type="submit" variant="outline" className="shrink-0 border-slate-300 bg-white text-slate-900 hover:bg-slate-100 hover:text-slate-950">
-            <Search className="mr-1.5 h-4 w-4" /> Search
-          </Button>
-        </div>
-      </form>
-    </>
-  );
-
-  const legend = (
-    <>
-      <span className="font-medium text-slate-600">Row colour:</span>
-      {STATUS_ORDER.map((item) => (
-        <span key={item} className="inline-flex items-center gap-1.5">
-          <span className={`inline-block h-3 w-3 rounded-sm ${STATUS_STYLE[item].swatch}`} />
-          {STATUS_STYLE[item].label}
-        </span>
-      ))}
-    </>
-  );
-
-  return (
-    <>
-      {error && <p className="px-4 pt-4 text-sm text-red-600 md:px-6">{error}</p>}
-      <DashboardDataTable
-        title="Orders"
-        filterSummary={`${count.toLocaleString('en-AU')} ${count === 1 ? 'order' : 'orders'} matching this view`}
-        filters={filters}
-        legend={legend}
-        showClear={activeFilters > 0}
-        onClearFilters={clearFilters}
-        columns={columns}
-        rows={orders}
-        rowKey={(order) => order.id}
-        loading={loading}
-        emptyMessage="No orders match these filters."
-        sort={sort}
-        onSort={toggleSort}
-        onRowClick={(order) => router.push(`/dashboard/admin/plans/${order.id}`)}
-        rowClassName={(order) => STATUS_STYLE[order.status]?.row ?? 'hover:bg-slate-50'}
-        pagination={{
-          page,
-          pageCount,
-          total: count,
-          pageSize: PAGE_SIZE,
-          hasPrev: page > 1,
-          hasNext,
-          onPrev: () => { setLoading(true); setPage((current) => current - 1); },
-          onNext: () => { setLoading(true); setPage((current) => current + 1); },
-        }}
-      />
-    </>
-  );
+  const pageCount = Math.max(1, Math.ceil(data.count / PAGE_SIZE));
+  return <>{error && <p className="px-4 pt-4 text-sm text-red-600 md:px-6">{error}</p>}<DashboardDataTable title="Orders" filterSummary={`${data.count.toLocaleString('en-AU')} ${data.count === 1 ? 'order' : 'orders'} matching this view`}
+    filters={<><DashboardFilterSelect value={table.status} onValueChange={table.setStatus} options={STATUS_OPTIONS} ariaLabel="Filter by status" /><DashboardFilterSelect value={table.kind} onValueChange={table.setKind} options={TYPE_OPTIONS} ariaLabel="Filter by type" /><form className="sm:col-span-2 lg:col-span-1" onSubmit={(event) => { event.preventDefault(); table.submitSearch(); }}><div className="flex gap-2"><Input value={table.query} onChange={(event) => table.setQuery(event.target.value)} placeholder="Search name, email or recipient" aria-label="Search orders" className="border-slate-300 bg-white text-slate-900 placeholder:text-slate-400" /><Button type="submit" variant="outline" className="shrink-0 border-slate-300 bg-white text-slate-900 hover:bg-slate-100"><Search className="mr-1.5 h-4 w-4" /> Search</Button></div></form></>}
+    legend={<><span className="font-medium text-slate-600">Row colour:</span>{STATUS_ORDER.map((status) => <span key={status} className="inline-flex items-center gap-1.5"><span className={`h-3 w-3 rounded-sm ${DASHBOARD_STATUS_STYLES[status].swatch}`} />{DASHBOARD_STATUS_STYLES[status].label}</span>)}</>}
+    showClear={table.isDirty} onClearFilters={table.clear} columns={columns} rows={data.results} rowKey={(item) => item.id} loading={loading} emptyMessage="No orders match these filters." sort={table.sort} onSort={table.toggleSort} onRowClick={(item) => router.push(`/dashboard/admin/plans/${item.id}`)} rowClassName={(item) => DASHBOARD_STATUS_STYLES[item.status]?.row ?? 'hover:bg-slate-50'} pagination={{ page: table.page, pageCount, total: data.count, pageSize: PAGE_SIZE, hasPrev: Boolean(data.previous), hasNext: Boolean(data.next), onPrev: () => table.setPage((value) => value - 1), onNext: () => table.setPage((value) => value + 1) }} /></>;
 }

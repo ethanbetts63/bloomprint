@@ -13,8 +13,8 @@ class Payout(models.Model):
         ('failed', 'Failed'),
     )
 
-    partner = models.ForeignKey(
-        'partners.Partner',
+    business_account = models.ForeignKey(
+        'partners.BusinessAccount',
         on_delete=models.CASCADE,
         related_name='payouts'
     )
@@ -30,4 +30,4 @@ class Payout(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Payout {self.id} - {self.payout_type} ${self.amount} to {self.partner}"
+        return f"Payout {self.id} - {self.payout_type} ${self.amount} to {self.business_account}"

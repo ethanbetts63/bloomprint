@@ -2,7 +2,7 @@ import pytest
 import stripe
 from decimal import Decimal
 from rest_framework.test import APIClient
-from partners.tests.factories.partner_factory import PartnerFactory
+from partners.tests.factories.business_account_factory import BusinessAccountFactory
 from partners.tests.factories.commission_factory import CommissionFactory
 from events.tests.factories.event_factory import EventFactory
 from users.tests.factories.user_factory import UserFactory
@@ -16,18 +16,18 @@ class TestAdminPayCommissionView:
         self.client = APIClient()
         self.client.force_authenticate(user=self.admin)
 
-    def _url(self, partner_id, commission_id):
-        return f'/api/partners/admin/{partner_id}/commissions/{commission_id}/pay/'
+    def _url(self, business_account_id, commission_id):
+        return f'/api/business-accounts/admin/{business_account_id}/commissions/{commission_id}/pay/'
 
     def _onboarded_partner(self):
-        return PartnerFactory(
+        return BusinessAccountFactory(
             stripe_connect_account_id='acct_test',
             stripe_connect_onboarding_complete=True,
         )
 
     def test_pay_commission_success(self, mocker):
         partner = self._onboarded_partner()
-        commission = CommissionFactory(partner=partner, amount=Decimal('10'), status='pending')
+        commission = CommissionFactory(business_account=partner, amount=Decimal('10'), status='pending')
         mocker.patch('stripe.Transfer.create', return_value=mocker.MagicMock(id='tr_abc123'))
 
         response = self.client.post(self._url(partner.id, commission.id))
@@ -41,20 +41,20 @@ class TestAdminPayCommissionView:
 
     def test_pay_commission_creates_payout_record(self, mocker):
         partner = self._onboarded_partner()
-        commission = CommissionFactory(partner=partner, amount=Decimal('10'), status='pending')
+        commission = CommissionFactory(business_account=partner, amount=Decimal('10'), status='pending')
         mocker.patch('stripe.Transfer.create', return_value=mocker.MagicMock(id='tr_payout_test'))
 
         self.client.post(self._url(partner.id, commission.id))
 
         payout = Payout.objects.get(stripe_transfer_id='tr_payout_test')
-        assert payout.partner == partner
+        assert payout.business_account == partner
         assert payout.amount == Decimal('10')
         assert payout.payout_type == 'commission'
         assert payout.status == 'processing'
 
     def test_pay_commission_creates_payout_line_item(self, mocker):
         partner = self._onboarded_partner()
-        commission = CommissionFactory(partner=partner, amount=Decimal('10'), status='pending')
+        commission = CommissionFactory(business_account=partner, amount=Decimal('10'), status='pending')
         mocker.patch('stripe.Transfer.create', return_value=mocker.MagicMock(id='tr_li_test'))
 
         self.client.post(self._url(partner.id, commission.id))
@@ -65,7 +65,7 @@ class TestAdminPayCommissionView:
     def test_fulfillment_commission_creates_fulfillment_payout(self, mocker):
         partner = self._onboarded_partner()
         commission = CommissionFactory(
-            partner=partner,
+            business_account=partner,
             amount=Decimal('120'),
             commission_type='fulfillment',
             status='pending',
@@ -80,7 +80,7 @@ class TestAdminPayCommissionView:
     @pytest.mark.parametrize('blocked_status', ['paid', 'processing', 'denied'])
     def test_pay_commission_blocked_status_returns_400(self, mocker, blocked_status):
         partner = self._onboarded_partner()
-        commission = CommissionFactory(partner=partner, status=blocked_status)
+        commission = CommissionFactory(business_account=partner, status=blocked_status)
         mock_transfer = mocker.patch('stripe.Transfer.create')
 
         response = self.client.post(self._url(partner.id, commission.id))
@@ -89,11 +89,11 @@ class TestAdminPayCommissionView:
         mock_transfer.assert_not_called()
 
     def test_pay_commission_partner_not_onboarded_returns_400(self, mocker):
-        partner = PartnerFactory(
+        partner = BusinessAccountFactory(
             stripe_connect_account_id='acct_test',
             stripe_connect_onboarding_complete=False,
         )
-        commission = CommissionFactory(partner=partner, status='pending')
+        commission = CommissionFactory(business_account=partner, status='pending')
         mock_transfer = mocker.patch('stripe.Transfer.create')
 
         response = self.client.post(self._url(partner.id, commission.id))
@@ -103,7 +103,7 @@ class TestAdminPayCommissionView:
 
     def test_pay_commission_stripe_error_returns_400(self, mocker):
         partner = self._onboarded_partner()
-        commission = CommissionFactory(partner=partner, status='pending')
+        commission = CommissionFactory(business_account=partner, status='pending')
         mocker.patch(
             'stripe.Transfer.create',
             side_effect=stripe.error.StripeError('Insufficient funds'),
@@ -119,7 +119,7 @@ class TestAdminPayCommissionView:
     def test_pay_commission_wrong_partner_returns_404(self, mocker):
         partner_a = self._onboarded_partner()
         partner_b = self._onboarded_partner()
-        commission = CommissionFactory(partner=partner_b, status='pending')
+        commission = CommissionFactory(business_account=partner_b, status='pending')
         mocker.patch('stripe.Transfer.create', return_value=mocker.MagicMock(id='tr_x'))
 
         response = self.client.post(self._url(partner_a.id, commission.id))
@@ -138,7 +138,7 @@ class TestAdminPayCommissionView:
         client.force_authenticate(user=non_admin)
 
         partner = self._onboarded_partner()
-        commission = CommissionFactory(partner=partner, status='pending')
+        commission = CommissionFactory(business_account=partner, status='pending')
         mocker.patch('stripe.Transfer.create', return_value=mocker.MagicMock(id='tr_x'))
 
         response = client.post(self._url(partner.id, commission.id))
@@ -146,7 +146,7 @@ class TestAdminPayCommissionView:
 
     def test_stripe_transfer_called_with_correct_params(self, mocker):
         partner = self._onboarded_partner()
-        commission = CommissionFactory(partner=partner, amount=Decimal('25'), status='pending')
+        commission = CommissionFactory(business_account=partner, amount=Decimal('25'), status='pending')
         mock_transfer = mocker.patch(
             'stripe.Transfer.create',
             return_value=mocker.MagicMock(id='tr_params_test'),

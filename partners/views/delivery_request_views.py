@@ -3,14 +3,14 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from partners.models import Partner, DeliveryRequest, Commission
+from partners.models import BusinessAccount, DeliveryRequest, Commission
 from partners.utils.commission_utils import get_referral_commission_amount
 from decimal import Decimal
 from django.db.models import Q
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import ListAPIView
 
-from partners.pagination import DashboardPagination
+from config.pagination import DashboardPagination
 from partners.serializers.delivery_request_list_serializer import DeliveryRequestListSerializer
 
 
@@ -20,7 +20,7 @@ class DeliveryRequestDetailView(APIView):
     def get(self, request, token):
         try:
             dr = DeliveryRequest.objects.select_related(
-                'event', 'event__order', 'partner'
+                'event', 'event__order', 'business_account'
             ).get(token=token)
         except DeliveryRequest.DoesNotExist:
             return Response({"error": "Delivery request not found."}, status=status.HTTP_404_NOT_FOUND)
@@ -39,7 +39,7 @@ class DeliveryRequestDetailView(APIView):
             'recipient_country': getattr(order, 'country', ''),
             'delivery_notes': getattr(order, 'delivery_notes', ''),
             'budget': str(getattr(order, 'budget', 0)),
-            'partner_name': dr.partner.business_name,
+            'business_account_name': dr.business_account.business_name,
             'event_status': dr.event.status,
             'expires_at': dr.expires_at,
         })
@@ -52,7 +52,7 @@ class DeliveryRequestRespondView(APIView):
     def post(self, request, token):
         try:
             dr = DeliveryRequest.objects.select_related(
-                'event', 'event__order', 'partner'
+                'event', 'event__order', 'business_account'
             ).get(token=token)
         except DeliveryRequest.DoesNotExist:
             return Response({"error": "Delivery request not found."}, status=status.HTTP_404_NOT_FOUND)
@@ -81,15 +81,15 @@ class DeliveryRequestRespondView(APIView):
         dr.status = 'declined'
         dr.save()
 
-        # If the order was referred by this partner, create a commission
+        # If the order was referred by this affiliate, create a commission.
         order = dr.event.order
-        if order.referred_by_partner_id == dr.partner_id:
+        if order.referred_by_affiliate_id == dr.business_account_id:
             budget = getattr(order, 'budget', None)
             if budget:
                 # Use snapshotted commission_amount from event if available, else calculate
                 commission_amount = dr.event.commission_amount or get_referral_commission_amount(budget)
                 Commission.objects.create(
-                    partner=dr.partner,
+                    business_account=dr.business_account,
                     event=dr.event,
                     commission_type='referral',
                     amount=commission_amount,
@@ -99,7 +99,7 @@ class DeliveryRequestRespondView(APIView):
 
         # Trigger reassignment
         from partners.utils.reassignment import reassign_delivery_request
-        reassign_delivery_request(dr.event, excluded_partner_ids=[dr.partner_id])
+        reassign_delivery_request(dr.event, excluded_business_account_ids=[dr.business_account_id])
 
         return Response({"status": "declined"})
 
@@ -121,12 +121,12 @@ class DeliveryRequestListView(ListAPIView):
 
     def get_queryset(self):
         try:
-            florist = Partner.objects.get(user=self.request.user, partner_type='delivery')
-        except Partner.DoesNotExist:
+            florist = BusinessAccount.objects.get(user=self.request.user, account_type='florist')
+        except BusinessAccount.DoesNotExist:
             raise NotFound('No florist account was found.')
 
         params = self.request.query_params
-        queryset = DeliveryRequest.objects.filter(partner=florist).select_related('event', 'event__order')
+        queryset = DeliveryRequest.objects.filter(business_account=florist).select_related('event', 'event__order')
 
         status_filter = params.get('status', '').strip()
         if status_filter:

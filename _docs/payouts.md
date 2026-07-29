@@ -49,17 +49,17 @@ Every partner must have a connected Stripe Express account before they can recei
 
 ### Flow
 
-1. **Registration** — Partner submits the registration form. The backend creates `User`, `Partner`, and `DiscountCode` records, then immediately calls `stripe.Account.create(type='express')`. The returned account ID (e.g. `acct_123abc`) is saved to `Partner.stripe_connect_account_id`.
+1. **Registration** — Partner submits the registration form. The backend creates `User`, `BusinessAccount`, and `DiscountCode` records, then immediately calls `stripe.Account.create(type='express')`. The returned account ID (e.g. `acct_123abc`) is saved to `BusinessAccount.stripe_connect_account_id`.
 
 2. **Embedded onboarding** — The backend calls `stripe.AccountSession.create()` and returns a short-lived `client_secret`. The frontend renders the Stripe embedded onboarding form using `@stripe/react-connect-js`. No redirect — partner stays on our site. They enter bank details and identity information, then land on their partner dashboard.
 
-3. **Webhook confirmation** — Stripe fires `account.updated`. If `payouts_enabled` is `True`, we set `Partner.stripe_connect_onboarding_complete = True` via `handle_account_updated()` in `payments/utils/webhook_handlers.py`.
+3. **Webhook confirmation** — Stripe fires `account.updated`. If `payouts_enabled` is `True`, we set `BusinessAccount.stripe_connect_onboarding_complete = True` via `handle_account_updated()` in `payments/utils/webhook_handlers.py`.
 
 4. **Admin approval (separate)** — Admin approves the partner via the admin dashboard. This activates their discount code. No Stripe interaction at this step.
 
-5. **Incomplete onboarding banner** — If `stripe_connect_onboarding_complete` is `False`, a banner on the partner dashboard links back to `/partner/stripe-connect/onboarding`. A new `AccountSession` is generated on each visit, so the partner can resume from where they left off.
+5. **Incomplete onboarding banner** — If `stripe_connect_onboarding_complete` is `False`, a banner on the partner dashboard links back to `/stripe-connect/onboarding`. A new `AccountSession` is generated on each visit, so the partner can resume from where they left off.
 
-### Relevant fields on `Partner`
+### Relevant fields on `BusinessAccount`
 - `stripe_connect_account_id` — the `acct_...` pointer used for all future transfers.
 - `stripe_connect_onboarding_complete` — `True` only after Stripe confirms `payouts_enabled` via webhook.
 
@@ -72,8 +72,8 @@ Every partner must have a connected Stripe Express account before they can recei
 Triggered automatically inside the Stripe webhook handlers (`payments/utils/webhook_handlers.py`) whenever a payment succeeds — both one-off payments (`payment_intent.succeeded`) and recurring subscription charges (`invoice.payment_succeeded`).
 
 The utility `process_referral_commission(payment)` in `partners/utils/commission_utils.py`:
-1. Checks if the paying customer was referred by a partner (`user.referred_by_partner`).
-2. Skips if that partner is a delivery partner (only `non_delivery` partners earn referral commissions).
+1. Checks if the paying customer was referred by a partner (`user.referred_by_affiliate`).
+2. Skips if that partner is a delivery partner (only `affiliate` partners earn referral commissions).
 3. Skips if the customer has already made more than 3 successful payments (commission is capped at first 3 payments per customer).
 4. Reads the plan budget and looks up the commission amount from the tier table.
 5. Creates a `Commission` record with `status='pending'`.
@@ -126,17 +126,17 @@ pending ──► approved ──► processing ──► paid
 
 **Payout detail** (`/dashboard/admin/payouts/:id`) — Full commission detail: partner link, type, amount, status badge, event link, Stripe onboarding status. Shows Approve and Deny action buttons when the commission is actionable. Shows contextual state messages when processing, paid, or denied.
 
-**Partner detail** (`/dashboard/admin/partners/:id`) — The existing "Pay Out" button on the Commissions & Payouts section of a partner's detail page still works and uses the same processing flow.
+**Business account detail** (`/dashboard/admin/accounts/:id`) — The existing "Pay Out" button on the Commissions & Payouts section of a partner's detail page still works and uses the same processing flow.
 
 ### API endpoints
 
 | Method | URL | View | Description |
 |--------|-----|------|-------------|
-| GET | `/api/partners/admin/commissions/` | `AdminCommissionListView` | List all commissions. Optional `?status=` and `?commission_type=` filters. |
-| GET | `/api/partners/admin/commissions/<id>/` | `AdminCommissionDetailView` | Single commission with partner Stripe fields. |
-| POST | `/api/partners/admin/commissions/<id>/approve/` | `AdminApproveCommissionView` | Fire Stripe Transfer, set status to `processing`. |
-| POST | `/api/partners/admin/commissions/<id>/deny/` | `AdminDenyCommissionView` | Set status to `denied`. No Stripe call. |
-| POST | `/api/partners/admin/<partner_id>/commissions/<id>/pay/` | `AdminPayCommissionView` | Legacy endpoint used by the Pay Out button on the partner detail page. Same Stripe + processing flow. |
+| GET | `/api/business-accounts/admin/commissions/` | `AdminCommissionListView` | List all commissions. Optional `?status=` and `?commission_type=` filters. |
+| GET | `/api/business-accounts/admin/commissions/<id>/` | `AdminCommissionDetailView` | Single commission with business-account Stripe fields. |
+| POST | `/api/business-accounts/admin/commissions/<id>/approve/` | `AdminApproveCommissionView` | Fire Stripe Transfer, set status to `processing`. |
+| POST | `/api/business-accounts/admin/commissions/<id>/deny/` | `AdminDenyCommissionView` | Set status to `denied`. No Stripe call. |
+| POST | `/api/business-accounts/admin/<account_id>/commissions/<id>/pay/` | `AdminPayCommissionView` | Legacy endpoint used by the Pay Out button on the business account detail page. Same Stripe + processing flow. |
 
 All endpoints require `IsAdminUser`.
 
@@ -189,8 +189,8 @@ Partners can see their own payout history in their dashboard. These views requir
 
 | Method | URL | View | Description |
 |--------|-----|------|-------------|
-| GET | `/api/partners/payouts/` | `PayoutListView` | List of all payouts for the authenticated partner. |
-| GET | `/api/partners/payouts/<id>/` | `PayoutDetailView` | Single payout with line items and `stripe_transfer_id`. |
+| GET | `/api/business-accounts/payouts/` | `PayoutListView` | List of all payouts for the authenticated partner. |
+| GET | `/api/business-accounts/payouts/<id>/` | `PayoutDetailView` | Single payout with line items and `stripe_transfer_id`. |
 
 ---
 

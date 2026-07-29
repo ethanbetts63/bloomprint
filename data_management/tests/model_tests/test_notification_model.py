@@ -1,7 +1,7 @@
 import pytest
 from data_management.models import Notification
 from data_management.tests.factories.notification_factory import NotificationFactory
-from partners.tests.factories.partner_factory import PartnerFactory
+from partners.tests.factories.business_account_factory import BusinessAccountFactory
 from events.tests.factories.event_factory import EventFactory
 
 @pytest.mark.django_db
@@ -21,23 +21,27 @@ def test_notification_stores_recipient_email():
     """
     notification = NotificationFactory(
         recipient_type='customer',
-        recipient_partner=None,
+        recipient_business_account=None,
         recipient_email='buyer@example.com',
     )
     assert notification.recipient_type == 'customer'
     assert notification.recipient_email == 'buyer@example.com'
-    assert notification.recipient_partner is None
+    assert notification.recipient_business_account is None
 
 
 @pytest.mark.django_db
-def test_notification_recipient_partner():
+def test_notification_recipient_business_account():
     """
-    Test creation of a notification for a partner.
+    Test creation of a notification for a business account.
     """
-    partner = PartnerFactory()
-    notification = NotificationFactory(recipient_type='partner', recipient_partner=partner, recipient_email=None)
-    assert notification.recipient_type == 'partner'
-    assert notification.recipient_partner == partner
+    account = BusinessAccountFactory()
+    notification = NotificationFactory(
+        recipient_type='business_account',
+        recipient_business_account=account,
+        recipient_email=None,
+    )
+    assert notification.recipient_type == 'business_account'
+    assert notification.recipient_business_account == account
 
 @pytest.mark.django_db
 def test_notification_status_choices():

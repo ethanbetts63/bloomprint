@@ -1,7 +1,7 @@
 import math
 from django.utils import timezone
 from datetime import timedelta
-from partners.models import Partner, DeliveryRequest
+from partners.models import BusinessAccount, DeliveryRequest
 
 
 def haversine_km(lat1, lon1, lat2, lon2):
@@ -15,41 +15,41 @@ def haversine_km(lat1, lon1, lat2, lon2):
     return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 
-def reassign_delivery_request(event, excluded_partner_ids=None):
-    if excluded_partner_ids is None:
-        excluded_partner_ids = []
+def reassign_delivery_request(event, excluded_business_account_ids=None):
+    if excluded_business_account_ids is None:
+        excluded_business_account_ids = []
 
-    existing_partner_ids = DeliveryRequest.objects.filter(
+    existing_business_account_ids = DeliveryRequest.objects.filter(
         event=event
-    ).values_list('partner_id', flat=True)
-    all_excluded = set(excluded_partner_ids) | set(existing_partner_ids)
+    ).values_list('business_account_id', flat=True)
+    all_excluded = set(excluded_business_account_ids) | set(existing_business_account_ids)
 
     order = event.order
     delivery_lat = getattr(order, 'latitude', None)
     delivery_lng = getattr(order, 'longitude', None)
 
     if delivery_lat is None or delivery_lng is None:
-        print(f"WARNING: Event {event.id} order has no coordinates. Cannot match delivery partner.")
+        print(f"WARNING: Event {event.id} order has no coordinates. Cannot match delivery account.")
         return None
 
-    candidates = Partner.objects.filter(
-        partner_type='delivery',
+    candidates = BusinessAccount.objects.filter(
+        account_type='florist',
         status='active',
         latitude__isnull=False,
         longitude__isnull=False,
     ).exclude(id__in=all_excluded)
 
-    best_partner = None
+    best_account = None
     best_distance = float('inf')
 
-    for partner in candidates:
-        distance = haversine_km(delivery_lat, delivery_lng, partner.latitude, partner.longitude)
-        if distance <= partner.service_radius_km and distance < best_distance:
-            best_partner = partner
+    for account in candidates:
+        distance = haversine_km(delivery_lat, delivery_lng, account.latitude, account.longitude)
+        if distance <= account.service_radius_km and distance < best_distance:
+            best_account = account
             best_distance = distance
 
-    if not best_partner:
-        print(f"WARNING: No available delivery partner for Event {event.id}. Flagging for admin.")
+    if not best_account:
+        print(f"WARNING: No available delivery account for Event {event.id}. Flagging for admin.")
         return None
 
     expires_at = timezone.make_aware(
@@ -58,10 +58,10 @@ def reassign_delivery_request(event, excluded_partner_ids=None):
 
     dr = DeliveryRequest.objects.create(
         event=event,
-        partner=best_partner,
+        business_account=best_account,
         first_notified_at=timezone.now(),
         expires_at=expires_at,
     )
 
-    print(f"Reassigned Event {event.id} to Partner {best_partner.id} (DeliveryRequest {dr.id})")
+    print(f"Reassigned Event {event.id} to Business account {best_account.id} (DeliveryRequest {dr.id})")
     return dr

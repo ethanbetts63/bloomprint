@@ -22,11 +22,11 @@ def get_referral_commission_amount(budget):
 
 def process_referral_commission(payment):
     order = payment.order
-    partner = order.referred_by_partner
-    if not partner:
+    account = order.referred_by_affiliate
+    if not account:
         return
 
-    if partner.partner_type != 'non_delivery':
+    if account.account_type != 'affiliate':
         return
 
     # Referral commission is limited to a customer's first few orders. With no
@@ -45,7 +45,7 @@ def process_referral_commission(payment):
     commission_amount = get_referral_commission_amount(budget)
 
     Commission.objects.create(
-        partner=partner,
+        business_account=account,
         payment=payment,
         commission_type='referral',
         amount=commission_amount,

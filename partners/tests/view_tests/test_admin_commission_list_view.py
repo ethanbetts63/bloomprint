@@ -1,11 +1,11 @@
 import pytest
 from decimal import Decimal
 from rest_framework.test import APIClient
-from partners.tests.factories.partner_factory import PartnerFactory
+from partners.tests.factories.business_account_factory import BusinessAccountFactory
 from partners.tests.factories.commission_factory import CommissionFactory
 from users.tests.factories.user_factory import UserFactory
 
-URL = '/api/partners/admin/commissions/'
+URL = '/api/business-accounts/admin/commissions/'
 
 
 @pytest.mark.django_db
@@ -23,7 +23,7 @@ class TestAdminCommissionListView:
         response = self.client.get(URL)
 
         assert response.status_code == 200
-        assert len(response.data) == 3
+        assert response.data['count'] == 3
 
     def test_ordered_newest_first(self):
         c1 = CommissionFactory(status='pending')
@@ -31,7 +31,7 @@ class TestAdminCommissionListView:
 
         response = self.client.get(URL)
 
-        ids = [c['id'] for c in response.data]
+        ids = [c['id'] for c in response.data['results']]
         assert ids.index(c2.id) < ids.index(c1.id)
 
     def test_filter_by_status(self):
@@ -42,8 +42,8 @@ class TestAdminCommissionListView:
         response = self.client.get(URL + '?status=pending')
 
         assert response.status_code == 200
-        assert len(response.data) == 2
-        assert all(c['status'] == 'pending' for c in response.data)
+        assert response.data['count'] == 2
+        assert all(c['status'] == 'pending' for c in response.data['results'])
 
     def test_filter_by_commission_type(self):
         CommissionFactory(commission_type='referral')
@@ -53,8 +53,8 @@ class TestAdminCommissionListView:
         response = self.client.get(URL + '?commission_type=referral')
 
         assert response.status_code == 200
-        assert len(response.data) == 2
-        assert all(c['commission_type'] == 'referral' for c in response.data)
+        assert response.data['count'] == 2
+        assert all(c['commission_type'] == 'referral' for c in response.data['results'])
 
     def test_filter_by_status_and_type_combined(self):
         CommissionFactory(status='pending', commission_type='referral')
@@ -64,40 +64,41 @@ class TestAdminCommissionListView:
         response = self.client.get(URL + '?status=pending&commission_type=referral')
 
         assert response.status_code == 200
-        assert len(response.data) == 1
+        assert response.data['count'] == 1
 
-    def test_response_includes_partner_name(self):
-        partner = PartnerFactory(business_name='Blooms & Co')
-        CommissionFactory(partner=partner)
+    def test_response_includes_business_account_name(self):
+        partner = BusinessAccountFactory(business_name='Blooms & Co')
+        CommissionFactory(business_account=partner)
 
         response = self.client.get(URL)
 
-        assert response.data[0]['partner_name'] == 'Blooms & Co'
+        assert response.data['results'][0]['business_account_name'] == 'Blooms & Co'
 
-    def test_partner_name_falls_back_to_full_name(self):
-        partner = PartnerFactory(business_name='')
+    def test_business_account_name_falls_back_to_full_name(self):
+        partner = BusinessAccountFactory(business_name='')
         partner.user.first_name = 'Jane'
         partner.user.last_name = 'Smith'
         partner.user.save()
-        CommissionFactory(partner=partner)
+        CommissionFactory(business_account=partner)
 
         response = self.client.get(URL)
 
-        assert response.data[0]['partner_name'] == 'Jane Smith'
+        assert response.data['results'][0]['business_account_name'] == 'Jane Smith'
 
-    def test_response_includes_partner_id_and_type(self):
-        partner = PartnerFactory(partner_type='delivery')
-        CommissionFactory(partner=partner)
+    def test_response_includes_business_account_id_and_type(self):
+        partner = BusinessAccountFactory(account_type='florist')
+        CommissionFactory(business_account=partner)
 
         response = self.client.get(URL)
 
-        assert response.data[0]['partner_id'] == partner.id
-        assert response.data[0]['partner_type'] == 'delivery'
+        assert response.data['results'][0]['business_account_id'] == partner.id
+        assert response.data['results'][0]['account_type'] == 'florist'
 
     def test_empty_list_when_no_commissions(self):
         response = self.client.get(URL)
         assert response.status_code == 200
-        assert response.data == []
+        assert response.data['count'] == 0
+        assert response.data['results'] == []
 
     def test_requires_admin(self):
         non_admin = UserFactory(is_staff=False)
@@ -120,5 +121,5 @@ class TestAdminCommissionListView:
         resp_processing = self.client.get(URL + '?status=processing')
         resp_denied = self.client.get(URL + '?status=denied')
 
-        assert len(resp_processing.data) == 1
-        assert len(resp_denied.data) == 1
+        assert resp_processing.data['count'] == 1
+        assert resp_denied.data['count'] == 1

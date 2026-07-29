@@ -1,13 +1,13 @@
 import pytest
 from decimal import Decimal
 from django.db import IntegrityError
-from partners.tests.factories.partner_factory import PartnerFactory
+from partners.tests.factories.business_account_factory import BusinessAccountFactory
 from partners.tests.factories.commission_factory import CommissionFactory
 from partners.tests.factories.discount_code_factory import DiscountCodeFactory
 from partners.tests.factories.delivery_request_factory import DeliveryRequestFactory
 from partners.tests.factories.payout_factory import PayoutFactory, PayoutLineItemFactory
 from partners.models import (
-    Partner, Commission, DiscountCode, DeliveryRequest,
+    BusinessAccount, Commission, DiscountCode, DeliveryRequest,
     Payout, PayoutLineItem,
 )
 
@@ -18,30 +18,30 @@ from users.tests.factories.user_factory import UserFactory
 class TestPartnerModel:
 
     def test_str_with_business_name(self):
-        partner = PartnerFactory(business_name='Floral Co')
+        partner = BusinessAccountFactory(business_name='Floral Co')
         assert 'Floral Co' in str(partner)
 
     def test_str_with_no_business_name_uses_email(self):
         user = UserFactory(email='partner@example.com')
-        partner = PartnerFactory(user=user, business_name='')
+        partner = BusinessAccountFactory(user=user, business_name='')
         assert 'partner@example.com' in str(partner)
 
-    def test_default_partner_type_is_non_delivery(self):
-        partner = PartnerFactory(partner_type='non_delivery')
-        assert partner.partner_type == 'non_delivery'
+    def test_default_account_type_is_affiliate(self):
+        partner = BusinessAccountFactory(account_type='affiliate')
+        assert partner.account_type == 'affiliate'
 
     def test_one_to_one_with_user(self):
-        partner = PartnerFactory()
-        assert partner.user.partner_profile == partner
+        partner = BusinessAccountFactory()
+        assert partner.user.business_account == partner
 
     def test_status_choices(self):
         for status in ('pending', 'active', 'suspended', 'denied'):
-            p = PartnerFactory(status=status)
+            p = BusinessAccountFactory(status=status)
             p.refresh_from_db()
             assert p.status == status
 
     def test_stripe_connect_fields_default_empty(self):
-        partner = PartnerFactory()
+        partner = BusinessAccountFactory()
         assert partner.stripe_connect_account_id is None
         assert partner.stripe_connect_onboarding_complete is False
 
@@ -127,10 +127,10 @@ class TestDiscountCodeModel:
         assert code2 != base_code
         assert '2' in code2
 
-    def test_generate_code_with_empty_business_name_uses_partner(self):
+    def test_generate_code_with_empty_business_name_uses_affiliate(self):
         code = DiscountCode.generate_code('')
         assert code
-        assert 'PARTNER' in code
+        assert 'AFFILIATE' in code
 
     def test_generate_code_ignores_inactive_codes(self):
         base_code = DiscountCode.generate_code('Same Name')

@@ -81,11 +81,11 @@ export default function AdminPayoutDetailPage() {
         <AdminDetailGrid className="lg:grid-cols-3">
           <AdminDetailField
             label="Account"
-            value={commission.partner_id
-              ? <AdminInlineLink href={`/dashboard/admin/partners/${commission.partner_id}`}>{commission.partner_name || 'View account'}</AdminInlineLink>
-              : commission.partner_name}
+            value={commission.business_account_id
+              ? <AdminInlineLink href={`/dashboard/admin/accounts/${commission.business_account_id}`}>{commission.business_account_name || 'View account'}</AdminInlineLink>
+              : commission.business_account_name}
           />
-          <AdminDetailField label="Account type" value={commission.partner_type === 'delivery' ? 'Florist' : 'Affiliate'} />
+          <AdminDetailField label="Account type" value={commission.account_type === 'florist' ? 'Florist' : 'Affiliate'} />
           <AdminDetailField label="Commission type" value={commission.commission_type === 'fulfillment' ? 'Fulfillment' : 'Referral'} />
           <AdminDetailField label="Amount" value={formatDashboardCurrency(commission.amount)} />
           <AdminDetailField label="Status" value={<DashboardStatusPill status={commission.status} />} />

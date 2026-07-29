@@ -1,6 +1,6 @@
 import pytest
 from partners.utils.reassignment import reassign_delivery_request
-from partners.tests.factories.partner_factory import PartnerFactory
+from partners.tests.factories.business_account_factory import BusinessAccountFactory
 from events.tests.factories.event_factory import EventFactory
 
 @pytest.mark.django_db
@@ -18,9 +18,9 @@ def test_reassign_delivery_request_success_if_coords_existed(mocker):
     mocker.patch.object(order, 'latitude', -33.8688, create=True)
     mocker.patch.object(order, 'longitude', 151.2093, create=True)
     
-    # Sydney partner
-    partner = PartnerFactory(
-        partner_type='delivery', 
+    # Sydney florist
+    account = BusinessAccountFactory(
+        account_type='florist',
         status='active',
         latitude=-33.8600,
         longitude=151.2000,
@@ -29,4 +29,4 @@ def test_reassign_delivery_request_success_if_coords_existed(mocker):
     
     dr = reassign_delivery_request(event)
     assert dr is not None
-    assert dr.partner == partner
+    assert dr.business_account == account

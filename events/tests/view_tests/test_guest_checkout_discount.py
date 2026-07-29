@@ -5,7 +5,7 @@ from rest_framework.test import APIClient
 
 from events.models import Order
 from partners.tests.factories.discount_code_factory import DiscountCodeFactory
-from partners.tests.factories.partner_factory import PartnerFactory
+from partners.tests.factories.business_account_factory import BusinessAccountFactory
 
 START_URL = '/api/events/guest-checkout/start/'
 DISCOUNT_URL = '/api/events/guest-checkout/discount/'
@@ -59,7 +59,7 @@ class TestGuestCheckoutDiscount:
         client.post(DISCOUNT_URL, {'code': 'SAVE5'}, format='json')
 
         order.refresh_from_db()
-        assert order.referred_by_partner == code.partner
+        assert order.referred_by_affiliate == code.business_account
 
     def test_an_empty_code_clears_the_discount(self):
         client = APIClient()
@@ -110,8 +110,8 @@ class TestGuestCheckoutDiscount:
     def test_a_code_from_an_inactive_partner_is_rejected(self):
         client = APIClient()
         start_order(client)
-        partner = PartnerFactory(status='pending')
-        DiscountCodeFactory(code='PENDING5', partner=partner)
+        partner = BusinessAccountFactory(status='pending')
+        DiscountCodeFactory(code='PENDING5', business_account=partner)
 
         response = client.post(DISCOUNT_URL, {'code': 'PENDING5'}, format='json')
 

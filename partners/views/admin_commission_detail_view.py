@@ -11,7 +11,7 @@ class AdminCommissionDetailView(APIView):
 
     def get(self, request, pk):
         try:
-            commission = Commission.objects.select_related('partner', 'partner__user').get(pk=pk)
+            commission = Commission.objects.select_related('business_account', 'business_account__user').get(pk=pk)
         except Commission.DoesNotExist:
             return Response({'detail': 'Commission not found.'}, status=status.HTTP_404_NOT_FOUND)
 

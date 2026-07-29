@@ -16,12 +16,12 @@ def resolve_recipient(notification):
     if rtype == 'admin':
         return getattr(settings, 'ADMIN_EMAIL', None), getattr(settings, 'ADMIN_NUMBER', None)
 
-    if rtype == 'partner':
-        partner = notification.recipient_partner
-        if not partner:
+    if rtype == 'business_account':
+        account = notification.recipient_business_account
+        if not account:
             return None, None
-        email = getattr(partner.user, 'email', None)
-        phone = getattr(partner, 'phone', None)
+        email = getattr(account.user, 'email', None)
+        phone = getattr(account, 'phone', None)
         return email, phone
 
     if rtype == 'customer':

@@ -32,12 +32,12 @@ class AdminUserDetailSerializer(serializers.ModelSerializer):
         return get_user_role(obj)
 
     def get_referred_by(self, obj):
-        if not obj.referred_by_partner:
+        if not obj.referred_by_affiliate:
             return None
-        p = obj.referred_by_partner
+        p = obj.referred_by_affiliate
         return p.business_name or f"{p.user.first_name} {p.user.last_name}".strip()
 
     def get_plans(self, obj):
         # Orders are no longer owned by a User; customer identity lives on the
-        # order itself. Staff/partner accounts own no orders.
+        # order itself. Staff/account accounts own no orders.
         return []

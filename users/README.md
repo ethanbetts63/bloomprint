@@ -11,13 +11,13 @@ Custom user model with additional fields for:
 - **Password reset throttling:** `password_reset_last_sent_at`
 - **Legal compliance:** `agreed_to_terms` (FK to TermsAndConditions)
 - **Stripe integration:** `stripe_customer_id`
-- **Partner tracking:** `referred_by_partner` (FK to Partner), `source_partner` (FK to Partner)
+- **Affiliate attribution:** `referred_by_affiliate` (FK to `BusinessAccount`)
 - **Deletion tracking:** `deleted_at`
 
 ## Key Flows
 
 ### Registration
-1. User submits email, password, first_name, last_name, and optional `source_partner_id` to `POST /api/users/register/`
+1. User submits email, password, first_name, and last_name to `POST /api/users/register/`
 2. Account created with email as username
 3. JWT tokens (access + refresh) returned immediately
 4. No email verification currently required

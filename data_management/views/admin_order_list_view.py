@@ -1,16 +1,10 @@
 from django.db.models import Q
 from rest_framework.generics import ListAPIView
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAdminUser
 
 from events.models import Order
 from data_management.serializers.admin_plan_serializer import AdminPlanSerializer
-
-
-class AdminOrderPagination(PageNumberPagination):
-    page_size = 50
-    page_size_query_param = 'page_size'
-    max_page_size = 200
+from config.pagination import DashboardPagination
 
 
 # Whitelist of client-facing sort keys -> real Order fields. Keeps `ordering`
@@ -36,7 +30,7 @@ class AdminOrderListView(ListAPIView):
     """
     permission_classes = [IsAdminUser]
     serializer_class = AdminPlanSerializer
-    pagination_class = AdminOrderPagination
+    pagination_class = DashboardPagination
 
     def get_queryset(self):
         params = self.request.query_params

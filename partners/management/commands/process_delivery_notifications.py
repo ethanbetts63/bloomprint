@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from events.models import Event
-from partners.models import Partner, DeliveryRequest
+from partners.models import BusinessAccount, DeliveryRequest
 from partners.utils.reassignment import reassign_delivery_request, haversine_km
 
 
@@ -34,40 +34,40 @@ class Command(BaseCommand):
                 ))
                 continue
 
-            chosen_partner = None
+            chosen_account = None
 
-            referred_partner = order.referred_by_partner
-            if (referred_partner and referred_partner.partner_type == 'delivery'
-                    and referred_partner.status == 'active'
-                    and referred_partner.latitude is not None
-                    and referred_partner.longitude is not None):
+            referred_affiliate = order.referred_by_affiliate
+            if (referred_affiliate and referred_affiliate.account_type == 'florist'
+                    and referred_affiliate.status == 'active'
+                    and referred_affiliate.latitude is not None
+                    and referred_affiliate.longitude is not None):
                 distance = haversine_km(
                     delivery_lat, delivery_lng,
-                    referred_partner.latitude, referred_partner.longitude
+                    referred_affiliate.latitude, referred_affiliate.longitude
                 )
-                if distance <= referred_partner.service_radius_km:
-                    chosen_partner = referred_partner
+                if distance <= referred_affiliate.service_radius_km:
+                    chosen_account = referred_affiliate
 
-            if not chosen_partner:
-                candidates = Partner.objects.filter(
-                    partner_type='delivery',
+            if not chosen_account:
+                candidates = BusinessAccount.objects.filter(
+                    account_type='florist',
                     status='active',
                     latitude__isnull=False,
                     longitude__isnull=False,
                 )
                 best_distance = float('inf')
-                for partner in candidates:
+                for account in candidates:
                     distance = haversine_km(
                         delivery_lat, delivery_lng,
-                        partner.latitude, partner.longitude
+                        account.latitude, account.longitude
                     )
-                    if distance <= partner.service_radius_km and distance < best_distance:
-                        chosen_partner = partner
+                    if distance <= account.service_radius_km and distance < best_distance:
+                        chosen_account = account
                         best_distance = distance
 
-            if not chosen_partner:
+            if not chosen_account:
                 self.stdout.write(self.style.WARNING(
-                    f"No delivery partner found for Event {event.id}. Flagging for admin."
+                    f"No delivery account found for Event {event.id}. Flagging for admin."
                 ))
                 continue
 
@@ -77,12 +77,12 @@ class Command(BaseCommand):
 
             dr = DeliveryRequest.objects.create(
                 event=event,
-                partner=chosen_partner,
+                business_account=chosen_account,
                 first_notified_at=now,
                 expires_at=expires_at,
             )
             self.stdout.write(self.style.SUCCESS(
-                f"Created DeliveryRequest {dr.id} for Event {event.id} → Partner {chosen_partner.id}"
+                f"Created DeliveryRequest {dr.id} for Event {event.id} → Business account {chosen_account.id}"
             ))
 
         target_date_7 = today + timedelta(days=7)
@@ -111,6 +111,6 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING(
                 f"DeliveryRequest {dr.id} expired. Triggering reassignment."
             ))
-            reassign_delivery_request(dr.event, excluded_partner_ids=[dr.partner_id])
+            reassign_delivery_request(dr.event, excluded_business_account_ids=[dr.business_account_id])
 
         self.stdout.write(self.style.SUCCESS('Delivery notifications processed successfully.'))

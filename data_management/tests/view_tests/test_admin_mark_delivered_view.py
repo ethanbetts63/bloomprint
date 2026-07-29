@@ -4,7 +4,7 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 from events.tests.factories.event_factory import EventFactory
 from partners.tests.factories.delivery_request_factory import DeliveryRequestFactory
-from partners.tests.factories.partner_factory import PartnerFactory
+from partners.tests.factories.business_account_factory import BusinessAccountFactory
 from partners.models import Commission
 from users.tests.factories.user_factory import UserFactory
 from events.tests.factories.order_factory import OrderFactory
@@ -37,14 +37,14 @@ class TestAdminMarkDeliveredView:
         """When there is an accepted DeliveryRequest, a fulfillment Commission is created."""
         plan = OrderFactory(billing_mode='one_time', budget=Decimal('120'))
         event = EventFactory(status='ordered', order=plan)
-        partner = PartnerFactory(partner_type='delivery')
-        DeliveryRequestFactory(event=event, partner=partner, status='accepted')
+        partner = BusinessAccountFactory(account_type='florist')
+        DeliveryRequestFactory(event=event, business_account=partner, status='accepted')
 
         payload = {'delivered_at': timezone.now().isoformat()}
         self.client.post(self._url(event.id), payload, format='json')
 
         commission = Commission.objects.get(event=event, commission_type='fulfillment')
-        assert commission.partner == partner
+        assert commission.business_account == partner
         assert commission.amount == Decimal('120')
         assert commission.status == 'pending'
 
@@ -60,8 +60,8 @@ class TestAdminMarkDeliveredView:
         """If a fulfillment Commission already exists for the event, another is not created."""
         plan = OrderFactory(billing_mode='one_time', budget=Decimal('120'))
         event = EventFactory(status='ordered', order=plan)
-        partner = PartnerFactory(partner_type='delivery')
-        DeliveryRequestFactory(event=event, partner=partner, status='accepted')
+        partner = BusinessAccountFactory(account_type='florist')
+        DeliveryRequestFactory(event=event, business_account=partner, status='accepted')
 
         payload = {'delivered_at': timezone.now().isoformat()}
         # First call creates the commission and marks delivered

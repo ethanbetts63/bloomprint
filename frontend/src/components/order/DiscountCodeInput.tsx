@@ -21,7 +21,7 @@ const DiscountCodeInput = ({
   const [result, setResult] = useState<DiscountValidationResult | null>(() => {
     if (existingCode) {
       initialized.current = true;
-      return { code: existingCode, discount_amount: '0', partner_name: null };
+      return { code: existingCode, discount_amount: '0', business_account_name: null };
     }
     return null;
   });
@@ -85,8 +85,8 @@ const DiscountCodeInput = ({
         <div className="flex items-center gap-2 text-sm text-green-600">
           <CheckCircle className="h-4 w-4" />
           <span>
-            {result.partner_name
-              ? <>Code from <strong>{result.partner_name}</strong> applied! ${Number(result.discount_amount).toFixed(2)} off.</>
+            {result.business_account_name
+              ? <>Code from <strong>{result.business_account_name}</strong> applied! ${Number(result.discount_amount).toFixed(2)} off.</>
               : <>Discount code applied.</>
             }
           </span>

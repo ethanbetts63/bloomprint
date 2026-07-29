@@ -1,14 +1,14 @@
 import factory
 from factory.django import DjangoModelFactory
 from partners.models import Payout, PayoutLineItem
-from .partner_factory import PartnerFactory
+from .business_account_factory import BusinessAccountFactory
 from django.utils import timezone
 
 class PayoutFactory(DjangoModelFactory):
     class Meta:
         model = Payout
 
-    partner = factory.SubFactory(PartnerFactory)
+    business_account = factory.SubFactory(BusinessAccountFactory)
     payout_type = 'commission'
     amount = factory.Faker('pydecimal', left_digits=3, right_digits=2, min_value=10, max_value=500)
     status = 'pending'

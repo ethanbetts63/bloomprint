@@ -36,13 +36,13 @@ class User(AbstractUser):
         help_text="The user's Stripe Customer ID."
     )
 
-    referred_by_partner = models.ForeignKey(
-        'partners.Partner',
+    referred_by_affiliate = models.ForeignKey(
+        'partners.BusinessAccount',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name='referred_users',
-        help_text="The partner who referred this user via discount code."
+        help_text="The affiliate who referred this user via discount code."
     )
 
     deleted_at = models.DateTimeField(

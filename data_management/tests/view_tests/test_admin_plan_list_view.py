@@ -19,13 +19,13 @@ class TestAdminPlanListView:
         OrderFactory(billing_mode='recurring', )
         response = self.client.get(self._url())
         assert response.status_code == 200
-        assert len(response.data) == 2
+        assert response.data['count'] == 2
 
     def test_filter_by_plan_type_upfront_only(self):
         upfront = OrderFactory(billing_mode='one_time', )
         OrderFactory(billing_mode='recurring', )
         response = self.client.get(self._url(), {'plan_type': 'one_time'})
-        ids = [p['id'] for p in response.data]
+        ids = [p['id'] for p in response.data['results']]
         assert upfront.pk in ids
         assert len(ids) == 1
 
@@ -33,7 +33,7 @@ class TestAdminPlanListView:
         OrderFactory(billing_mode='one_time', )
         sub = OrderFactory(billing_mode='recurring', )
         response = self.client.get(self._url(), {'plan_type': 'recurring'})
-        ids = [p['id'] for p in response.data]
+        ids = [p['id'] for p in response.data['results']]
         assert sub.pk in ids
         assert len(ids) == 1
 
@@ -41,7 +41,7 @@ class TestAdminPlanListView:
         active = OrderFactory(billing_mode='one_time', status='active')
         OrderFactory(billing_mode='one_time', status='pending_payment')
         response = self.client.get(self._url(), {'status': 'active'})
-        ids = [p['id'] for p in response.data]
+        ids = [p['id'] for p in response.data['results']]
         assert active.pk in ids
         assert len(ids) == 1
 
@@ -49,14 +49,14 @@ class TestAdminPlanListView:
         plan = OrderFactory(billing_mode='one_time', customer_email='findme@example.com')
         OrderFactory(billing_mode='one_time', )
         response = self.client.get(self._url(), {'search': 'findme'})
-        ids = [p['id'] for p in response.data]
+        ids = [p['id'] for p in response.data['results']]
         assert plan.pk in ids
 
     def test_search_by_recipient_last_name(self):
         plan = OrderFactory(billing_mode='one_time', recipient_last_name='UniqueRecipient')
         OrderFactory(billing_mode='one_time', recipient_last_name='Other')
         response = self.client.get(self._url(), {'search': 'UniqueRecipient'})
-        ids = [p['id'] for p in response.data]
+        ids = [p['id'] for p in response.data['results']]
         assert plan.pk in ids
 
     def test_requires_admin(self):
@@ -69,4 +69,5 @@ class TestAdminPlanListView:
     def test_empty_list_when_no_plans(self):
         response = self.client.get(self._url())
         assert response.status_code == 200
-        assert response.data == []
+        assert response.data['count'] == 0
+        assert response.data['results'] == []

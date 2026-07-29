@@ -43,7 +43,7 @@ class AdminMarkDeliveredView(APIView):
                 budget = getattr(event.order, 'budget', None)
                 if budget:
                     Commission.objects.create(
-                        partner=accepted_dr.partner,
+                        business_account=accepted_dr.business_account,
                         event=event,
                         commission_type='fulfillment',
                         amount=budget,

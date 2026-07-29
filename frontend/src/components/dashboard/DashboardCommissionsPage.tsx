@@ -1,15 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { Search } from 'lucide-react';
 import { getDashboardCommissions } from '@/api/businessAccounts';
 import { DASHBOARD_STATUS_STYLES, DashboardStatusPill, formatDashboardCurrency } from './DashboardData';
 import DashboardDataTable, { DashboardFilterSelect, formatDashboardTableDate, type DashboardColumn } from './DashboardDataTable';
 import { useDashboardTableQuery } from './useDashboardTableQuery';
+import { usePaginatedDashboardData } from './usePaginatedDashboardData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { errorMessage } from '@/lib/errors';
-import type { Commission, Paginated } from '@/types';
+import type { Commission } from '@/types';
 
 const PAGE_SIZE = 50;
 const STATUS_ORDER = ['pending', 'approved', 'processing', 'paid', 'denied'] as const;
@@ -19,17 +18,10 @@ const commissionType = (value: Commission['commission_type']) => value === 'fulf
 
 export default function DashboardCommissionsPage({ accountType }: { accountType: 'florist' | 'affiliate' }) {
   const table = useDashboardTableQuery();
-  const [data, setData] = useState<Paginated<Commission>>({ count: 0, next: null, previous: null, results: [] });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  useEffect(() => {
-    let cancelled = false;
-    getDashboardCommissions({ status: table.status, commissionType: table.kind, search: table.search, ordering: table.ordering, page: table.page, pageSize: PAGE_SIZE })
-      .then((result) => { if (!cancelled) { setData(result); setError(null); } })
-      .catch((reason) => { if (!cancelled) setError(errorMessage(reason)); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, [table.kind, table.ordering, table.page, table.search, table.status]);
+  const { data, loading, error } = usePaginatedDashboardData(getDashboardCommissions, {
+    status: table.status, commissionType: table.kind, search: table.search,
+    ordering: table.ordering, page: table.page, pageSize: PAGE_SIZE,
+  });
   const pageCount = Math.max(1, Math.ceil(data.count / PAGE_SIZE));
   const columns: DashboardColumn<Commission>[] = [
     { key: 'id', header: 'Commission', sortable: true, render: (item) => <span className="font-mono font-semibold text-slate-950">#{item.id}</span> },

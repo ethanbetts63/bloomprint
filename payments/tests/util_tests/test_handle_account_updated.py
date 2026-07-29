@@ -1,13 +1,13 @@
 import pytest
 from payments.utils.webhook_handlers import handle_account_updated
-from partners.tests.factories.partner_factory import PartnerFactory
+from partners.tests.factories.business_account_factory import BusinessAccountFactory
 
 
 @pytest.mark.django_db
 class TestHandleAccountUpdated:
 
     def test_marks_onboarding_complete_when_payouts_enabled(self):
-        partner = PartnerFactory(
+        partner = BusinessAccountFactory(
             stripe_connect_account_id='acct_test',
             stripe_connect_onboarding_complete=False,
         )
@@ -18,7 +18,7 @@ class TestHandleAccountUpdated:
         assert partner.stripe_connect_onboarding_complete is True
 
     def test_does_not_update_if_payouts_disabled(self):
-        partner = PartnerFactory(
+        partner = BusinessAccountFactory(
             stripe_connect_account_id='acct_test',
             stripe_connect_onboarding_complete=False,
         )
@@ -29,7 +29,7 @@ class TestHandleAccountUpdated:
         assert partner.stripe_connect_onboarding_complete is False
 
     def test_already_complete_partner_not_changed(self):
-        partner = PartnerFactory(
+        partner = BusinessAccountFactory(
             stripe_connect_account_id='acct_already',
             stripe_connect_onboarding_complete=True,
         )
@@ -47,11 +47,11 @@ class TestHandleAccountUpdated:
         handle_account_updated({'payouts_enabled': True})
 
     def test_multiple_partners_only_incomplete_ones_updated(self):
-        already_done = PartnerFactory(
+        already_done = BusinessAccountFactory(
             stripe_connect_account_id='acct_same',
             stripe_connect_onboarding_complete=True,
         )
-        pending = PartnerFactory(
+        pending = BusinessAccountFactory(
             stripe_connect_account_id='acct_other',
             stripe_connect_onboarding_complete=False,
         )

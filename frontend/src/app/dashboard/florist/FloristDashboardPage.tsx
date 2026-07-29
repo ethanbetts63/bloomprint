@@ -96,7 +96,7 @@ export default function FloristDashboardPage() {
                 <TableCell className="text-slate-600">{formatDashboardDateLong(request.expires_at)}</TableCell>
                 <TableCell><DashboardStatusPill status={request.status} /></TableCell>
                 <TableCell className="text-right">
-                  <DashboardTableLink href={`/partner/delivery-request/${request.token}`}>Review</DashboardTableLink>
+                  <DashboardTableLink href={`/florist/delivery-request/${request.token}`}>Review</DashboardTableLink>
                 </TableCell>
               </TableRow>
             ))}

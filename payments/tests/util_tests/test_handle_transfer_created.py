@@ -1,7 +1,7 @@
 import pytest
 from decimal import Decimal
 from payments.utils.webhook_handlers import handle_transfer_created
-from partners.tests.factories.partner_factory import PartnerFactory
+from partners.tests.factories.business_account_factory import BusinessAccountFactory
 from partners.tests.factories.commission_factory import CommissionFactory
 from partners.tests.factories.payout_factory import PayoutFactory, PayoutLineItemFactory
 from partners.models import Commission, Payout
@@ -11,10 +11,10 @@ from partners.models import Commission, Payout
 class TestHandleTransferCreated:
 
     def _make_payout_with_commission(self, transfer_id, payout_status='processing', commission_status='processing'):
-        partner = PartnerFactory()
-        commission = CommissionFactory(partner=partner, status=commission_status)
+        partner = BusinessAccountFactory()
+        commission = CommissionFactory(business_account=partner, status=commission_status)
         payout = PayoutFactory(
-            partner=partner,
+            business_account=partner,
             stripe_transfer_id=transfer_id,
             status=payout_status,
         )
@@ -60,9 +60,9 @@ class TestHandleTransferCreated:
         handle_transfer_created({})
 
     def test_payout_without_commission_line_item_does_not_raise(self):
-        partner = PartnerFactory()
+        partner = BusinessAccountFactory()
         payout = PayoutFactory(
-            partner=partner,
+            business_account=partner,
             stripe_transfer_id='tr_no_commission',
             status='processing',
         )

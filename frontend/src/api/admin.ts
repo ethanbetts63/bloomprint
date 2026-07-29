@@ -51,33 +51,45 @@ export async function markEventDelivered(id: number, payload: MarkDeliveredPaylo
   return res.json();
 }
 
-export async function getPendingBusinessAccounts(): Promise<AdminBusinessAccount[]> {
-  const res = await authedFetch('/api/partners/admin/pending/');
-  if (!res.ok) throw new Error('Failed to fetch pending partners');
-  return res.json();
+export interface AdminListParams {
+  status?: string; type?: string; search?: string; ordering?: string; page?: number; pageSize?: number;
 }
 
-export async function getAdminBusinessAccounts(status?: string): Promise<AdminBusinessAccount[]> {
-  const url = status ? `/api/partners/admin/list/?status=${status}` : '/api/partners/admin/list/';
-  const res = await authedFetch(url);
-  if (!res.ok) throw new Error('Failed to fetch partners');
+function adminListQuery(params: AdminListParams): string {
+  const query = new URLSearchParams();
+  if (params.status && params.status !== 'all') query.set('status', params.status);
+  if (params.type && params.type !== 'all') query.set('type', params.type);
+  if (params.search) query.set('search', params.search);
+  if (params.ordering) query.set('ordering', params.ordering);
+  if (params.page) query.set('page', String(params.page));
+  if (params.pageSize) query.set('page_size', String(params.pageSize));
+  const value = query.toString();
+  return value ? `?${value}` : '';
+}
+
+export async function getAdminBusinessAccounts(params: AdminListParams = {}): Promise<Paginated<AdminBusinessAccount>> {
+  const query = new URLSearchParams(adminListQuery(params).replace(/^\?/, ''));
+  if (params.type && params.type !== 'all') { query.delete('type'); query.set('account_type', params.type); }
+  const value = query.toString();
+  const res = await authedFetch(`/api/business-accounts/admin/list/${value ? `?${value}` : ''}`);
+  if (!res.ok) throw new Error('Failed to fetch business accounts');
   return res.json();
 }
 
 export async function getAdminBusinessAccount(id: number): Promise<AdminBusinessAccount> {
-  const res = await authedFetch(`/api/partners/admin/${id}/`);
+  const res = await authedFetch(`/api/business-accounts/admin/${id}/`);
   if (!res.ok) throw new Error('Failed to fetch florist or affiliate');
   return res.json();
 }
 
 export async function approveBusinessAccount(id: number): Promise<AdminBusinessAccount> {
-  const res = await authedFetch(`/api/partners/admin/${id}/approve/`, { method: 'POST' });
+  const res = await authedFetch(`/api/business-accounts/admin/${id}/approve/`, { method: 'POST' });
   if (!res.ok) throw new Error('Failed to approve account');
   return res.json();
 }
 
 export async function denyBusinessAccount(id: number): Promise<AdminBusinessAccount> {
-  const res = await authedFetch(`/api/partners/admin/${id}/deny/`, { method: 'POST' });
+  const res = await authedFetch(`/api/business-accounts/admin/${id}/deny/`, { method: 'POST' });
   if (!res.ok) throw new Error('Failed to deny account');
   return res.json();
 }
@@ -88,9 +100,11 @@ export async function getAdminPlanDetail(planId: string | number): Promise<Admin
   return res.json();
 }
 
-export async function getAdminUsers(search?: string): Promise<AdminUser[]> {
-  const qs = search ? `?search=${encodeURIComponent(search)}` : '';
-  const res = await authedFetch(`/api/data/admin/users/${qs}`);
+export async function getAdminUsers(params: AdminListParams = {}): Promise<Paginated<AdminUser>> {
+  const query = new URLSearchParams(adminListQuery(params).replace(/^\?/, ''));
+  if (params.type && params.type !== 'all') { query.delete('type'); query.set('role', params.type); }
+  const value = query.toString();
+  const res = await authedFetch(`/api/data/admin/users/${value ? `?${value}` : ''}`);
   if (!res.ok) throw new Error('Failed to fetch users');
   return res.json();
 }
@@ -101,8 +115,8 @@ export async function getAdminUser(id: number): Promise<AdminUserDetail> {
   return res.json();
 }
 
-export async function payCommission(partnerId: number, commissionId: number): Promise<PayCommissionResult> {
-  const res = await authedFetch(`/api/partners/admin/${partnerId}/commissions/${commissionId}/pay/`, {
+export async function payCommission(accountId: number, commissionId: number): Promise<PayCommissionResult> {
+  const res = await authedFetch(`/api/business-accounts/admin/${accountId}/commissions/${commissionId}/pay/`, {
     method: 'POST',
   });
   if (!res.ok) {
@@ -112,24 +126,23 @@ export async function payCommission(partnerId: number, commissionId: number): Pr
   return res.json();
 }
 
-export async function getAdminCommissions(params: { status?: string; commission_type?: string } = {}): Promise<AdminCommission[]> {
-  const qs = new URLSearchParams();
-  if (params.status) qs.set('status', params.status);
-  if (params.commission_type) qs.set('commission_type', params.commission_type);
-  const query = qs.toString();
-  const res = await authedFetch(`/api/partners/admin/commissions/${query ? `?${query}` : ''}`);
+export async function getAdminCommissions(params: AdminListParams = {}): Promise<Paginated<AdminCommission>> {
+  const query = new URLSearchParams(adminListQuery(params).replace(/^\?/, ''));
+  if (params.type && params.type !== 'all') { query.delete('type'); query.set('commission_type', params.type); }
+  const value = query.toString();
+  const res = await authedFetch(`/api/business-accounts/admin/commissions/${value ? `?${value}` : ''}`);
   if (!res.ok) throw new Error('Failed to fetch commissions');
   return res.json();
 }
 
 export async function getAdminCommission(id: number): Promise<AdminCommission> {
-  const res = await authedFetch(`/api/partners/admin/commissions/${id}/`);
+  const res = await authedFetch(`/api/business-accounts/admin/commissions/${id}/`);
   if (!res.ok) throw new Error('Failed to fetch commission');
   return res.json();
 }
 
 export async function approveCommission(id: number): Promise<CommissionActionResult> {
-  const res = await authedFetch(`/api/partners/admin/commissions/${id}/approve/`, { method: 'POST' });
+  const res = await authedFetch(`/api/business-accounts/admin/commissions/${id}/approve/`, { method: 'POST' });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
     throw Object.assign(new Error(data.detail || 'Failed to approve commission'), { data });
@@ -138,7 +151,7 @@ export async function approveCommission(id: number): Promise<CommissionActionRes
 }
 
 export async function denyCommission(id: number): Promise<CommissionActionResult> {
-  const res = await authedFetch(`/api/partners/admin/commissions/${id}/deny/`, { method: 'POST' });
+  const res = await authedFetch(`/api/business-accounts/admin/commissions/${id}/deny/`, { method: 'POST' });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
     throw Object.assign(new Error(data.detail || 'Failed to deny commission'), { data });
@@ -146,34 +159,23 @@ export async function denyCommission(id: number): Promise<CommissionActionResult
   return res.json();
 }
 
-export async function getAdminPlans(params: { status?: string; plan_type?: string; search?: string } = {}): Promise<AdminPlan[]> {
-  const qs = new URLSearchParams();
-  if (params.status) qs.set('status', params.status);
-  if (params.plan_type) qs.set('plan_type', params.plan_type);
-  if (params.search) qs.set('search', params.search);
-  const query = qs.toString();
-  const res = await authedFetch(`/api/data/admin/plans/${query ? `?${query}` : ''}`);
+export async function getAdminPlans(params: AdminListParams = {}): Promise<Paginated<AdminPlan>> {
+  const query = new URLSearchParams(adminListQuery(params).replace(/^\?/, ''));
+  if (params.type && params.type !== 'all') { query.delete('type'); query.set('plan_type', params.type); }
+  const value = query.toString();
+  const res = await authedFetch(`/api/data/admin/plans/${value ? `?${value}` : ''}`);
   if (!res.ok) throw new Error('Failed to fetch plans');
   return res.json();
 }
 
-export interface AdminOrderListParams {
-  status?: string;
-  plan_type?: string;
-  search?: string;
-  ordering?: string;
-  page?: number;
-  page_size?: number;
-}
-
-export async function getAdminOrders(params: AdminOrderListParams = {}): Promise<Paginated<AdminPlan>> {
+export async function getAdminOrders(params: AdminListParams = {}): Promise<Paginated<AdminPlan>> {
   const qs = new URLSearchParams();
   if (params.status) qs.set('status', params.status);
-  if (params.plan_type) qs.set('plan_type', params.plan_type);
+  if (params.type && params.type !== 'all') qs.set('plan_type', params.type);
   if (params.search) qs.set('search', params.search);
   if (params.ordering) qs.set('ordering', params.ordering);
   if (params.page) qs.set('page', String(params.page));
-  if (params.page_size) qs.set('page_size', String(params.page_size));
+  if (params.pageSize) qs.set('page_size', String(params.pageSize));
   const query = qs.toString();
   const res = await authedFetch(`/api/data/admin/orders/${query ? `?${query}` : ''}`);
   if (!res.ok) throw new Error('Failed to fetch orders');

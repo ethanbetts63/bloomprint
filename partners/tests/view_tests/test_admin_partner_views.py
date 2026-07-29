@@ -1,25 +1,25 @@
 import pytest
 from decimal import Decimal
 from rest_framework.test import APIClient
-from partners.tests.factories.partner_factory import PartnerFactory
+from partners.tests.factories.business_account_factory import BusinessAccountFactory
 from partners.tests.factories.commission_factory import CommissionFactory
 from events.tests.factories.event_factory import EventFactory
 from users.tests.factories.user_factory import UserFactory
 
 
 @pytest.mark.django_db
-class TestAdminPartnerDetailView:
+class TestAdminBusinessAccountDetailView:
     def setup_method(self):
         self.admin = UserFactory(is_staff=True, is_superuser=True)
         self.client = APIClient()
         self.client.force_authenticate(user=self.admin)
 
     def test_detail_view_includes_commissions(self):
-        partner = PartnerFactory()
-        CommissionFactory(partner=partner, amount=Decimal('10'), commission_type='referral', status='pending')
-        CommissionFactory(partner=partner, amount=Decimal('100'), commission_type='fulfillment', status='paid')
+        partner = BusinessAccountFactory()
+        CommissionFactory(business_account=partner, amount=Decimal('10'), commission_type='referral', status='pending')
+        CommissionFactory(business_account=partner, amount=Decimal('100'), commission_type='fulfillment', status='paid')
 
-        response = self.client.get(f'/api/partners/admin/{partner.id}/')
+        response = self.client.get(f'/api/business-accounts/admin/{partner.id}/')
 
         assert response.status_code == 200
         commissions = response.data['commissions']
@@ -28,12 +28,12 @@ class TestAdminPartnerDetailView:
         assert types == {'referral', 'fulfillment'}
 
     def test_detail_view_includes_stripe_fields(self):
-        partner = PartnerFactory(
+        partner = BusinessAccountFactory(
             stripe_connect_account_id='acct_abc',
             stripe_connect_onboarding_complete=True,
         )
 
-        response = self.client.get(f'/api/partners/admin/{partner.id}/')
+        response = self.client.get(f'/api/business-accounts/admin/{partner.id}/')
 
         assert response.status_code == 200
         assert response.data['stripe_connect_account_id'] == 'acct_abc'
@@ -43,27 +43,27 @@ class TestAdminPartnerDetailView:
         non_admin = UserFactory(is_staff=False)
         client = APIClient()
         client.force_authenticate(user=non_admin)
-        partner = PartnerFactory()
+        partner = BusinessAccountFactory()
 
-        response = client.get(f'/api/partners/admin/{partner.id}/')
+        response = client.get(f'/api/business-accounts/admin/{partner.id}/')
         assert response.status_code == 403
 
     def test_detail_view_not_found(self):
-        response = self.client.get('/api/partners/admin/99999/')
+        response = self.client.get('/api/business-accounts/admin/99999/')
         assert response.status_code == 404
 
     def test_detail_view_commission_fields(self):
-        partner = PartnerFactory()
+        partner = BusinessAccountFactory()
         event = EventFactory()
         CommissionFactory(
-            partner=partner,
+            business_account=partner,
             amount=Decimal('15'),
             commission_type='referral',
             status='pending',
             event=event,
         )
 
-        response = self.client.get(f'/api/partners/admin/{partner.id}/')
+        response = self.client.get(f'/api/business-accounts/admin/{partner.id}/')
         commission = response.data['commissions'][0]
 
         assert 'id' in commission

@@ -38,14 +38,14 @@ class PasswordResetRequestView(APIView):
         try:
             # An email can be attached to several rows (guest-checkout placeholders
             # reuse the buyer's email), so filtering to the single reset-eligible
-            # account avoids MultipleObjectsReturned. Only staff/superusers/partners
+            # account avoids MultipleObjectsReturned. Only staff, superusers, and business accounts
             # hold passwords; those accounts have username == email (unique), so at
             # most one matches.
             user = User.objects.filter(
                 email__iexact=email,
                 is_active=True,
             ).filter(
-                Q(is_staff=True) | Q(is_superuser=True) | Q(partner_profile__isnull=False)
+                Q(is_staff=True) | Q(is_superuser=True) | Q(business_account__isnull=False)
             ).first()
             if user is None:
                 return Response(

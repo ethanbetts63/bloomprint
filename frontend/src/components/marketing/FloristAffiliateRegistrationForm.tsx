@@ -27,7 +27,7 @@ const FloristAffiliateRegistrationForm = ({ accountType, className = '' }: Flori
   const formTopRef = useRef<HTMLDivElement>(null);
   const { handleLoginSuccess } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [partnerTermsAccepted, setPartnerTermsAccepted] = useState(false);
+  const [accountTermsAccepted, setaccountTermsAccepted] = useState(false);
 
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
@@ -69,7 +69,7 @@ const FloristAffiliateRegistrationForm = ({ accountType, className = '' }: Flori
       return;
     }
 
-    if (!partnerTermsAccepted) {
+    if (!accountTermsAccepted) {
       toast.error('Please accept the terms and conditions before registering.');
       return;
     }
@@ -80,7 +80,7 @@ const FloristAffiliateRegistrationForm = ({ accountType, className = '' }: Flori
       const { confirm_password, ...formData } = form;
       const data: FloristAffiliateRegistrationData = {
         ...formData,
-        partner_type: isDelivery ? 'delivery' : 'non_delivery',
+        account_type: isDelivery ? 'florist' : 'affiliate',
         ...(isDelivery && {
           latitude: latitude!,
           longitude: longitude!,
@@ -238,8 +238,8 @@ const FloristAffiliateRegistrationForm = ({ accountType, className = '' }: Flori
         <div className="space-y-3 border-t border-black/10 pt-6">
           <label className="flex cursor-pointer items-start gap-3">
             <Checkbox
-              checked={partnerTermsAccepted}
-              onCheckedChange={(checked) => setPartnerTermsAccepted(checked === true)}
+              checked={accountTermsAccepted}
+              onCheckedChange={(checked) => setaccountTermsAccepted(checked === true)}
               className="mt-0.5 flex-shrink-0"
             />
             <span className="text-sm leading-relaxed text-black/70">
@@ -276,7 +276,7 @@ const FloristAffiliateRegistrationForm = ({ accountType, className = '' }: Flori
             )}
             <button
               type="submit"
-              disabled={isSubmitting || !partnerTermsAccepted}
+              disabled={isSubmitting || !accountTermsAccepted}
               className="flex w-full items-center justify-between rounded-lg bg-black px-5 py-4 text-left text-white transition hover:bg-black/85 disabled:cursor-not-allowed disabled:opacity-70"
             >
               <span className="block text-sm font-semibold">

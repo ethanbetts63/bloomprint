@@ -4,8 +4,8 @@ from django.db import models
 
 
 class DiscountCode(models.Model):
-    partner = models.ForeignKey(
-        'partners.Partner',
+    business_account = models.ForeignKey(
+        'partners.BusinessAccount',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -21,7 +21,7 @@ class DiscountCode(models.Model):
 
     @staticmethod
     def generate_code(business_name, discount_amount=5):
-        base = re.sub(r'[^a-zA-Z0-9]', '', business_name)[:20].upper() if business_name else 'PARTNER'
+        base = re.sub(r'[^a-zA-Z0-9]', '', business_name)[:20].upper() if business_name else 'AFFILIATE'
         code = f"{base}{int(discount_amount)}"
         if not DiscountCode.objects.filter(code=code, is_active=True).exists():
             return code

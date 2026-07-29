@@ -5,7 +5,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from partners.models import (
-    Partner, Commission, DeliveryRequest,
+    BusinessAccount, Commission, DeliveryRequest,
     Payout, PayoutLineItem,
 )
 
@@ -13,7 +13,7 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 class Command(BaseCommand):
-    help = 'Process partner payouts via Stripe Connect'
+    help = 'Process business account payouts via Stripe Connect'
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -34,14 +34,14 @@ class Command(BaseCommand):
 
     def process_fulfillment_payouts(self):
         today = date.today()
-        partners = Partner.objects.filter(
-            partner_type='delivery',
+        accounts = BusinessAccount.objects.filter(
+            account_type='florist',
             stripe_connect_onboarding_complete=True,
         )
 
-        for partner in partners:
+        for account in accounts:
             delivered_requests = DeliveryRequest.objects.filter(
-                partner=partner,
+                business_account=account,
                 status='accepted',
                 event__status='delivered',
             ).exclude(
@@ -68,7 +68,7 @@ class Command(BaseCommand):
 
             with transaction.atomic():
                 payout = Payout.objects.create(
-                    partner=partner,
+                    business_account=account,
                     payout_type='fulfillment',
                     amount=total_amount,
                     status='processing',
@@ -88,32 +88,32 @@ class Command(BaseCommand):
                     transfer = stripe.Transfer.create(
                         amount=int(total_amount * 100),
                         currency='usd',
-                        destination=partner.stripe_connect_account_id,
+                        destination=account.stripe_connect_account_id,
                         metadata={'payout_id': payout.id},
                     )
                     payout.stripe_transfer_id = transfer.id
                     payout.status = 'completed'
                     payout.save()
                     self.stdout.write(self.style.SUCCESS(
-                        f"Fulfillment payout ${total_amount} to Partner {partner.id} completed."
+                        f"Fulfillment payout ${total_amount} to Business account {account.id} completed."
                     ))
                 except stripe.error.StripeError as e:
                     payout.status = 'failed'
                     payout.note = str(e)
                     payout.save()
                     self.stdout.write(self.style.ERROR(
-                        f"Fulfillment payout to Partner {partner.id} failed: {e}"
+                        f"Fulfillment payout to Business account {account.id} failed: {e}"
                     ))
 
     def process_commission_payouts(self):
         today = date.today()
-        partners = Partner.objects.filter(
+        accounts = BusinessAccount.objects.filter(
             stripe_connect_onboarding_complete=True,
         )
 
-        for partner in partners:
+        for account in accounts:
             approved_commissions = Commission.objects.filter(
-                partner=partner,
+                business_account=account,
                 status='approved',
             ).exclude(
                 payout_line_item__isnull=False
@@ -138,7 +138,7 @@ class Command(BaseCommand):
 
             with transaction.atomic():
                 payout = Payout.objects.create(
-                    partner=partner,
+                    business_account=account,
                     payout_type='commission',
                     amount=total_amount,
                     status='processing',
@@ -158,7 +158,7 @@ class Command(BaseCommand):
                     transfer = stripe.Transfer.create(
                         amount=int(total_amount * 100),
                         currency='usd',
-                        destination=partner.stripe_connect_account_id,
+                        destination=account.stripe_connect_account_id,
                         metadata={'payout_id': payout.id},
                     )
                     payout.stripe_transfer_id = transfer.id
@@ -168,12 +168,12 @@ class Command(BaseCommand):
                     approved_commissions.update(status='paid')
 
                     self.stdout.write(self.style.SUCCESS(
-                        f"Commission payout ${total_amount} to Partner {partner.id} completed."
+                        f"Commission payout ${total_amount} to Business account {account.id} completed."
                     ))
                 except stripe.error.StripeError as e:
                     payout.status = 'failed'
                     payout.note = str(e)
                     payout.save()
                     self.stdout.write(self.style.ERROR(
-                        f"Commission payout to Partner {partner.id} failed: {e}"
+                        f"Commission payout to Business account {account.id} failed: {e}"
                     ))

@@ -25,8 +25,8 @@ def test_user_profile_serializer():
 
 @pytest.mark.django_db
 def test_user_profile_serializer_uses_role_instead_of_partner_flag():
-    from partners.tests.factories.partner_factory import PartnerFactory
-    partner = PartnerFactory()
+    from partners.tests.factories.business_account_factory import BusinessAccountFactory
+    partner = BusinessAccountFactory()
     user = partner.user
 
     serializer = UserProfileSerializer(instance=user)
@@ -48,15 +48,15 @@ def test_role_is_admin_for_superuser():
 
 @pytest.mark.django_db
 def test_role_is_florist_for_delivery_partner():
-    from partners.tests.factories.partner_factory import PartnerFactory
-    partner = PartnerFactory(partner_type='delivery')
+    from partners.tests.factories.business_account_factory import BusinessAccountFactory
+    partner = BusinessAccountFactory(account_type='florist')
     assert UserProfileSerializer(instance=partner.user).data['role'] == 'florist'
 
 
 @pytest.mark.django_db
-def test_role_is_affiliate_for_non_delivery_partner():
-    from partners.tests.factories.partner_factory import PartnerFactory
-    partner = PartnerFactory(partner_type='non_delivery')
+def test_role_is_affiliate_for_affiliate_account():
+    from partners.tests.factories.business_account_factory import BusinessAccountFactory
+    partner = BusinessAccountFactory(account_type='affiliate')
     assert UserProfileSerializer(instance=partner.user).data['role'] == 'affiliate'
 
 
@@ -69,8 +69,8 @@ def test_role_is_customer_for_plain_user():
 @pytest.mark.django_db
 def test_role_prefers_admin_over_partner():
     """A staff member who also has a partner profile is treated as admin."""
-    from partners.tests.factories.partner_factory import PartnerFactory
-    partner = PartnerFactory(partner_type='delivery')
+    from partners.tests.factories.business_account_factory import BusinessAccountFactory
+    partner = BusinessAccountFactory(account_type='florist')
     partner.user.is_staff = True
     partner.user.save()
     assert UserProfileSerializer(instance=partner.user).data['role'] == 'admin'

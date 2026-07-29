@@ -1,7 +1,7 @@
 import pytest
 from decimal import Decimal
 from rest_framework.test import APIClient
-from partners.tests.factories.partner_factory import PartnerFactory
+from partners.tests.factories.business_account_factory import BusinessAccountFactory
 from partners.tests.factories.commission_factory import CommissionFactory
 from events.tests.factories.event_factory import EventFactory
 from users.tests.factories.user_factory import UserFactory
@@ -15,11 +15,11 @@ class TestAdminCommissionDetailView:
         self.client.force_authenticate(user=self.admin)
 
     def _url(self, pk):
-        return f'/api/partners/admin/commissions/{pk}/'
+        return f'/api/business-accounts/admin/commissions/{pk}/'
 
     def test_returns_commission_detail(self):
-        partner = PartnerFactory(business_name='Petal Co')
-        commission = CommissionFactory(partner=partner, amount=Decimal('42'), status='pending')
+        partner = BusinessAccountFactory(business_name='Petal Co')
+        commission = CommissionFactory(business_account=partner, amount=Decimal('42'), status='pending')
 
         response = self.client.get(self._url(commission.id))
 
@@ -29,19 +29,19 @@ class TestAdminCommissionDetailView:
         assert response.data['status'] == 'pending'
 
     def test_includes_partner_fields(self):
-        partner = PartnerFactory(
+        partner = BusinessAccountFactory(
             business_name='Bloom House',
-            partner_type='delivery',
+            account_type='florist',
             stripe_connect_account_id='acct_detail',
             stripe_connect_onboarding_complete=True,
         )
-        commission = CommissionFactory(partner=partner)
+        commission = CommissionFactory(business_account=partner)
 
         response = self.client.get(self._url(commission.id))
 
-        assert response.data['partner_name'] == 'Bloom House'
-        assert response.data['partner_id'] == partner.id
-        assert response.data['partner_type'] == 'delivery'
+        assert response.data['business_account_name'] == 'Bloom House'
+        assert response.data['business_account_id'] == partner.id
+        assert response.data['account_type'] == 'florist'
         assert response.data['stripe_connect_account_id'] == 'acct_detail'
         assert response.data['stripe_connect_onboarding_complete'] is True
 
@@ -76,8 +76,8 @@ class TestAdminCommissionDetailView:
         assert response.status_code == 401
 
     def test_stripe_onboarding_false_when_not_complete(self):
-        partner = PartnerFactory(stripe_connect_onboarding_complete=False)
-        commission = CommissionFactory(partner=partner)
+        partner = BusinessAccountFactory(stripe_connect_onboarding_complete=False)
+        commission = CommissionFactory(business_account=partner)
 
         response = self.client.get(self._url(commission.id))
 

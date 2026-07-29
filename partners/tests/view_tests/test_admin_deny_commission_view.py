@@ -1,6 +1,6 @@
 import pytest
 from rest_framework.test import APIClient
-from partners.tests.factories.partner_factory import PartnerFactory
+from partners.tests.factories.business_account_factory import BusinessAccountFactory
 from partners.tests.factories.commission_factory import CommissionFactory
 from users.tests.factories.user_factory import UserFactory
 from partners.models import Commission
@@ -14,7 +14,7 @@ class TestAdminDenyCommissionView:
         self.client.force_authenticate(user=self.admin)
 
     def _url(self, pk):
-        return f'/api/partners/admin/commissions/{pk}/deny/'
+        return f'/api/business-accounts/admin/commissions/{pk}/deny/'
 
     def test_deny_pending_commission_succeeds(self):
         commission = CommissionFactory(status='pending')

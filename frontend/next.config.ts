@@ -13,21 +13,6 @@ const nextConfig: NextConfig = {
         destination: '/terms-and-conditions/customer',
         permanent: true,
       },
-      {
-        source: '/partner/dashboard',
-        destination: '/dashboard/partner',
-        permanent: true,
-      },
-      {
-        source: '/partner/payouts',
-        destination: '/dashboard/partner/payouts',
-        permanent: true,
-      },
-      {
-        source: '/partner/payouts/:payoutId',
-        destination: '/dashboard/partner/payouts',
-        permanent: true,
-      },
     ];
   },
 

@@ -22,7 +22,7 @@ urlpatterns = [
     path("api/payments/", include("payments.urls")),
     path("api/data/", include("data_management.urls")),
     path("api/events/", include("events.urls")),
-    path("api/partners/", include("partners.urls")),
+    path("api/business-accounts/", include("partners.urls")),
     path("api/marketing/", include("marketing.urls")),
 
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),

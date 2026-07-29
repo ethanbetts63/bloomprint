@@ -11,6 +11,11 @@ import { type HomepageBrief, orderToBrief } from '@/lib/homepageBrief';
 import { OCCASIONS, occasionByName, occasionByValue, type Occasion } from '@/lib/occasions';
 import { startGuestCheckout, getGuestOrder } from '@/api/guestCheckout';
 import { errorMessage } from '@/lib/errors';
+import {
+  ORDER_FORM_ID,
+  ORDER_FORM_HIGHLIGHT_EVENT,
+  ORDER_FORM_HIGHLIGHT_MS,
+} from '@/lib/orderForm';
 
 interface HomeStarterFormProps {
   defaultVibeName?: string;
@@ -27,8 +32,11 @@ export default function HomeStarterForm({ defaultVibeName }: HomeStarterFormProp
   const [deliveryDate, setDeliveryDate] = useState(minDeliveryDate);
   const [cardMessage, setCardMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isHighlighted, setIsHighlighted] = useState(false);
   const budgetScrollRef = useRef<HTMLDivElement>(null);
   const customBudgetInputRef = useRef<HTMLInputElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const highlightTimer = useRef<number>(undefined);
 
   // Prefill from the existing draft, if any. Without this, returning to the form
   // — via a confirmation "Edit" link, or just navigating back to the homepage —
@@ -58,6 +66,32 @@ export default function HomeStarterForm({ defaultVibeName }: HomeStarterFormProp
       });
     return () => {
       cancelled = true;
+    };
+  }, []);
+
+  // The nav "Order" button flashes this card so the click always produces visible
+  // feedback — including for someone already parked on the form, where there is
+  // nothing to scroll. Focusing the heading gives keyboard and screen reader users
+  // the same signal, and skips the nav on the next Tab.
+  useEffect(() => {
+    const flash = () => {
+      setIsHighlighted(true);
+      headingRef.current?.focus({ preventScroll: true });
+      window.clearTimeout(highlightTimer.current);
+      highlightTimer.current = window.setTimeout(
+        () => setIsHighlighted(false),
+        ORDER_FORM_HIGHLIGHT_MS,
+      );
+    };
+
+    window.addEventListener(ORDER_FORM_HIGHLIGHT_EVENT, flash);
+    // Arriving from another page via /#start-order: Next handles the scroll, but
+    // the click happened before this component existed, so flash on mount.
+    if (window.location.hash === `#${ORDER_FORM_ID}`) flash();
+
+    return () => {
+      window.removeEventListener(ORDER_FORM_HIGHLIGHT_EVENT, flash);
+      window.clearTimeout(highlightTimer.current);
     };
   }, []);
 
@@ -100,9 +134,17 @@ export default function HomeStarterForm({ defaultVibeName }: HomeStarterFormProp
   };
 
   return (
-    <div className="min-w-0 bg-white border-y border-black/10 shadow-xl shadow-black/5 rounded-none p-5 sm:rounded-xl sm:border sm:p-6 lg:p-7">
+    <div
+      className={`min-w-0 bg-white border-y border-black/10 shadow-xl shadow-black/5 rounded-none p-5 ring-2 transition-shadow duration-500 sm:rounded-xl sm:border sm:p-6 lg:p-7 ${
+        isHighlighted ? 'ring-black' : 'ring-transparent'
+      }`}
+    >
       <div className="flex items-center justify-between gap-4 border-b border-black/10 pb-4">
-        <h2 className="break-words text-2xl font-bold text-black font-playfair-display">
+        <h2
+          ref={headingRef}
+          tabIndex={-1}
+          className="break-words text-2xl font-bold text-black outline-none font-playfair-display"
+        >
           Tell the florist what to make
         </h2>
       </div>

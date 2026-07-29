@@ -16,7 +16,7 @@ class ChangePasswordView(UpdateAPIView):
         return self.request.user
 
     def update(self, request, *args, **kwargs):
-        if not (request.user.is_staff or request.user.is_superuser or hasattr(request.user, 'partner_profile')):
+        if not (request.user.is_staff or request.user.is_superuser or hasattr(request.user, 'business_account')):
             return Response({'detail': 'Customer orders are managed through email access links.'}, status=status.HTTP_403_FORBIDDEN)
         self.object = self.get_object()
         serializer = self.get_serializer(data=request.data)

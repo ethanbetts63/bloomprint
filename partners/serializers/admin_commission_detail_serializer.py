@@ -3,14 +3,14 @@ from partners.models import Commission
 
 
 class AdminCommissionDetailSerializer(serializers.ModelSerializer):
-    partner_name = serializers.SerializerMethodField()
-    partner_id = serializers.IntegerField(source='partner.id', read_only=True)
-    partner_type = serializers.CharField(source='partner.partner_type', read_only=True)
+    business_account_name = serializers.SerializerMethodField()
+    business_account_id = serializers.IntegerField(source='business_account.id', read_only=True)
+    account_type = serializers.CharField(source='business_account.account_type', read_only=True)
     stripe_connect_onboarding_complete = serializers.BooleanField(
-        source='partner.stripe_connect_onboarding_complete', read_only=True
+        source='business_account.stripe_connect_onboarding_complete', read_only=True
     )
     stripe_connect_account_id = serializers.CharField(
-        source='partner.stripe_connect_account_id', read_only=True
+        source='business_account.stripe_connect_account_id', read_only=True
     )
 
     class Meta:
@@ -23,15 +23,15 @@ class AdminCommissionDetailSerializer(serializers.ModelSerializer):
             'note',
             'created_at',
             'event',
-            'partner_name',
-            'partner_id',
-            'partner_type',
+            'business_account_name',
+            'business_account_id',
+            'account_type',
             'stripe_connect_onboarding_complete',
             'stripe_connect_account_id',
         ]
 
-    def get_partner_name(self, obj):
-        partner = obj.partner
-        if partner.business_name:
-            return partner.business_name
-        return f"{partner.user.first_name} {partner.user.last_name}".strip() or partner.user.email
+    def get_business_account_name(self, obj):
+        account = obj.business_account
+        if account.business_name:
+            return account.business_name
+        return f"{account.user.first_name} {account.user.last_name}".strip() or account.user.email

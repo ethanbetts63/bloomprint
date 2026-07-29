@@ -6,7 +6,7 @@ from data_management.utils.send_notification import resolve_recipient
 def _make_notification(recipient_type, **kwargs):
     notif = MagicMock()
     notif.recipient_type = recipient_type
-    notif.recipient_partner = kwargs.get('partner', None)
+    notif.recipient_business_account = kwargs.get('business_account', None)
     notif.recipient_email = kwargs.get('email', None)
     return notif
 
@@ -20,17 +20,17 @@ class TestResolveRecipient:
         assert email == 'admin@example.com'
         assert phone == '+15550001111'
 
-    def test_partner_returns_partner_user_email(self):
-        partner = MagicMock()
-        partner.user.email = 'florist@example.com'
-        partner.phone = '+15559998888'
-        notif = _make_notification('partner', partner=partner)
+    def test_business_account_returns_user_email(self):
+        account = MagicMock()
+        account.user.email = 'florist@example.com'
+        account.phone = '+15559998888'
+        notif = _make_notification('business_account', business_account=account)
         email, phone = resolve_recipient(notif)
         assert email == 'florist@example.com'
         assert phone == '+15559998888'
 
-    def test_partner_with_no_partner_returns_none_none(self):
-        notif = _make_notification('partner', partner=None)
+    def test_business_account_with_no_account_returns_none_none(self):
+        notif = _make_notification('business_account', business_account=None)
         email, phone = resolve_recipient(notif)
         assert email is None
         assert phone is None

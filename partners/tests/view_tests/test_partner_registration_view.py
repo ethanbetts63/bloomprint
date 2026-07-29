@@ -1,13 +1,13 @@
 import pytest
 from rest_framework.test import APIClient
-from partners.models import Partner
+from partners.models import BusinessAccount
 from users.models import User
 
 @pytest.mark.django_db
-class TestPartnerRegistrationView:
+class TestBusinessAccountRegistrationView:
     def setup_method(self):
         self.client = APIClient()
-        self.url = '/api/partners/register/'
+        self.url = '/api/business-accounts/register/'
 
     def test_partner_registration_success(self):
         data = {
@@ -28,7 +28,7 @@ class TestPartnerRegistrationView:
         user = User.objects.get(email="newpartner@example.com")
         assert user.first_name == "Partner"
         
-        partner = Partner.objects.get(user=user)
+        partner = BusinessAccount.objects.get(user=user)
         assert partner.business_name == "Partner Flowers"
         assert partner.status == 'pending'
 
@@ -47,7 +47,7 @@ class TestPartnerRegistrationView:
 
         assert response.status_code == 201
         user = User.objects.get(email="stripetest@example.com")
-        partner = Partner.objects.get(user=user)
+        partner = BusinessAccount.objects.get(user=user)
         assert partner.stripe_connect_account_id is None
         mock_account.assert_not_called()
 

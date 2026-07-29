@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from partners.models.partner import Partner
+from partners.models.business_account import BusinessAccount
 from partners.models.discount_code import DiscountCode
 
 User = get_user_model()
@@ -14,8 +14,8 @@ ADMIN_USER = {
     'is_active': True,
 }
 
-ADMIN_PARTNER = {
-    'partner_type': 'delivery',
+ADMIN_BUSINESS_ACCOUNT = {
+    'account_type': 'florist',
     'status': 'active',
     'business_name': 'FutureFlower',
     'phone': '0423853830',
@@ -54,17 +54,17 @@ class AdminUserGenerator:
         else:
             self.command.stdout.write(f"Updated admin user: {user.email}")
 
-        partner, created = Partner.objects.update_or_create(
+        account, created = BusinessAccount.objects.update_or_create(
             user=user,
-            defaults=ADMIN_PARTNER,
+            defaults=ADMIN_BUSINESS_ACCOUNT,
         )
         if created:
-            self.command.stdout.write(f"Created partner: {partner.business_name}")
+            self.command.stdout.write(f"Created business account: {account.business_name}")
         else:
-            self.command.stdout.write(f"Updated partner: {partner.business_name}")
+            self.command.stdout.write(f"Updated business account: {account.business_name}")
 
         discount_code, created = DiscountCode.objects.update_or_create(
-            partner=partner,
+            business_account=account,
             defaults=ADMIN_DISCOUNT_CODE,
         )
         if created:

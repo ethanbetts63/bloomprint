@@ -13,7 +13,7 @@ class AdminApproveCommissionView(APIView):
     def post(self, request, pk):
         try:
             commission = Commission.objects.select_related(
-                'partner', 'event', 'event__order'
+                'business_account', 'event', 'event__order'
             ).get(pk=pk)
         except Commission.DoesNotExist:
             return Response({'detail': 'Commission not found.'}, status=status.HTTP_404_NOT_FOUND)
@@ -24,11 +24,11 @@ class AdminApproveCommissionView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        partner = commission.partner
+        account = commission.business_account
 
-        if not partner.stripe_connect_onboarding_complete:
+        if not account.stripe_connect_onboarding_complete:
             return Response(
-                {'detail': 'Partner has not completed Stripe onboarding.'},
+                {'detail': 'Business account has not completed Stripe onboarding.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -46,7 +46,7 @@ class AdminApproveCommissionView(APIView):
             transfer = stripe.Transfer.create(
                 amount=int(commission.amount * 100),
                 currency=currency,
-                destination=partner.stripe_connect_account_id,
+                destination=account.stripe_connect_account_id,
                 transfer_group=f"commission_{commission.id}",
             )
         except stripe.error.StripeError as e:
@@ -54,7 +54,7 @@ class AdminApproveCommissionView(APIView):
             return Response({'detail': err}, status=status.HTTP_400_BAD_REQUEST)
 
         payout = Payout.objects.create(
-            partner=partner,
+            business_account=account,
             payout_type=payout_type,
             amount=commission.amount,
             currency=currency.upper(),

@@ -17,7 +17,7 @@ def load_db_from_latest_archive(command):
         'events.upfrontplan.json',
         'events.orderbase.json',
 
-        'partners.partner.json',
+        'partners.businessaccount.json',
         'partners.commission.json',
         'partners.discountcode.json',
         'partners.discountusage.json',

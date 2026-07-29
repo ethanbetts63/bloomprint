@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAdminUser
-from partners.models import Partner, Commission, Payout, PayoutLineItem
+from partners.models import BusinessAccount, Commission, Payout, PayoutLineItem
 
 
 class AdminPayCommissionView(APIView):
@@ -12,13 +12,13 @@ class AdminPayCommissionView(APIView):
 
     def post(self, request, pk, commission_id):
         try:
-            partner = Partner.objects.get(pk=pk)
-        except Partner.DoesNotExist:
-            return Response({'detail': 'Partner not found.'}, status=status.HTTP_404_NOT_FOUND)
+            account = BusinessAccount.objects.get(pk=pk)
+        except BusinessAccount.DoesNotExist:
+            return Response({'detail': 'Business account not found.'}, status=status.HTTP_404_NOT_FOUND)
 
         try:
             commission = Commission.objects.select_related('event', 'event__order').get(
-                pk=commission_id, partner=partner
+                pk=commission_id, business_account=account
             )
         except Commission.DoesNotExist:
             return Response({'detail': 'Commission not found.'}, status=status.HTTP_404_NOT_FOUND)
@@ -26,9 +26,9 @@ class AdminPayCommissionView(APIView):
         if commission.status in ('processing', 'paid', 'denied'):
             return Response({'detail': 'Commission already paid or in progress.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not partner.stripe_connect_onboarding_complete:
+        if not account.stripe_connect_onboarding_complete:
             return Response(
-                {'detail': 'Partner has not completed Stripe onboarding.'},
+                {'detail': 'Business account has not completed Stripe onboarding.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -47,7 +47,7 @@ class AdminPayCommissionView(APIView):
             transfer = stripe.Transfer.create(
                 amount=int(commission.amount * 100),
                 currency=currency,
-                destination=partner.stripe_connect_account_id,
+                destination=account.stripe_connect_account_id,
                 transfer_group=f"commission_{commission.id}",
             )
         except stripe.error.StripeError as e:
@@ -55,7 +55,7 @@ class AdminPayCommissionView(APIView):
             return Response({'detail': err}, status=status.HTTP_400_BAD_REQUEST)
 
         payout = Payout.objects.create(
-            partner=partner,
+            business_account=account,
             payout_type=payout_type,
             amount=commission.amount,
             currency=currency.upper(),

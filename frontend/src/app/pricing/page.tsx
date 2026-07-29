@@ -52,7 +52,7 @@ export default function Page() {
                     <div className="min-w-0 px-5 pb-10 sm:px-6 lg:px-0 lg:pb-0">
                         <div className="max-w-full sm:max-w-2xl">
                             <h1 className="text-4xl font-bold leading-[1.05] font-playfair-display sm:text-6xl lg:text-7xl">
-                                Flower delivery pricing.
+                                Your Flowers, Your Price.
                             </h1>
                             <HeroPills />
                             <p className="mt-5 max-w-xl text-lg leading-relaxed text-black/65">

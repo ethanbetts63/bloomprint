@@ -31,7 +31,7 @@ class PasswordResetConfirmView(APIView):
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
             user = None
 
-        if user is not None and (user.is_staff or user.is_superuser or hasattr(user, 'partner_profile')) and default_token_generator.check_token(user, token):
+        if user is not None and (user.is_staff or user.is_superuser or hasattr(user, 'business_account')) and default_token_generator.check_token(user, token):
             user.set_password(serializer.validated_data['password'])
             user.save()
             return Response(

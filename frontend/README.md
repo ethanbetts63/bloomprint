@@ -90,7 +90,7 @@ cookie and resolved from it server-side, so these URLs carry no order id.
 confirmation summary, not numbered steps. `/order` itself redirects to `/`.
 
 ### Dashboard (Authenticated)
-`/dashboard` Home | `/dashboard/account` | `/dashboard/orders/:planId/*` | `/dashboard/refunds` | `/dashboard/partner/*` | `/dashboard/admin/*`
+`/dashboard` Home | `/dashboard/account` | `/dashboard/orders/:planId/*` | `/dashboard/refunds` | `/dashboard/florist/* | /dashboard/affiliate/*` | `/dashboard/admin/*`
 
 ### Checkout
 `/checkout` | `/payment-status`

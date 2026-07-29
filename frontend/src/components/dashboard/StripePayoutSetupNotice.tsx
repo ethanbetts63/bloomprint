@@ -11,7 +11,7 @@ export default function StripePayoutSetupNotice() {
           <p className="mt-0.5 text-sm text-amber-800">Connect Stripe to receive automatic payouts.</p>
         </div>
       </div>
-      <DashboardTableLink href="/partner/stripe-connect/onboarding">Set up Stripe</DashboardTableLink>
+      <DashboardTableLink href="/stripe-connect/onboarding">Set up Stripe</DashboardTableLink>
     </section>
   );
 }

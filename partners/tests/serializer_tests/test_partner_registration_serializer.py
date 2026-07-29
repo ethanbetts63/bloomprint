@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from partners.serializers.partner_registration_serializer import PartnerRegistrationSerializer
-from partners.models import Partner, DiscountCode
+from partners.serializers.business_account_registration_serializer import BusinessAccountRegistrationSerializer
+from partners.models import BusinessAccount, DiscountCode
 from users.tests.factories.user_factory import UserFactory
 from django.contrib.auth import get_user_model
 
@@ -16,24 +16,24 @@ def _valid_data(**overrides):
         'last_name': 'Partner',
         'business_name': 'My Flower Shop',
         'phone': '+15551234567',
-        'partner_type': 'non_delivery',
+        'account_type': 'affiliate',
     }
     data.update(overrides)
     return data
 
 
 @pytest.mark.django_db
-class TestPartnerRegistrationSerializer:
+class TestBusinessAccountRegistrationSerializer:
 
-    def test_valid_non_delivery_data_is_valid(self):
+    def test_valid_affiliate_data_is_valid(self):
         with patch('stripe.Account.create') as mock_stripe:
             mock_stripe.return_value = MagicMock(id='acct_test')
-            serializer = PartnerRegistrationSerializer(data=_valid_data())
+            serializer = BusinessAccountRegistrationSerializer(data=_valid_data())
             assert serializer.is_valid(), serializer.errors
 
     def test_duplicate_email_fails_validation(self):
         UserFactory(email='existing@example.com')
-        serializer = PartnerRegistrationSerializer(
+        serializer = BusinessAccountRegistrationSerializer(
             data=_valid_data(email='existing@example.com')
         )
         assert not serializer.is_valid()
@@ -41,51 +41,51 @@ class TestPartnerRegistrationSerializer:
 
     def test_email_case_insensitive_duplicate_check(self):
         UserFactory(email='existing@example.com')
-        serializer = PartnerRegistrationSerializer(
+        serializer = BusinessAccountRegistrationSerializer(
             data=_valid_data(email='EXISTING@example.com')
         )
         assert not serializer.is_valid()
         assert 'email' in serializer.errors
 
     def test_delivery_partner_without_lat_lng_fails(self):
-        data = _valid_data(partner_type='delivery', latitude=None, longitude=None)
-        serializer = PartnerRegistrationSerializer(data=data)
+        data = _valid_data(account_type='florist', latitude=None, longitude=None)
+        serializer = BusinessAccountRegistrationSerializer(data=data)
         assert not serializer.is_valid()
 
     def test_delivery_partner_with_lat_lng_is_valid(self):
-        data = _valid_data(partner_type='delivery', latitude=40.7128, longitude=-74.0060)
+        data = _valid_data(account_type='florist', latitude=40.7128, longitude=-74.0060)
         with patch('stripe.Account.create') as mock_stripe:
             mock_stripe.return_value = MagicMock(id='acct_test')
-            serializer = PartnerRegistrationSerializer(data=data)
+            serializer = BusinessAccountRegistrationSerializer(data=data)
             assert serializer.is_valid(), serializer.errors
 
     def test_create_creates_user_and_partner(self):
         data = _valid_data()
         with patch('stripe.Account.create') as mock_stripe:
             mock_stripe.return_value = MagicMock(id='acct_test')
-            serializer = PartnerRegistrationSerializer(data=data)
+            serializer = BusinessAccountRegistrationSerializer(data=data)
             assert serializer.is_valid()
             user = serializer.save()
 
         assert User.objects.filter(email='newpartner@example.com').exists()
-        assert Partner.objects.filter(user=user).exists()
+        assert BusinessAccount.objects.filter(user=user).exists()
 
     def test_create_generates_discount_code(self):
         data = _valid_data(business_name='Code Test Shop')
         with patch('stripe.Account.create') as mock_stripe:
             mock_stripe.return_value = MagicMock(id='acct_test')
-            serializer = PartnerRegistrationSerializer(data=data)
+            serializer = BusinessAccountRegistrationSerializer(data=data)
             assert serializer.is_valid()
             user = serializer.save()
 
-        partner = Partner.objects.get(user=user)
-        assert DiscountCode.objects.filter(partner=partner).exists()
+        partner = BusinessAccount.objects.get(user=user)
+        assert DiscountCode.objects.filter(business_account=partner).exists()
 
     def test_create_normalizes_email_to_lowercase(self):
         data = _valid_data(email='TestEmail@Example.COM')
         with patch('stripe.Account.create') as mock_stripe:
             mock_stripe.return_value = MagicMock(id='acct_test')
-            serializer = PartnerRegistrationSerializer(data=data)
+            serializer = BusinessAccountRegistrationSerializer(data=data)
             assert serializer.is_valid()
             user = serializer.save()
 
@@ -95,7 +95,7 @@ class TestPartnerRegistrationSerializer:
         data = _valid_data()
         with patch('stripe.Account.create') as mock_stripe:
             mock_stripe.side_effect = Exception('Stripe error')
-            serializer = PartnerRegistrationSerializer(data=data)
+            serializer = BusinessAccountRegistrationSerializer(data=data)
             assert serializer.is_valid()
             user = serializer.save()
 

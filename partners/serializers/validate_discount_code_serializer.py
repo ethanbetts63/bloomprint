@@ -11,7 +11,7 @@ class ValidateDiscountCodeSerializer(serializers.Serializer):
     code = serializers.CharField(max_length=30, required=False, allow_blank=True)
 
     def _lookup(self, code):
-        return DiscountCode.objects.select_related('partner', 'partner__user').get(
+        return DiscountCode.objects.select_related('business_account', 'business_account__user').get(
             code=code, is_active=True
         )
 
@@ -24,7 +24,7 @@ class ValidateDiscountCodeSerializer(serializers.Serializer):
         except DiscountCode.DoesNotExist:
             raise serializers.ValidationError("This discount code does not exist.")
 
-        if discount_code.partner.status != 'active':
+        if discount_code.business_account.status != 'active':
             raise serializers.ValidationError("This discount code is not currently valid.")
 
         return value
@@ -39,7 +39,7 @@ class ValidateDiscountCodeSerializer(serializers.Serializer):
             return {
                 'code': None,
                 'discount_amount': '0.00',
-                'partner_name': None,
+                'business_account_name': None,
                 'new_total_amount': str(order.total_amount),
             }
 
@@ -48,13 +48,13 @@ class ValidateDiscountCodeSerializer(serializers.Serializer):
         order.discount_amount = discount_code.discount_amount
         order.save()
 
-        if not order.referred_by_partner:
-            order.referred_by_partner = discount_code.partner
-            order.save(update_fields=['referred_by_partner'])
+        if not order.referred_by_affiliate:
+            order.referred_by_affiliate = discount_code.business_account
+            order.save(update_fields=['referred_by_affiliate'])
 
         return {
             'code': discount_code.code,
             'discount_amount': str(discount_code.discount_amount),
-            'partner_name': discount_code.partner.business_name or 'Partner',
+            'business_account_name': discount_code.business_account.business_name or 'Affiliate',
             'new_total_amount': str(order.total_amount),
         }

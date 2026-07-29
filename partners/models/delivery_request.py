@@ -15,8 +15,8 @@ class DeliveryRequest(models.Model):
         on_delete=models.CASCADE,
         related_name='delivery_requests'
     )
-    partner = models.ForeignKey(
-        'partners.Partner',
+    business_account = models.ForeignKey(
+        'partners.BusinessAccount',
         on_delete=models.CASCADE,
         related_name='delivery_requests'
     )
@@ -30,7 +30,7 @@ class DeliveryRequest(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"DeliveryRequest {self.id} for Event {self.event_id} → {self.partner}"
+        return f"DeliveryRequest {self.id} for Event {self.event_id} → {self.business_account}"
 
     def save(self, *args, **kwargs):
         if not self.token:

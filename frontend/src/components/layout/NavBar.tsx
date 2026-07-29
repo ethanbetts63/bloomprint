@@ -10,6 +10,7 @@ import logo256 from '@/assets/logo-256w.webp';
 import { assetSrc } from '@/lib/assets';
 import { cn } from '@/lib/utils';
 import { roleHome } from '@/lib/roleHome';
+import { ORDER_FORM_ID, revealOrderForm } from '@/lib/orderForm';
 import { useAuth } from '@/context/AuthContext';
 
 const MENU_LINK =
@@ -19,7 +20,7 @@ type MenuItem = { href: string; label: string };
 
 const ADMIN_LINKS: MenuItem[] = [
   { href: '/dashboard/admin', label: 'Admin Dashboard' },
-  { href: '/dashboard/admin/partners', label: 'Admin Florists & Affiliates' },
+  { href: '/dashboard/admin/accounts', label: 'Admin Florists & Affiliates' },
   { href: '/dashboard/admin/plans', label: 'Admin Plan List' },
   { href: '/dashboard/admin/users', label: 'Admin User List' },
   { href: '/dashboard/admin/payouts', label: 'Admin Payouts' },
@@ -104,8 +105,14 @@ const NavBar = () => {
               Pricing
             </Link>
             <Link
-              href="/"
-              onClick={close}
+              href={`/#${ORDER_FORM_ID}`}
+              onClick={(event) => {
+                close();
+                // Already on a page that has the brief form: scroll + flash it in
+                // place rather than navigating. Letting the hash link run instead
+                // would do nothing at all for anyone already sitting on the form.
+                if (revealOrderForm()) event.preventDefault();
+              }}
               className="inline-flex items-center bg-black text-white font-bold px-4 py-1.5 text-xs tracking-widest uppercase"
             >
               Order

@@ -1,9 +1,9 @@
 from django.urls import path
 from partners.views import (
-    PartnerRegistrationView,
-    PartnerDashboardView,
+    BusinessAccountRegistrationView,
+    BusinessAccountDashboardView,
     CommissionListView,
-    PartnerUpdateView,
+    BusinessAccountUpdateView,
     DeliveryRequestDetailView,
     DeliveryRequestRespondView,
     DeliveryRequestListView,
@@ -12,11 +12,10 @@ from partners.views import (
     StripeConnectStatusView,
     PayoutListView,
     PayoutDetailView,
-    AdminPendingPartnersView,
-    AdminPartnerListView,
-    AdminPartnerDetailView,
-    AdminApprovePartnerView,
-    AdminDenyPartnerView,
+    AdminBusinessAccountListView,
+    AdminBusinessAccountDetailView,
+    AdminApproveBusinessAccountView,
+    AdminDenyBusinessAccountView,
     AdminPayCommissionView,
     AdminCommissionListView,
     AdminCommissionDetailView,
@@ -26,10 +25,10 @@ from partners.views import (
 )
 
 urlpatterns = [
-    path('register/', PartnerRegistrationView.as_view(), name='partner-register'),
-    path('dashboard/', PartnerDashboardView.as_view(), name='partner-dashboard'),
+    path('register/', BusinessAccountRegistrationView.as_view(), name='business-account-register'),
+    path('dashboard/', BusinessAccountDashboardView.as_view(), name='business-account-dashboard'),
     path('commissions/', CommissionListView.as_view(), name='commission-list'),
-    path('update/', PartnerUpdateView.as_view(), name='partner-update'),
+    path('update/', BusinessAccountUpdateView.as_view(), name='business-account-update'),
     path('discount-codes/', AffiliateDiscountCodeListCreateView.as_view(), name='affiliate-discount-code-list-create'),
 
     path('delivery-requests/', DeliveryRequestListView.as_view(), name='delivery-request-list'),
@@ -42,11 +41,10 @@ urlpatterns = [
     path('admin/commissions/<int:pk>/approve/', AdminApproveCommissionView.as_view(), name='admin-approve-commission'),
     path('admin/commissions/<int:pk>/deny/', AdminDenyCommissionView.as_view(), name='admin-deny-commission'),
 
-    path('admin/pending/', AdminPendingPartnersView.as_view(), name='admin-pending-partners'),
-    path('admin/list/', AdminPartnerListView.as_view(), name='admin-partner-list'),
-    path('admin/<int:pk>/', AdminPartnerDetailView.as_view(), name='admin-partner-detail'),
-    path('admin/<int:pk>/approve/', AdminApprovePartnerView.as_view(), name='admin-approve-partner'),
-    path('admin/<int:pk>/deny/', AdminDenyPartnerView.as_view(), name='admin-deny-partner'),
+    path('admin/list/', AdminBusinessAccountListView.as_view(), name='admin-business-account-list'),
+    path('admin/<int:pk>/', AdminBusinessAccountDetailView.as_view(), name='admin-business-account-detail'),
+    path('admin/<int:pk>/approve/', AdminApproveBusinessAccountView.as_view(), name='admin-approve-business-account'),
+    path('admin/<int:pk>/deny/', AdminDenyBusinessAccountView.as_view(), name='admin-deny-business-account'),
     path('admin/<int:pk>/commissions/<int:commission_id>/pay/', AdminPayCommissionView.as_view(), name='admin-pay-commission'),
 
     path('stripe-connect/onboard/', StripeConnectOnboardView.as_view(), name='stripe-connect-onboard'),

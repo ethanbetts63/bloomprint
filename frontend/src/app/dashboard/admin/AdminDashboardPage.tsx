@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
-import { getAdminCommissions, getAdminDashboard, getPendingBusinessAccounts } from '@/api/admin';
+import { getAdminBusinessAccounts, getAdminCommissions, getAdminDashboard } from '@/api/admin';
 import { formatDashboardTableDate } from '@/components/dashboard/DashboardDataTable';
 import DashboardOverviewTable, {
   DashboardPrimaryLink as PrimaryLink,
@@ -88,19 +88,19 @@ function EventTable({ title, events, queue }: { title: string; events: AdminEven
 
 export default function AdminDashboardPage() {
   const [dashboard, setDashboard] = useState<AdminDashboard | null>(null);
-  const [pendingPartners, setPendingPartners] = useState<AdminBusinessAccount[]>([]);
+  const [pendingAccounts, setPendingAccounts] = useState<AdminBusinessAccount[]>([]);
   const [pendingPayouts, setPendingPayouts] = useState<AdminCommission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([getAdminDashboard(), getPendingBusinessAccounts(), getAdminCommissions({ status: 'pending' })])
-      .then(([nextDashboard, partners, payouts]) => {
+    Promise.all([getAdminDashboard(), getAdminBusinessAccounts({ status: 'pending', pageSize: 5 }), getAdminCommissions({ status: 'pending', pageSize: 5 })])
+      .then(([nextDashboard, accountsPage, payoutsPage]) => {
         if (cancelled) return;
         setDashboard(nextDashboard);
-        setPendingPartners(partners);
-        setPendingPayouts(payouts);
+        setPendingAccounts(accountsPage.results);
+        setPendingPayouts(payoutsPage.results);
         setError(null);
       })
       .catch((reason) => {
@@ -139,7 +139,7 @@ export default function AdminDashboardPage() {
           >
             {pendingPayouts.slice(0, 5).map((commission) => (
               <TableRow key={commission.id} className="border-slate-100 hover:bg-slate-50">
-                <TableCell className="font-medium text-slate-900">{commission.partner_name || 'Unknown account'}</TableCell>
+                <TableCell className="font-medium text-slate-900">{commission.business_account_name || 'Unknown account'}</TableCell>
                 <TableCell className="capitalize text-slate-700">{commission.commission_type}</TableCell>
                 <TableCell className="font-semibold text-slate-950">{formatAmount(commission.amount)}</TableCell>
                 <TableCell className="text-slate-600">{formatDashboardTableDate(commission.created_at)}</TableCell>
@@ -152,28 +152,28 @@ export default function AdminDashboardPage() {
 
           <DashboardOverviewTable
             title="Florist & affiliate applications"
-            count={pendingPartners.length}
-            viewAllHref="/dashboard/admin/partners"
+            count={pendingAccounts.length}
+            viewAllHref="/dashboard/admin/accounts"
             viewAllLabel="View all accounts"
             headers={['Business', 'Contact', 'Type', 'Applied', 'Action']}
-            empty={pendingPartners.length === 0}
+            empty={pendingAccounts.length === 0}
             emptyMessage="No pending florist or affiliate applications."
           >
-            {pendingPartners.map((partner) => (
-              <TableRow key={partner.id} className="border-slate-100 hover:bg-slate-50">
+            {pendingAccounts.map((account) => (
+              <TableRow key={account.id} className="border-slate-100 hover:bg-slate-50">
                 <TableCell className="font-medium text-slate-900">
-                  {partner.business_name || personName(partner.first_name, partner.last_name)}
+                  {account.business_name || personName(account.first_name, account.last_name)}
                 </TableCell>
                 <TableCell>
-                  <div className="text-slate-700">{personName(partner.first_name, partner.last_name)}</div>
-                  <div className="text-xs text-slate-500">{partner.email}</div>
+                  <div className="text-slate-700">{personName(account.first_name, account.last_name)}</div>
+                  <div className="text-xs text-slate-500">{account.email}</div>
                 </TableCell>
                 <TableCell className="text-slate-700">
-                  {partner.partner_type === 'delivery' ? 'Florist' : 'Affiliate'}
+                  {account.account_type === 'florist' ? 'Florist' : 'Affiliate'}
                 </TableCell>
-                <TableCell className="text-slate-600">{formatDashboardTableDate(partner.created_at)}</TableCell>
+                <TableCell className="text-slate-600">{formatDashboardTableDate(account.created_at)}</TableCell>
                 <TableCell className="text-right">
-                  <ViewLink href={`/dashboard/admin/partners/${partner.id}`} />
+                  <ViewLink href={`/dashboard/admin/accounts/${account.id}`} />
                 </TableCell>
               </TableRow>
             ))}

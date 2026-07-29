@@ -19,27 +19,27 @@ class TestAdminUserListView:
         response = self.client.get(self._url())
         assert response.status_code == 200
         # At least 3 (admin + 2 created)
-        assert len(response.data) >= 3
+        assert response.data['count'] >= 3
 
     def test_search_by_email(self):
         target = UserFactory(email='findme@example.com')
         UserFactory(email='other@example.com')
         response = self.client.get(self._url(), {'search': 'findme'})
-        emails = [u['email'] for u in response.data]
+        emails = [u['email'] for u in response.data['results']]
         assert 'findme@example.com' in emails
 
     def test_search_by_first_name(self):
         target = UserFactory(first_name='Findable', last_name='Person')
         UserFactory(first_name='Other')
         response = self.client.get(self._url(), {'search': 'Findable'})
-        ids = [u['id'] for u in response.data]
+        ids = [u['id'] for u in response.data['results']]
         assert target.pk in ids
 
     def test_search_by_last_name(self):
         target = UserFactory(last_name='UniqueSurname')
         UserFactory(last_name='CommonSurname')
         response = self.client.get(self._url(), {'search': 'UniqueSurname'})
-        ids = [u['id'] for u in response.data]
+        ids = [u['id'] for u in response.data['results']]
         assert target.pk in ids
 
     def test_requires_admin(self):
@@ -53,5 +53,5 @@ class TestAdminUserListView:
         UserFactory(email='unique99@example.com')
         UserFactory(email='other@example.com')
         response = self.client.get(self._url(), {'search': 'unique99'})
-        emails = [u['email'] for u in response.data]
+        emails = [u['email'] for u in response.data['results']]
         assert 'other@example.com' not in emails

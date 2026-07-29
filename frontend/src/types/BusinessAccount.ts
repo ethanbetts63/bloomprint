@@ -65,7 +65,7 @@ export interface PayoutSummary {
 export interface DiscountCodeValidation {
   code: string | null;
   discount_amount: string;
-  partner_name: string | null;
+  business_account_name: string | null;
   new_total_amount?: string;
 }
 
@@ -92,7 +92,7 @@ export interface FloristAffiliateRegistrationData {
   last_name: string;
   business_name?: string;
   phone?: string;
-  partner_type: 'non_delivery' | 'delivery';
+  account_type: 'affiliate' | 'florist';
   street_address?: string;
   suburb?: string;
   city?: string;

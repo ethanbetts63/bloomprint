@@ -5,9 +5,9 @@ from rest_framework.generics import ListAPIView
 from rest_framework.exceptions import NotFound, PermissionDenied
 from django.db.models import Count
 
-from partners.models import DiscountCode, Partner
-from partners.pagination import DashboardPagination
-from partners.serializers.partner_dashboard_serializer import DiscountCodeSerializer
+from partners.models import BusinessAccount, DiscountCode
+from config.pagination import DashboardPagination
+from partners.serializers.business_account_dashboard_serializer import DiscountCodeSerializer
 
 
 class AffiliateDiscountCodeListCreateView(ListAPIView):
@@ -17,10 +17,10 @@ class AffiliateDiscountCodeListCreateView(ListAPIView):
 
     def get_account(self):
         try:
-            account = Partner.objects.get(user=self.request.user)
-        except Partner.DoesNotExist:
+            account = BusinessAccount.objects.get(user=self.request.user)
+        except BusinessAccount.DoesNotExist:
             raise NotFound('No affiliate account was found.')
-        if account.partner_type != 'non_delivery':
+        if account.account_type != 'affiliate':
             raise PermissionDenied('Discount codes are only available to affiliates.')
         return account
 
@@ -44,19 +44,19 @@ class AffiliateDiscountCodeListCreateView(ListAPIView):
 
     def post(self, request):
         try:
-            partner = Partner.objects.get(user=request.user)
-        except Partner.DoesNotExist:
+            account = BusinessAccount.objects.get(user=request.user)
+        except BusinessAccount.DoesNotExist:
             return Response({'error': 'No affiliate account was found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        if partner.partner_type != 'non_delivery':
+        if account.account_type != 'affiliate':
             return Response(
-                {'error': 'Discount codes are only available to affiliate partners.'},
+                {'error': 'Discount codes are only available to affiliates.'},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        name = request.data.get('name', '').strip() or partner.business_name
+        name = request.data.get('name', '').strip() or account.business_name
         code = DiscountCode.generate_code(name)
-        dc = DiscountCode.objects.create(partner=partner, code=code, discount_amount=5)
+        dc = DiscountCode.objects.create(business_account=account, code=code, discount_amount=5)
 
         return Response({
             'id': dc.id,

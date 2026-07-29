@@ -57,7 +57,7 @@ class CookieTokenObtainPairView(APIView):
             )
 
         user = serializer.user
-        if not (user.is_staff or user.is_superuser or hasattr(user, 'partner_profile')):
+        if not (user.is_staff or user.is_superuser or hasattr(user, 'business_account')):
             return Response(
                 {'detail': 'Customer orders are accessed using the private link sent by email.'},
                 status=status.HTTP_401_UNAUTHORIZED,

@@ -1,7 +1,7 @@
-from .partner_registration_view import PartnerRegistrationView
-from .partner_dashboard_view import PartnerDashboardView
-from .partner_commission_list_view import CommissionListView
-from .partner_update_view import PartnerUpdateView
+from .business_account_registration_view import BusinessAccountRegistrationView
+from .business_account_dashboard_view import BusinessAccountDashboardView
+from .commission_list_view import CommissionListView
+from .business_account_update_view import BusinessAccountUpdateView
 from .delivery_request_views import (
     DeliveryRequestDetailView,
     DeliveryRequestRespondView,
@@ -11,12 +11,11 @@ from .delivery_request_views import (
 from .stripe_connect_onboard_view import StripeConnectOnboardView
 from .stripe_connect_status_view import StripeConnectStatusView
 from .payout_views import PayoutListView, PayoutDetailView
-from .admin_partner_views import (
-    AdminPendingPartnersView,
-    AdminPartnerListView,
-    AdminPartnerDetailView,
-    AdminApprovePartnerView,
-    AdminDenyPartnerView,
+from .admin_business_account_views import (
+    AdminBusinessAccountListView,
+    AdminBusinessAccountDetailView,
+    AdminApproveBusinessAccountView,
+    AdminDenyBusinessAccountView,
 )
 from .admin_pay_commission_view import AdminPayCommissionView
 from .admin_commission_list_view import AdminCommissionListView

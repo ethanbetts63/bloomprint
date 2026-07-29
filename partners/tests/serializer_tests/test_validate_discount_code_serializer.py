@@ -1,7 +1,7 @@
 import pytest
 from decimal import Decimal
 from partners.serializers.validate_discount_code_serializer import ValidateDiscountCodeSerializer
-from partners.tests.factories.partner_factory import PartnerFactory
+from partners.tests.factories.business_account_factory import BusinessAccountFactory
 from partners.tests.factories.discount_code_factory import DiscountCodeFactory
 from users.tests.factories.user_factory import UserFactory
 from events.tests.factories.order_factory import OrderFactory
@@ -17,8 +17,8 @@ def serializer_for(code):
 class TestValidateDiscountCodeSerializer:
 
     def test_valid_code_passes_validation(self):
-        partner = PartnerFactory(status='active')
-        dc = DiscountCodeFactory(partner=partner, is_active=True)
+        partner = BusinessAccountFactory(status='active')
+        dc = DiscountCodeFactory(business_account=partner, is_active=True)
 
         serializer = serializer_for(dc.code)
 
@@ -38,8 +38,8 @@ class TestValidateDiscountCodeSerializer:
         assert not serializer.is_valid()
 
     def test_inactive_partner_code_fails(self):
-        partner = PartnerFactory(status='pending')
-        dc = DiscountCodeFactory(partner=partner, is_active=True)
+        partner = BusinessAccountFactory(status='pending')
+        dc = DiscountCodeFactory(business_account=partner, is_active=True)
 
         serializer = serializer_for(dc.code)
 
@@ -51,8 +51,8 @@ class TestValidateDiscountCodeSerializer:
         assert serializer.is_valid(), serializer.errors
 
     def test_apply_discount_sets_discount_on_the_order(self):
-        partner = PartnerFactory(status='active')
-        dc = DiscountCodeFactory(partner=partner, is_active=True, discount_amount=Decimal('5.00'))
+        partner = BusinessAccountFactory(status='active')
+        dc = DiscountCodeFactory(business_account=partner, is_active=True, discount_amount=Decimal('5.00'))
         order = OrderFactory(billing_mode='one_time', budget=100)
 
         serializer = serializer_for(dc.code)
@@ -82,8 +82,8 @@ class TestValidateDiscountCodeSerializer:
         assert order.discount_amount == 0
 
     def test_apply_discount_attributes_the_order_to_the_partner(self):
-        partner = PartnerFactory(status='active')
-        dc = DiscountCodeFactory(partner=partner, is_active=True)
+        partner = BusinessAccountFactory(status='active')
+        dc = DiscountCodeFactory(business_account=partner, is_active=True)
         order = OrderFactory(billing_mode='one_time', budget=100)
 
         serializer = serializer_for(dc.code)
@@ -91,24 +91,24 @@ class TestValidateDiscountCodeSerializer:
         serializer.apply_discount(order)
 
         order.refresh_from_db()
-        assert order.referred_by_partner == partner
+        assert order.referred_by_affiliate == partner
 
     def test_apply_discount_keeps_an_existing_attribution(self):
-        first = PartnerFactory(status='active')
-        second = PartnerFactory(status='active')
-        dc = DiscountCodeFactory(partner=second, is_active=True)
-        order = OrderFactory(billing_mode='one_time', budget=100, referred_by_partner=first)
+        first = BusinessAccountFactory(status='active')
+        second = BusinessAccountFactory(status='active')
+        dc = DiscountCodeFactory(business_account=second, is_active=True)
+        order = OrderFactory(billing_mode='one_time', budget=100, referred_by_affiliate=first)
 
         serializer = serializer_for(dc.code)
         assert serializer.is_valid(), serializer.errors
         serializer.apply_discount(order)
 
         order.refresh_from_db()
-        assert order.referred_by_partner == first
+        assert order.referred_by_affiliate == first
 
     def test_apply_discount_works_for_a_recurring_order(self):
-        partner = PartnerFactory(status='active')
-        dc = DiscountCodeFactory(partner=partner, is_active=True, discount_amount=Decimal('5.00'))
+        partner = BusinessAccountFactory(status='active')
+        dc = DiscountCodeFactory(business_account=partner, is_active=True, discount_amount=Decimal('5.00'))
         order = OrderFactory(billing_mode='recurring', budget=100)
 
         serializer = serializer_for(dc.code)

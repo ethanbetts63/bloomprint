@@ -58,12 +58,12 @@ class Order(models.Model):
         related_name='order_acceptances',
         help_text="The terms version the customer accepted at checkout."
     )
-    referred_by_partner = models.ForeignKey(
-        'partners.Partner',
+    referred_by_affiliate = models.ForeignKey(
+        'partners.BusinessAccount',
         on_delete=models.SET_NULL,
         null=True, blank=True,
         related_name='referred_orders',
-        help_text="The partner who referred this order via discount code."
+        help_text="The affiliate who referred this order via discount code."
     )
     status = models.CharField(
         max_length=20,

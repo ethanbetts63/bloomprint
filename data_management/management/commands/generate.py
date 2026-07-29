@@ -21,7 +21,7 @@ class Command(BaseCommand):
             '--admin_user',
             type=str,
             metavar='PASSWORD',
-            help='Create the default admin user, partner, and discount code. Provide the password as the argument.',
+            help='Create the default admin user, account, and discount code. Provide the password as the argument.',
         )
 
     def handle(self, *args, **options):

@@ -20,7 +20,7 @@ const nav: DashboardNavSection[] = [
     label: 'People',
     items: [
       { href: '/dashboard/admin/users', label: 'Users', icon: Users },
-      { href: '/dashboard/admin/partners', label: 'Florists & affiliates', icon: Store },
+      { href: '/dashboard/admin/accounts', label: 'Florists & affiliates', icon: Store },
       { href: '/dashboard/admin/payouts', label: 'Payouts', icon: Wallet },
     ],
   },

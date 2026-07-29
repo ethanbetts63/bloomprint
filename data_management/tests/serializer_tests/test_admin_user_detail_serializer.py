@@ -2,7 +2,7 @@ import pytest
 from decimal import Decimal
 from data_management.serializers.admin_user_detail_serializer import AdminUserDetailSerializer
 from users.tests.factories.user_factory import UserFactory
-from partners.tests.factories.partner_factory import PartnerFactory
+from partners.tests.factories.business_account_factory import BusinessAccountFactory
 from events.tests.factories.order_factory import OrderFactory
 
 @pytest.mark.django_db
@@ -23,7 +23,7 @@ def test_admin_user_detail_serializer_affiliate_role():
     """
     Test that is_partner returns True if user has a partner profile.
     """
-    partner = PartnerFactory(partner_type='non_delivery')
+    partner = BusinessAccountFactory(account_type='affiliate')
     user = partner.user
     
     serializer = AdminUserDetailSerializer(user)
@@ -35,8 +35,8 @@ def test_admin_user_detail_serializer_referred_by():
     """
     Test that referred_by returns the partner's business name.
     """
-    partner = PartnerFactory(business_name="Test Partner")
-    user = UserFactory(referred_by_partner=partner)
+    partner = BusinessAccountFactory(business_name="Test Partner")
+    user = UserFactory(referred_by_affiliate=partner)
     
     serializer = AdminUserDetailSerializer(user)
     data = serializer.data
