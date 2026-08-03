@@ -36,6 +36,9 @@ export const metadata: Metadata = {
       { url: '/favicon-180x180.png', sizes: '180x180', type: 'image/png' },
     ],
   },
+  verification: {
+    google: 'kOvPJFuf4yOerSaBElKlg2UqNAPAYf0iWu72lbOHNmk',
+  },
 };
 
 export const viewport: Viewport = {
