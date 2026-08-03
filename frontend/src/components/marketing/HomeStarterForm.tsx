@@ -163,7 +163,7 @@ export default function HomeStarterForm({ defaultVibeName }: HomeStarterFormProp
                   onClick={() => setSelectedVibe(vibe)}
                   className={`min-h-20 min-w-0 rounded-lg border p-3 text-left transition ${
                     isSelected
-                      ? 'border-brand-blue bg-brand-blue text-white shadow-md'
+                      ? 'border-black bg-black text-white shadow-md'
                       : 'border-black/10 bg-white text-black hover:border-black/40'
                   }`}
                 >
@@ -217,12 +217,12 @@ export default function HomeStarterForm({ defaultVibeName }: HomeStarterFormProp
                   onClick={() => setBudget(tier.price)}
                   className={`relative flex w-64 shrink-0 snap-start flex-col overflow-hidden rounded-lg border text-left transition ${
                     isSelected
-                      ? 'border-brand-blue bg-white text-black shadow-md ring-1 ring-brand-blue'
+                      ? 'border-black bg-white text-black shadow-md ring-1 ring-black'
                       : 'border-black/10 bg-white text-black hover:border-black/40'
                   }`}
                 >
                   {isSelected && (
-                    <span className="absolute left-3 top-3 z-10 rounded-full bg-brand-blue px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
+                    <span className="absolute left-3 top-3 z-10 rounded-full bg-black px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
                       Selected
                     </span>
                   )}
@@ -253,12 +253,12 @@ export default function HomeStarterForm({ defaultVibeName }: HomeStarterFormProp
               onClick={() => customBudgetInputRef.current?.focus()}
               className={`relative flex w-64 shrink-0 cursor-text snap-start flex-col overflow-hidden rounded-lg border bg-white text-left transition ${
                 !IMPACT_TIERS.some((tier) => tier.price === budget)
-                  ? 'border-brand-blue text-black shadow-md ring-1 ring-brand-blue'
+                  ? 'border-black text-black shadow-md ring-1 ring-black'
                   : 'border-black/10 text-black'
               }`}
             >
               {!IMPACT_TIERS.some((tier) => tier.price === budget) && (
-                <span className="absolute left-3 top-3 z-10 rounded-full bg-brand-blue px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
+                <span className="absolute left-3 top-3 z-10 rounded-full bg-black px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
                   Selected
                 </span>
               )}
@@ -357,7 +357,7 @@ export default function HomeStarterForm({ defaultVibeName }: HomeStarterFormProp
         type="button"
         onClick={handleSubmit}
         disabled={isSubmitting}
-        className="mt-6 flex w-full items-center justify-between rounded-lg bg-brand-blue px-5 py-4 text-left text-white transition hover:bg-brand-blue/85 disabled:cursor-wait disabled:opacity-70"
+        className="mt-6 flex w-full items-center justify-between rounded-lg bg-black px-5 py-4 text-left text-white transition hover:bg-black/85 disabled:cursor-wait disabled:opacity-70"
       >
         <span className="block text-sm font-semibold">
           {isSubmitting ? 'Preparing your order…' : 'Next: Recipient Details'}

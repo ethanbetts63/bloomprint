@@ -111,7 +111,7 @@ const NavBar = () => {
                 // would do nothing at all for anyone already sitting on the form.
                 if (revealOrderForm()) event.preventDefault();
               }}
-              className="inline-flex items-center bg-brand-blue text-white font-bold px-4 py-1.5 text-xs tracking-widest uppercase"
+              className="inline-flex items-center bg-black text-white font-bold px-4 py-1.5 text-xs tracking-widest uppercase"
             >
               Order
             </Link>
