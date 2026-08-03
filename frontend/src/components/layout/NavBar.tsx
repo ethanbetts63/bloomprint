@@ -74,25 +74,23 @@ const NavBar = () => {
         <div className="flex h-16 items-center justify-between md:grid md:grid-cols-3">
 
           <Link href="/" onClick={close} aria-label="Bloom Print company logo" className="flex items-center gap-3 flex-shrink-0">
-            <span className="flex h-11 w-11 items-center justify-center rounded-full border border-black/10 bg-white shadow-sm">
-              <img
-                src={assetSrc(logo)}
-                srcSet={`${assetSrc(logo128)} 128w, ${assetSrc(logo192)} 192w, ${assetSrc(logo256)} 256w`}
-                sizes="32px"
-                alt=""
-                width="367"
-                height="367"
-                className="h-8 w-8 object-contain"
-              />
-            </span>
-            <span className="hidden sm:block md:hidden font-playfair-display italic font-bold text-2xl text-black tracking-widest leading-none">
-              BLOOM PRINT
+            <img
+              src={assetSrc(logo)}
+              srcSet={`${assetSrc(logo128)} 128w, ${assetSrc(logo192)} 192w, ${assetSrc(logo256)} 256w`}
+              sizes="48px"
+              alt=""
+              width="367"
+              height="367"
+              className="h-12 w-12 object-contain"
+            />
+            <span className="hidden sm:block md:hidden font-playfair-display font-bold text-2xl text-black tracking-widest leading-none">
+              BLOOMPRINT
             </span>
           </Link>
 
           <div className="hidden md:flex justify-center">
-            <Link href="/" onClick={close} className="font-playfair-display italic font-bold text-3xl text-black tracking-widest leading-none">
-              BLOOM PRINT
+            <Link href="/" onClick={close} className="font-playfair-display font-bold text-3xl text-black tracking-widest leading-none">
+              BLOOMPRINT
             </Link>
           </div>
 

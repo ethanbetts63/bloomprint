@@ -70,18 +70,16 @@ const Footer = () => {
           </div>
 
           <div className="flex flex-col gap-3">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full border border-black/10 bg-white shadow-sm">
-              <img
-                width="367"
-                height="367"
-                className="h-11 w-11 object-contain"
-                src={assetSrc(logo)}
-                srcSet={`${assetSrc(logo128)} 128w, ${assetSrc(logo192)} 192w, ${assetSrc(logo256)} 256w`}
-                sizes="40px"
-                alt="Bloom Print Logo"
-                loading="lazy"
-              />
-            </div>
+            <img
+              width="367"
+              height="367"
+              className="h-16 w-16 object-contain"
+              src={assetSrc(logo)}
+              srcSet={`${assetSrc(logo128)} 128w, ${assetSrc(logo192)} 192w, ${assetSrc(logo256)} 256w`}
+              sizes="64px"
+              alt="Bloom Print Logo"
+              loading="lazy"
+            />
             <p className="text-sm opacity-80">&copy; {currentYear} Bloom Print. All rights reserved.</p>
             <div className="flex items-center gap-1 mt-1">
               <span className="text-xs opacity-60">Powered by</span>
