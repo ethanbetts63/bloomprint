@@ -74,7 +74,7 @@ const Footer = () => {
               <img
                 width="367"
                 height="367"
-                className="h-11 w-11 object-contain brightness-0"
+                className="h-11 w-11 object-contain"
                 src={assetSrc(logo)}
                 srcSet={`${assetSrc(logo128)} 128w, ${assetSrc(logo192)} 192w, ${assetSrc(logo256)} 256w`}
                 sizes="40px"

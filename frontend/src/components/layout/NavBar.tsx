@@ -82,7 +82,7 @@ const NavBar = () => {
                 alt=""
                 width="367"
                 height="367"
-                className="h-8 w-8 object-contain brightness-0"
+                className="h-8 w-8 object-contain"
               />
             </span>
             <span className="hidden sm:block md:hidden font-playfair-display italic font-bold text-2xl text-black tracking-widest leading-none">
