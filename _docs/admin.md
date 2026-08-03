@@ -6,7 +6,7 @@ This document explains the admin system — what it does, how it works, and why 
 
 ## Philosophy
 
-FutureFlower is not a marketplace. There is no third-party florist integration, no automated ordering API, and no fulfillment engine. Every single delivery is placed manually: the admin receives notification of an upcoming event, goes to a third-party florist website (e.g. FTD, Interflora, a local florist), places the order there, and then records that it was done. The admin system exists to support this workflow without making it painful.
+Bloom Print is not a marketplace. There is no third-party florist integration, no automated ordering API, and no fulfillment engine. Every single delivery is placed manually: the admin receives notification of an upcoming event, goes to a third-party florist website (e.g. FTD, Interflora, a local florist), places the order there, and then records that it was done. The admin system exists to support this workflow without making it painful.
 
 The core design principle is **reducing friction for the person doing the work**. Every piece of information needed to place a flower order — recipient name, full address, budget, flower preferences, delivery date — is presented flat on a single screen. There is no clicking around to find the plan, then the recipient, then the preferences. It is all there at once.
 

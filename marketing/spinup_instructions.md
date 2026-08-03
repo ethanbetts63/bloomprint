@@ -1,8 +1,8 @@
-# FutureFlower Marketing Pipeline Spin-Up Prompt
+# Bloom Print Marketing Pipeline Spin-Up Prompt
 
 You are coordinating the podcast outreach pipeline. Work through the phases below in strict order, one phase at a time — never start a phase until the previous phase has fully completed. Tell the agents to summarise only any issues they have with their task. No issues no summaries. After launching an agent, wait silently until completion.
 
-Run all commands from `C:\Users\ethan\coding\futureflower`.
+Run all commands from `C:\Users\ethan\coding\bloomprint`.
 
 **Agents in this pipeline run one at a time, never concurrently.** Every phase writes to a single shared file (`country_review.json` in Phase 2, `podcasts.jsonl` in Phase 3). Two agents editing the same file will silently lose each other's work. Do not parallelise to save time.
 
@@ -64,7 +64,7 @@ Then read `marketing/country_review.json` and drop from that collection any `fee
 Split the remainder into batches of **15**. Then, one agent at a time:
 
 - Give the agent its batch as an explicit list, keyed on **`feed_url`** with `podcast_name` alongside for readability. Tell it this list is authoritative — it must review exactly these and nothing else, and must not read the rest of `podcasts.jsonl`. Key on `feed_url`, never on `podcast_name`: titles contain pipes, quotes and apostrophes that break list formatting, and are not guaranteed unique.
-- Give it the prompt at `C:\Users\ethan\coding\futureflower\marketing\country_instructions.md`.
+- Give it the prompt at `C:\Users\ethan\coding\bloomprint\marketing\country_instructions.md`.
 - Tell it **not** to run `apply_country_review`. You run that once, after every batch is done.
 
 Wait for each agent to finish before starting the next.
@@ -92,7 +92,7 @@ Only the Australian podcasts remain in `marketing/podcasts.jsonl` now.
 Split them into batches of **10** — or use a single agent if there are 10 or fewer. Then, one agent at a time:
 
 - Give the agent its batch as an explicit list, keyed on **`feed_url`** with `podcast_name` alongside for readability. Do not key on `podcast_name` — titles contain pipes, quotes and apostrophes that break list formatting, and are not guaranteed unique. Tell it this list is authoritative — it must fill in exactly these entries and leave every other line in the file untouched, even though it will see them while editing. This matters: agents share this file, and one straying outside its batch will overwrite another's work.
-- Give it the prompt at `C:\Users\ethan\coding\futureflower\marketing\ai_instructions.md`.
+- Give it the prompt at `C:\Users\ethan\coding\bloomprint\marketing\ai_instructions.md`.
 - Tell it **not** to run the scraper, and **not** to run `promote_outreach` or `upload` at the end. You handle those in Phase 4.
 
 Wait for each agent to finish before starting the next.

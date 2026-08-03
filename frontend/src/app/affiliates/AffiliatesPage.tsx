@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import JsonLd from '@/components/marketing/JsonLd';
 import { HeroAffiliatesPage } from './HeroAffiliatesPage';
 import { ValuePropsAffiliates } from './ValuePropsAffiliates';
-import { WhyFutureFlowerAffiliatesSection } from './WhyFutureFlowerAffiliatesSection';
+import { WhyBloomPrintAffiliatesSection } from './WhyBloomPrintAffiliatesSection';
 import { HowItWorksSection } from '@/components/marketing/HowItWorksSection';
 import type { HowItWorksStep } from '@/components/marketing/HowItWorksSection';
 import { ContentIdeasSection } from './ContentIdeasSection';
@@ -50,7 +50,7 @@ const AffiliatesPage = () => {
         steps={affiliateHowItWorksSteps}
       />
 
-      <WhyFutureFlowerAffiliatesSection />
+      <WhyBloomPrintAffiliatesSection />
 
       <ContentIdeasSection />
     </main>

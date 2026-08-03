@@ -53,7 +53,7 @@ export const floristComparisonBars: BarChartEntry[] = [
     ],
   },
   {
-    label: 'FutureFlower',
+    label: 'Bloom Print',
     segments: [
       { widthPercent: 15, color: '#f87171', icon: creditCardIcon, iconAlt: 'Fees', title: 'Commission/Fees' },
       { widthPercent: 85, color: 'var(--colorgreen)', icon: flowerIcon, iconAlt: 'Florist', title: 'Florist' },

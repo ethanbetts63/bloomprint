@@ -28,22 +28,22 @@ const reasons = [
   },
 ];
 
-export const WhyFutureFlowerSection = () => (
-  <section className="bg-[#eaf1e7] py-14 sm:py-16" aria-labelledby="why-futureflower-heading">
+export const WhyBloomPrintSection = () => (
+  <section className="bg-[#eaf1e7] py-14 sm:py-16" aria-labelledby="why-bloomprint-heading">
     <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
       <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-black/55">
-            Why FutureFlower?
+            Why Bloom Print?
           </p>
           <h2
-            id="why-futureflower-heading"
+            id="why-bloomprint-heading"
             className="mt-3 text-3xl font-bold leading-tight text-black font-playfair-display sm:text-4xl"
           >
             Personalised flowers, made locally.
           </h2>
           <p className="mt-5 max-w-xl leading-relaxed text-black/65">
-            FutureFlower gives local florists room to work with what is fresh, seasonal and right for your brief. You get an original arrangement, and more of your order stays with the florist who made it.
+            Bloom Print gives local florists room to work with what is fresh, seasonal and right for your brief. You get an original arrangement, and more of your order stays with the florist who made it.
           </p>
 
           <div className="mt-7 space-y-5">

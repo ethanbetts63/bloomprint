@@ -17,14 +17,14 @@ class TestFixSiteDomainsCommand:
         
         site.refresh_from_db()
         
-        assert site.domain == 'www.futureflower.app'
-        assert site.name == 'www.futureflower.app'
+        assert site.domain == 'www.bloomprint.app'
+        assert site.name == 'www.bloomprint.app'
         assert "Successfully updated site domain" in out.getvalue()
 
     def test_site_already_updated(self):
         site = Site.objects.get(pk=1)
-        site.domain = 'www.futureflower.app'
-        site.name = 'www.futureflower.app'
+        site.domain = 'www.bloomprint.app'
+        site.name = 'www.bloomprint.app'
         site.save()
         
         err = StringIO()

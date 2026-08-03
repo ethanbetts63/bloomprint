@@ -24,7 +24,7 @@ class TestCreateCustomerDeliveryDayNotification:
         assert notif.recipient_email == 'alice@example.com'
         assert notif.channel == 'email'
         assert notif.scheduled_for == delivery_date
-        assert notif.subject == "Your FutureFlower delivery is today!"
+        assert notif.subject == "Your Bloom Print delivery is today!"
         assert notif.status == 'pending'
 
     def test_body_contains_recipient_name(self):

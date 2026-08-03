@@ -73,7 +73,7 @@ const NavBar = () => {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between md:grid md:grid-cols-3">
 
-          <Link href="/" onClick={close} aria-label="FutureFlower company logo" className="flex items-center gap-3 flex-shrink-0">
+          <Link href="/" onClick={close} aria-label="Bloom Print company logo" className="flex items-center gap-3 flex-shrink-0">
             <span className="flex h-11 w-11 items-center justify-center rounded-full border border-black/10 bg-white shadow-sm">
               <img
                 src={assetSrc(logo)}
@@ -86,13 +86,13 @@ const NavBar = () => {
               />
             </span>
             <span className="hidden sm:block md:hidden font-playfair-display italic font-bold text-2xl text-black tracking-widest leading-none">
-              FUTUREFLOWER
+              BLOOM PRINT
             </span>
           </Link>
 
           <div className="hidden md:flex justify-center">
             <Link href="/" onClick={close} className="font-playfair-display italic font-bold text-3xl text-black tracking-widest leading-none">
-              FUTUREFLOWER
+              BLOOM PRINT
             </Link>
           </div>
 

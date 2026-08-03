@@ -1,4 +1,4 @@
-// futureflower/frontend/src/components/preferences/SelectableTag.tsx
+// bloomprint/frontend/src/components/preferences/SelectableTag.tsx
 import { Badge } from "@/components/ui/badge";
 import type { SelectableTagProps } from '@/types/SelectableTagProps';
 

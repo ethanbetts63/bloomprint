@@ -3,8 +3,8 @@
   "model": "sites.site",
   "pk": 1,
   "fields": {
-    "domain": "www.futureflower.app",
-    "name": "www.futureflower.app"
+    "domain": "www.bloomprint.app",
+    "name": "www.bloomprint.app"
   }
 }
 ]

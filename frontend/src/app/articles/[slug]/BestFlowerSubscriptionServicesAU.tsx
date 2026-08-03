@@ -43,7 +43,7 @@ const BestFlowerSubscriptionServicesAU = () => {
 
           <h2 className="text-3xl font-bold tracking-tight">Final Take</h2>
           <p>Floraly is the strongest default recommendation for most Australian buyers because it is easy to start, flexible, and built for recurring flower delivery at scale. East End Flower Market is better if you are in its delivery zone and want a more florist-led experience. Little Flowers is the better fit when you want smaller, regular flowers at a friendlier price point.</p>
-          <p>If you want flowers for a specific occasion rather than a standing home subscription, <a href="/" className="underline hover:opacity-70">FutureFlower</a> takes a different approach. You choose the occasion, budget, delivery date, and preferences, then a local florist designs a custom bouquet from the freshest flowers they have available.</p>
+          <p>If you want flowers for a specific occasion rather than a standing home subscription, <a href="/" className="underline hover:opacity-70">Bloom Print</a> takes a different approach. You choose the occasion, budget, delivery date, and preferences, then a local florist designs a custom bouquet from the freshest flowers they have available.</p>
         </div>
       </ArticleLayout>
       <section>

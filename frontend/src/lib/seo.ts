@@ -1,7 +1,7 @@
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.futureflower.app';
+  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bloomprint.app';
 
-export const SITE_NAME = 'FutureFlower';
+export const SITE_NAME = 'Bloom Print';
 
 const DEFAULT_IMAGE = '/og-images/og-homepage.webp';
 const PUBLISHER_LOGO = '/favicon-512x512.png';
@@ -39,7 +39,7 @@ export function buildOrganizationSchema(): object {
       height: 512,
     },
     areaServed: [{ '@type': 'Country', name: 'Australia' }],
-    sameAs: ['https://www.instagram.com/futureflowerapp/'],
+    sameAs: ['https://www.instagram.com/bloomprintapp/'],
     founder: {
       '@type': 'Person',
       name: 'Ethan Betts',
@@ -287,7 +287,7 @@ function getPageType(path: string): 'WebPage' | 'CollectionPage' {
 }
 
 function cleanTitle(title: string): string {
-  return title.replace(/\s*\|\s*FutureFlower\s*$/i, '');
+  return title.replace(/\s*\|\s*Bloom Print\s*$/i, '');
 }
 
 function resolveSchemaImage(pathOrUrl?: string): string {

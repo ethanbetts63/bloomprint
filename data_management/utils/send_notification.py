@@ -52,7 +52,7 @@ def send_notification(notification):
                 data={
                     "from": settings.DEFAULT_FROM_EMAIL,
                     "to": [email],
-                    "subject": notification.subject or "FutureFlower Notification",
+                    "subject": notification.subject or "Bloom Print Notification",
                     "text": text_body,
                     "html": html_body,
                 },

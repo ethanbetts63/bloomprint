@@ -20,12 +20,12 @@ export default function Page() {
         "@context": "https://schema.org",
         "@type": "Service",
         "serviceType": "Flower Delivery",
-        "name": "FutureFlower Flower Delivery",
+        "name": "Bloom Print Flower Delivery",
         "description": "Personalized flower delivery. Choose a budget tier, add your preferences, and a local florist designs and delivers the bouquet.",
         "provider": {
             "@type": "Organization",
-            "name": "FutureFlower",
-            "url": "https://www.futureflower.app"
+            "name": "Bloom Print",
+            "url": "https://www.bloomprint.app"
         },
         "areaServed": [
             { "@type": "Country", "name": "Australia" }

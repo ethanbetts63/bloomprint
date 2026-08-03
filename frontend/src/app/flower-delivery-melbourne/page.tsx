@@ -48,7 +48,7 @@ const config: OccasionLandingPageConfig = {
     canonicalPath: '/flower-delivery-melbourne',
     structuredData: buildServiceSchema({
       serviceType: 'Flower Delivery',
-      name: 'Flower Delivery Melbourne by FutureFlower',
+      name: 'Flower Delivery Melbourne by Bloom Print',
       description:
         'Fresh flower delivery in Melbourne from local florists. Give the occasion, budget, and preferences, and a Melbourne florist designs and delivers a custom bouquet.',
       areaServed: {

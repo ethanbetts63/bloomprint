@@ -1,5 +1,5 @@
 """
-URL configuration for futureflower project.
+URL configuration for bloomprint project.
 """
 from django.contrib import admin
 from django.urls import path, include, re_path

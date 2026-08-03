@@ -1,7 +1,7 @@
 import UnifiedSummaryCard from '@/components/order/UnifiedSummaryCard';
 import FlowBackButton from '@/components/order/FlowBackButton';
 
-const REFUND_EMAIL = 'admin@futureflower.app';
+const REFUND_EMAIL = 'admin@bloomprint.app';
 
 export default function Page() {
   return (
@@ -25,7 +25,7 @@ export default function Page() {
             <div className="bg-black/5 rounded-2xl p-6 space-y-2">
               <p className="text-xs font-bold tracking-widest uppercase text-black/40">Contact</p>
               <a
-                href={`mailto:${REFUND_EMAIL}?subject=Order%20Support%20-%20FutureFlower`}
+                href={`mailto:${REFUND_EMAIL}?subject=Order%20Support%20-%20Bloom Print`}
                 className="text-lg font-semibold text-black underline hover:text-black/70 transition-colors"
               >
                 {REFUND_EMAIL}

@@ -17,11 +17,11 @@ import { buildWebsiteSchema, buildOrganizationSchema } from '@/lib/seo';
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.futureflower.app",
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.bloomprint.app",
   ),
   title: {
-    default: "FutureFlower | Australian Florist-Led Flower Delivery",
-    template: "%s | FutureFlower",
+    default: "Bloom Print | Australian Florist-Led Flower Delivery",
+    template: "%s | Bloom Print",
   },
   description:
     "Tell us the occasion, budget, and flower preferences. A local Australian florist designs a bouquet that fits.",

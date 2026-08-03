@@ -9,7 +9,7 @@ class Command(BaseCommand):
         self.stdout.write("Sending test email with Mailgun...")
         
         api_key = os.getenv('MAILGUN_API_KEY')
-        domain = 'mail.futureflower.app'
+        domain = 'mail.bloomprint.app'
         
         response = requests.post(
             f"https://api.mailgun.net/v3/{domain}/messages",

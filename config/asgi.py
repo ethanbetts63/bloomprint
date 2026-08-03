@@ -1,5 +1,5 @@
 """
-ASGI config for futureflower project.
+ASGI config for bloomprint project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 

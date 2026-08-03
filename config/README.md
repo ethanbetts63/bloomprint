@@ -1,4 +1,4 @@
-# FutureFlower - Django Project Configuration
+# Bloom Print - Django Project Configuration
 
 ## Purpose
 

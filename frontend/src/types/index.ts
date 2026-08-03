@@ -1,4 +1,4 @@
-// futureflower/frontend/src/types/index.ts
+// bloomprint/frontend/src/types/index.ts
 
 export type { DecodedToken } from './DecodedToken';
 export type { AuthResponse } from './AuthResponse';

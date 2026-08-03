@@ -2,8 +2,8 @@
 
 ## Purpose
 
-The `partners` app manages the relationship between FutureFlower and its business partners. It supports two types of partners:
-- **Non-Delivery (Referral) Partners:** These partners refer users to FutureFlower and earn a commission on the first three successful payments.
+The `partners` app manages the relationship between Bloom Print and its business partners. It supports two types of partners:
+- **Non-Delivery (Referral) Partners:** These partners refer users to Bloom Print and earn a commission on the first three successful payments.
 - **Delivery Partners:** These partners fulfill deliveries in their local service area. They have a public landing page (via `booking_slug`) and can receive delivery requests.
 
 ## Models

@@ -48,7 +48,7 @@ const config: OccasionLandingPageConfig = {
     canonicalPath: '/flower-delivery-perth',
     structuredData: buildServiceSchema({
       serviceType: 'Flower Delivery',
-      name: 'Flower Delivery Perth by FutureFlower',
+      name: 'Flower Delivery Perth by Bloom Print',
       description:
         'Fresh flower delivery in Perth from local florists. Give the occasion, budget, and preferences, and a Perth florist designs and delivers a custom bouquet.',
       areaServed: {

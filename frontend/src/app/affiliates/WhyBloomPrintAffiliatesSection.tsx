@@ -9,7 +9,7 @@ const customerBenefits = [
   'Money spent stays with a local business.',
 ];
 
-export const WhyFutureFlowerAffiliatesSection = () => {
+export const WhyBloomPrintAffiliatesSection = () => {
   return (
     <section className="bg-white py-14 text-black sm:py-16">
       <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-5 sm:px-6 lg:grid-cols-[0.9fr_1fr] lg:gap-16 lg:px-8">

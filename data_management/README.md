@@ -39,7 +39,7 @@ Data generation orchestrator with flags:
 Batch resizes images to responsive widths (default: 320, 640, 768, 1024, 1280). Outputs WebP format at quality 75.
 
 ### `python manage.py fix_site_domains`
-Updates Django Sites framework domain from `example.com` to `www.futureflower.app`.
+Updates Django Sites framework domain from `example.com` to `www.bloomprint.app`.
 
 ### `python manage.py send_test_email`
 Tests email sending. Supports `--template_name`, `--context` (JSON), and `--reminder_test` flags.

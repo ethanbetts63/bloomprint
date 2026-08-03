@@ -31,7 +31,7 @@ const mothersDayFaqs: FaqItem[] = [
   {
     question: 'Where do you deliver?',
     answer:
-      'FutureFlower is focused on Australia. Availability can depend on the delivery location and florist coverage.',
+      'Bloom Print is focused on Australia. Availability can depend on the delivery location and florist coverage.',
   },
 ];
 
@@ -40,7 +40,7 @@ const config: OccasionLandingPageConfig = {
     canonicalPath: '/mothers-day-flower-delivery',
     structuredData: buildServiceSchema({
       serviceType: "Mother's Day Flower Delivery",
-      name: "Mother's Day Flower Delivery by FutureFlower",
+      name: "Mother's Day Flower Delivery by Bloom Print",
       description:
         "Fresh Mother's Day flowers designed by local Australian florists and delivered on Mother's Day.",
     }),

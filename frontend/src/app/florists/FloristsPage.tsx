@@ -11,7 +11,7 @@ import deliveryImage from '@/assets/delivery-1280w.webp';
 import { ValuePropsA } from './ValuePropsA';
 import type { FaqItem } from '@/types/FaqItem';
 import { HeroFloristPage } from './HeroFloristPage';
-import { WhyFutureFlowerSection } from './WhyFutureFlowerSection';
+import { WhyBloomPrintSection } from './WhyBloomPrintSection';
 import { SoWhatsTheCatchSection } from './SoWhatsTheCatchSection';
 import ComparisonSectionFlorists from './ComparisonSectionFlorists';
 
@@ -71,7 +71,7 @@ const FloristsPage = () => {
         steps={floristHowItWorksSteps}
       />
 
-      <WhyFutureFlowerSection />
+      <WhyBloomPrintSection />
 
       <ComparisonSectionFlorists />
 

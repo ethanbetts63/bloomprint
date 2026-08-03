@@ -5,13 +5,13 @@ You are reviewing scraped podcast leads and deciding which ones are Australian.
 Read:
 
 ```text
-C:\Users\ethan\coding\futureflower\marketing\podcasts.jsonl
+C:\Users\ethan\coding\bloomprint\marketing\podcasts.jsonl
 ```
 
 Update:
 
 ```text
-C:\Users\ethan\coding\futureflower\marketing\country_review.json
+C:\Users\ethan\coding\bloomprint\marketing\country_review.json
 ```
 
 ---

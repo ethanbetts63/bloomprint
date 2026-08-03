@@ -1,10 +1,10 @@
 Your task is to look in this file: 
-C:\Users\ethan\coding\futureflower\marketing\podcasts.jsonl
+C:\Users\ethan\coding\bloomprint\marketing\podcasts.jsonl
 
 Your job will be to one at a time fill in the "subject": "", "custom_intro": "", for any entries where these fields are blank. if they already have contents you do not need to touch them. 
 
 We will be using what you write to fill in the ___ in the following email. 
-C:\Users\ethan\coding\futureflower\marketing\email.txt
+C:\Users\ethan\coding\bloomprint\marketing\email.txt
 
 
 the subject is the subject line to be sent with the email. 
@@ -14,7 +14,7 @@ and the intro paragraph is the text that follows the line: ...ests, I just liste
 The subject can be anything you feel is right. Try to keep it varied but it does not matter too much. here are some examples: 
 - Thoughts on this? 
 - What do you think of this? 
-- Affliate offer from FutureFlower
+- Affliate offer from Bloom Print
 - etc. 
 
 okay so then there is the intro paragraph. its going to be bit formulaic. You start by writnig in the episode name. But don't copy and paste. Only write the episode name in a way that is natural for example: 

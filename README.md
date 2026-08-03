@@ -1,6 +1,6 @@
-# FutureFlower
+# Bloom Print
 
-**Live Site:** [https://www.futureflower.app/]
+**Live Site:** [https://www.bloomprint.app/]
 
 ## Tech Stack
 
@@ -35,8 +35,8 @@ Follow these instructions to set up a local development environment.
 
 1.  **Clone the repository:**
     ```bash
-    git clone <https://github.com/ethanbetts63/futureflower>
-    cd futureflower
+    git clone <https://github.com/ethanbetts63/bloomprint>
+    cd bloomprint
     ```
 
 2.  **Create and activate a Python virtual environment:**
@@ -60,7 +60,7 @@ Follow these instructions to set up a local development environment.
     HASHING_SALT=your_hashing_salt
 
     # Database Settings
-    DB_NAME=futureflower_db
+    DB_NAME=bloomprint_db
     DB_USER=root
     DB_PASSWORD=your_db_password
     DB_HOST=localhost
@@ -174,7 +174,7 @@ This project is licensed under the **Functional Source License 1.1 (FSL-1.1-MIT)
 
 ### What this means:
 * **Personal & Internal Use:** You are free to use, modify, and distribute this code for personal projects, internal business tools, and educational purposes.
-* **Non-Compete:** You **cannot** use this code to create a commercial product or service that competes with **FutureFlower**.
+* **Non-Compete:** You **cannot** use this code to create a commercial product or service that competes with **Bloom Print**.
 * **Future Open Source:** This specific version of the code will automatically become fully open-source under the **MIT License** on **December 23, 2027**.
 
 For the full legal terms, please see the [LICENSE.md](./LICENSE.md) file.

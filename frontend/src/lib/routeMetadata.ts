@@ -197,7 +197,7 @@ export function getRouteMetadata(path: string): Metadata {
   // There used to be a noindexPrefixes list checked here, but both branches
   // returned exactly this, so the list never changed an outcome.
   return {
-    title: "FutureFlower",
+    title: "Bloom Print",
     robots: {
       index: false,
       follow: false,

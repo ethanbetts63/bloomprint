@@ -6,7 +6,7 @@ from data_management.utils import sms_messages
 def _build_event_body(event):
     order = event.order
     return (
-        f"Upcoming FutureFlower delivery requires ordering.\n\n"
+        f"Upcoming Bloom Print delivery requires ordering.\n\n"
         f"Recipient: {order.recipient_first_name} {order.recipient_last_name}\n"
         f"Address: {order.recipient_street_address}, {order.recipient_suburb}, "
         f"{order.recipient_city}, {order.recipient_state} {order.recipient_postcode}, "
@@ -84,20 +84,20 @@ def create_customer_delivery_day_notification(event):
 
     body = (
         f"Hi {first_name},\n\n"
-        f"Your FutureFlower delivery is today! "
+        f"Your Bloom Print delivery is today! "
         f"Flowers should be arriving for {recipient_name}.\n"
     )
 
     if next_event:
         body += f"\nYour next delivery after this one is scheduled for {next_event.delivery_date}.\n"
 
-    body += "\nThank you for choosing FutureFlower!"
+    body += "\nThank you for choosing Bloom Print!"
 
     Notification.objects.create(
         recipient_type='customer',
         recipient_email=order.customer_email,
         channel='email',
-        subject="Your FutureFlower delivery is today!",
+        subject="Your Bloom Print delivery is today!",
         body=body,
         scheduled_for=event.delivery_date,
         related_event=event,

@@ -5,8 +5,8 @@ from partners.models.discount_code import DiscountCode
 User = get_user_model()
 
 ADMIN_USER = {
-    'username': 'admin@futureflower.app',
-    'email': 'admin@futureflower.app',
+    'username': 'admin@bloomprint.app',
+    'email': 'admin@bloomprint.app',
     'first_name': 'Ethan',
     'last_name': 'Betts',
     'is_superuser': True,
@@ -17,7 +17,7 @@ ADMIN_USER = {
 ADMIN_BUSINESS_ACCOUNT = {
     'account_type': 'florist',
     'status': 'active',
-    'business_name': 'FutureFlower',
+    'business_name': 'Bloom Print',
     'phone': '0423853830',
     'street_address': '78 Harold Street',
     'suburb': 'Dianella',

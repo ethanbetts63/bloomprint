@@ -48,7 +48,7 @@ class TestGuestCheckoutClaim:
         with a staff address neither resolves to that account nor grants anything.
         """
         staff = User.objects.create_user(
-            username='boss', email='boss@futureflower.app', is_staff=True
+            username='boss', email='boss@bloomprint.app', is_staff=True
         )
 
         client = APIClient()
@@ -56,13 +56,13 @@ class TestGuestCheckoutClaim:
 
         response = client.post(
             CLAIM_URL,
-            {'email': 'boss@futureflower.app', 'first_name': 'Not', 'last_name': 'Boss'},
+            {'email': 'boss@bloomprint.app', 'first_name': 'Not', 'last_name': 'Boss'},
             format='json',
         )
         assert response.status_code == 200, response.data
 
         order.refresh_from_db()
-        assert order.customer_email == 'boss@futureflower.app'
+        assert order.customer_email == 'boss@bloomprint.app'
         assert order.total_amount == Decimal('125.00')
         staff.refresh_from_db()
         assert staff.is_staff

@@ -1,5 +1,5 @@
 export const ORDER_FORM_ID = 'start-order';
-export const ORDER_FORM_HIGHLIGHT_EVENT = 'futureflower:highlight-order-form';
+export const ORDER_FORM_HIGHLIGHT_EVENT = 'bloomprint:highlight-order-form';
 
 /** How long the brief form stays highlighted after the nav "Order" button is clicked. */
 export const ORDER_FORM_HIGHLIGHT_MS = 900;

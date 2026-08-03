@@ -36,7 +36,7 @@ def send_password_reset_email(user: User):
             'unsubscribe_url': unsubscribe_url,
         }
 
-        subject = "Reset Your FutureFlower Password"
+        subject = "Reset Your Bloom Print Password"
         html_content = render_to_string("users/emails/password_reset_email.html", context)
         text_content = render_to_string("users/emails/password_reset_email.txt", context)
 

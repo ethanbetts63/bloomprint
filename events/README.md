@@ -2,93 +2,65 @@
 
 ## Purpose
 
-The `events` app is the core domain of FutureFlower. It manages orders (plans), individual deliveries (events), and the reference data for customer preferences (colors and flower types). It also contains the pricing engine for upfront multi-year plans.
+The `events` app is the core domain of Bloom Print. It manages orders (one-time or recurring flower plans), the individual deliveries (events) within them, and the guest checkout flow customers use to build and pay for an order.
 
 ## Models
 
-### OrderBase (Abstract Base)
-Base class for all order types. Stores recipient details, delivery preferences, plan parameters (budget, frequency, start date), and M2M preferences for colors and flower types.
+### Order
+The single order model for the system. `billing_mode` (`one_time` | `recurring`) distinguishes a single delivery from a subscription; `frequency` (`weekly`, `fortnightly`, `monthly`, `annually`) only applies when recurring.
 
 **Status lifecycle:** `pending_payment` -> `active` -> `completed` | `cancelled` | `refunded`
 
-### UpfrontPlan (extends OrderBase)
-A prepaid multi-year flower delivery plan. The customer pays upfront for all deliveries across a given number of years at a discounted rate (annuity pricing).
+**Pricing fields** (`delivery_fee`, `subtotal`, `total_amount`) are auto-computed on every `save()` while `status == 'pending_payment'` — see `_recalculate_price()` in `models/order.py`. Never set them directly.
 
-**Key fields:** `years`, `total_amount`
-
-Also used for single deliveries (years=1, frequency='annually') as a special case with no discount.
-
-### SubscriptionPlan (extends OrderBase)
-A recurring flower delivery subscription billed per delivery cycle via Stripe.
-
-**Key fields:** `total_amount`, `stripe_subscription_id`, `subscription_message`
+**Key methods:** `make_recurring(frequency)`, `make_one_time()` — convert a draft order between billing modes before payment.
 
 ### Event
-An individual flower delivery within a plan. Auto-generated for upfront plans on creation; created per-payment for subscriptions via webhook.
+An individual flower delivery belonging to an `Order`.
 
-**Key fields:** `order` (FK to OrderBase), `delivery_date`, `message`, `status`
+**Key fields:** `order` (FK), `delivery_date`, `message`, `status`, `ordered_at` / `delivered_at` with evidence text, `commission_amount`.
 
-### FlowerType
-Simple reference table for customer flower preferences. Populated via management commands from JSON data files.
+### CheckoutSession
+Opaque, cookie-held authority for an in-progress guest checkout. Maps a hashed token to a draft `Order` so an unauthenticated visitor can build and resume an order without an account.
+
+## Guest Checkout
+
+`GuestCheckoutView` (`events/views/guest_checkout_view.py`) exposes a single action-dispatch endpoint backing the whole checkout flow: starting a draft order, editing it, claiming it with contact details, switching billing mode, applying a discount code, accepting terms, and finally creating a Stripe payment intent.
 
 ## Testing
 
-The `events` app is covered by a comprehensive suite of tests:
-
-- **Model Tests:** Verifies `OrderBase`, `UpfrontPlan`, and `SubscriptionPlan` creation and string representations.
-- **Util Tests:** Covers pricing calculators, fee calculations, and delivery date projections.
-- **Serializer Tests:** Validates `UpfrontPlanSerializer` logic, including start date validation and update restrictions on active plans.
-- **View Tests:** Tests `UpfrontPlanViewSet`, `SubscriptionPlanViewSet`, `EventViewSet`, `FlowerTypeViewSet`, and public pricing endpoints. Includes authentication and ownership checks.
-- **Integration Tests:** Verifies that delivery `Event` objects are correctly generated upon successful payment (via mocked Stripe webhooks).
+- **Model Tests:** `Order` and `Event` creation, string representations.
+- **Util Tests:** Fee calculations (`utils/fee_calc.py`).
+- **Serializer Tests:** `OrderSerializer`.
+- **View Tests:** Guest checkout claim and discount flows.
+- **Integration Tests:** Verifies `Event` objects are correctly generated on successful payment.
 
 Run tests using: `pytest events/tests`
 
-### Discount
-Promotional discount codes linked to florist partners. Currently schema-only (not yet integrated into order/payment flow).
-
 ## Pricing Engine
-
-### `utils/upfront_price_calc.py`
-- `forever_flower_upfront_price(budget, frequency, years)` - Calculates total upfront cost using a compound-interest annuity formula with a 4% assumed annual return. Returns price and a detailed breakdown dict.
-- `calculate_final_plan_cost(plan, new_structure)` - Calculates the amount owing when modifying an existing plan, accounting for already-succeeded payments.
 
 ### `utils/fee_calc.py`
 - `calculate_delivery_fee(budget)` - Returns `$0` once the budget reaches `DELIVERY_INCLUDED_THRESHOLD` (the budget absorbs delivery), otherwise `DELIVERY_FEE`. Both live in `settings.py`.
 - `frequency_to_deliveries_per_year(frequency)` - Maps frequency string to annual delivery count.
 
-Pricing is computed server-side in `OrderBase.save()`: `subtotal = budget + delivery_fee`,
-then `total_amount = subtotal - discount_amount + tax_amount`. Never set `subtotal` or
+Pricing is computed server-side in `Order.save()`: `subtotal = budget + delivery_fee`,
+then `total_amount = subtotal - discount_amount`. Never set `subtotal` or
 `delivery_fee` directly — they are derived from `budget` on every save.
 
 ## API Endpoints
 
 All under `/api/events/`:
 
-### Upfront Plans
-- `GET/POST /upfront-plans/` - List/create plans (authenticated)
-- `GET/PATCH/DELETE /upfront-plans/<id>/` - Retrieve/update/delete (authenticated)
-- `GET /upfront-plans/get-latest-pending/` - Most recent pending plan
-- `GET /upfront-plans/get-or-create-pending/` - Get or create pending plan (`?mode=single-delivery` for single deliveries)
-- `POST /upfront-plans/<id>/calc-upfront-price/` - Price calculation for plan modifications
-
-### Subscription Plans
-- `GET/POST /subscription-plans/` - List/create (authenticated)
-- `GET/PATCH/DELETE /subscription-plans/<id>/` - Retrieve/update/delete
-- `GET /subscription-plans/get-or-create-pending/` - Get or create pending subscription
-- `POST /subscription-plans/<id>/calculate-price/` - Calculate price per delivery
-
-### Events
-- `GET/POST /events/` - List/create deliveries (authenticated, scoped to user)
-- `GET/PATCH/DELETE /events/<id>/` - Individual delivery management
-
-### Reference Data (Public)
-- `GET /colors/` - List available colors
-- `GET /flower-types/` - List available flower types
-
-### Public Pricing
-- `POST /calculate-price/` - Public price calculator (no auth required)
+- `POST /guest-checkout/start/` - Create or resume a draft order, sets the checkout cookie
+- `GET /guest-checkout/order/` - Retrieve the current draft order
+- `POST /guest-checkout/order/` - Update the draft order
+- `POST /guest-checkout/claim/` - Attach customer name/email to the draft order
+- `POST /guest-checkout/make-recurring/` - Switch the draft order to a subscription
+- `POST /guest-checkout/make-one-time/` - Switch the draft order back to a single delivery
+- `POST /guest-checkout/discount/` - Validate and apply a discount code
+- `POST /guest-checkout/accept-terms/` - Record acceptance of the current customer terms
+- `POST /guest-checkout/checkout/` - Validate the order and create a Stripe payment intent
 
 ## Templates
 
-- `notifications/emails/base.html` - Base email template (dark theme, responsive)
-- `notifications/emails/event_reminder.html` - Delivery reminder email (extends base)
+- `notifications/emails/base.html` / `base.txt` - Base email templates (dark theme, responsive)

@@ -31,7 +31,7 @@ const birthdayFaqs: FaqItem[] = [
   {
     question: 'Where do you deliver?',
     answer:
-      'FutureFlower is focused on Australia. Availability can depend on the delivery location and florist coverage.',
+      'Bloom Print is focused on Australia. Availability can depend on the delivery location and florist coverage.',
   },
 ];
 
@@ -40,7 +40,7 @@ const config: OccasionLandingPageConfig = {
     canonicalPath: '/birthday-flower-delivery',
     structuredData: buildServiceSchema({
       serviceType: 'Birthday Flower Delivery',
-      name: 'Birthday Flower Delivery by FutureFlower',
+      name: 'Birthday Flower Delivery by Bloom Print',
       description:
         'Fresh birthday flowers designed by local Australian florists and delivered on the date you choose.',
     }),

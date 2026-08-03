@@ -66,11 +66,11 @@ const BestFlowerDeliveryPerth = () => {
             <li>Easy Flowers is the most affordable option for simple deliveries.</li>
           </ul>
           <p>Which service is best depends on whether you value design, speed, or price, but for most occasions, one of these three will cover your needs.</p>
-          <p>If you do not want to choose from a fixed catalog bouquet, <a href="/" className="underline hover:opacity-70">FutureFlower</a> offers a more flexible way to order. You set the occasion, budget, delivery date, and preferences, then a local florist designs from the flowers they have fresh and available.</p>
+          <p>If you do not want to choose from a fixed catalog bouquet, <a href="/" className="underline hover:opacity-70">Bloom Print</a> offers a more flexible way to order. You set the occasion, budget, delivery date, and preferences, then a local florist designs from the flowers they have fresh and available.</p>
 
           <h2 className="text-3xl font-bold tracking-tight">A More Custom Way To Send Flowers</h2>
           <p>Most online flower ordering starts with a photo and asks a florist to recreate it. That can limit the florist and sometimes leads to substitutions that feel like compromises.</p>
-          <p>FutureFlower starts with the brief instead: who the flowers are for, the occasion, the budget, and any colours or flowers to include or avoid. The florist can then make something suited to the recipient and the season.</p>
+          <p>Bloom Print starts with the brief instead: who the flowers are for, the occasion, the budget, and any colours or flowers to include or avoid. The florist can then make something suited to the recipient and the season.</p>
           <p>That makes it a better fit when you want the bouquet to feel personal, fresh, and locally made rather than pulled from a standard product grid.</p>
         </div>
       </ArticleLayout>

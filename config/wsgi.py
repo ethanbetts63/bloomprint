@@ -1,5 +1,5 @@
 """
-WSGI config for futureflower project.
+WSGI config for bloomprint project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

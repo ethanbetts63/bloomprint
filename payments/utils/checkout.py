@@ -29,7 +29,7 @@ def _subscription_product_id():
     if product_id:
         return product_id
 
-    product = stripe.Product.create(name='FutureFlower Subscription')
+    product = stripe.Product.create(name='Bloom Print Subscription')
     cache.set(_SUBSCRIPTION_PRODUCT_CACHE_KEY, product.id, timeout=None)
     return product.id
 

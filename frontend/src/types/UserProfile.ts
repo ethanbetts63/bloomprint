@@ -1,4 +1,4 @@
-// futureflower/frontend/src/types/users.ts
+// bloomprint/frontend/src/types/users.ts
 
 /**
  * The dashboard a user belongs to. Computed on the backend (see

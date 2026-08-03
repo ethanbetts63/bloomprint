@@ -31,7 +31,7 @@ class StripeConnectOnboardView(APIView):
                     'url': settings.SITE_URL,
                     'product_description': (
                         'Referral affiliate earning commissions for referring customers to '
-                        'FutureFlower, an online flower subscription and delivery service.'
+                        'Bloom Print, an online flower subscription and delivery service.'
                     ),
                     'mcc': '7311',
                 }

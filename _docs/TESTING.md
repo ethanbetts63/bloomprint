@@ -1,6 +1,6 @@
-# FutureFlower Testing Strategy
+# Bloom Print Testing Strategy
 
-This document outlines the testing strategy for the FutureFlower project.
+This document outlines the testing strategy for the Bloom Print project.
 
 ## 1. Core Technology Stack
 

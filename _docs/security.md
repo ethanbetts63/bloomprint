@@ -1,4 +1,4 @@
-# FutureFlower Security Overview
+# Bloom Print Security Overview
 
 This document explains every significant security measure in the application — what the threat is, how we defend against it, and where in the code that defence lives. It is written to be readable without a security background.
 
@@ -57,7 +57,7 @@ Each cookie is set with three flags beyond HttpOnly:
 
 ### The threat
 
-CSRF is the flip side of using cookies. Because the browser sends cookies *automatically* with every request to your domain, an attacker on `evil.com` can craft a hidden form that submits to `futureflower.app/api/users/delete/`. The user's browser will helpfully attach the auth cookie, and the server has no way to tell the request didn't come from your own frontend.
+CSRF is the flip side of using cookies. Because the browser sends cookies *automatically* with every request to your domain, an attacker on `evil.com` can craft a hidden form that submits to `bloomprint.app/api/users/delete/`. The user's browser will helpfully attach the auth cookie, and the server has no way to tell the request didn't come from your own frontend.
 
 HttpOnly cookies solve XSS but introduce this new risk.
 
@@ -67,7 +67,7 @@ A CSRF token is a second, random value that the server sets as a *readable* cook
 
 The server checks: "did this request include the CSRF token that I set in the cookie?" A request from `evil.com` cannot include this header because:
 1. The attacker's page is on a different domain
-2. The browser's same-origin policy prevents `evil.com` from reading cookies belonging to `futureflower.app`
+2. The browser's same-origin policy prevents `evil.com` from reading cookies belonging to `bloomprint.app`
 
 So the attacker can trigger the request but can't include the token, and the server rejects it.
 
@@ -79,7 +79,7 @@ The CSRF token check is the second, belt-and-suspenders layer.
 
 ### Where this lives
 
-- **`django.middleware.csrf.CsrfViewMiddleware`** in `futureflower/settings.py` (MIDDLEWARE list) — Django's built-in CSRF middleware sets the `csrftoken` cookie on every response.
+- **`django.middleware.csrf.CsrfViewMiddleware`** in `bloomprint/settings.py` (MIDDLEWARE list) — Django's built-in CSRF middleware sets the `csrftoken` cookie on every response.
 - **`users/authentication.py` — `_enforce_csrf()`** — Our custom auth class manually enforces the CSRF check on every authenticated request (the same thing Django's `SessionAuthentication` does internally). This is critical: without it, cookie-based auth has no CSRF protection at the framework level.
 - **`frontend/src/utils/utils.ts` — `getCsrfToken()`** — Reads the `csrftoken` cookie value.
 - **`frontend/src/api/apiClient.ts` — `authedFetch()`** — Automatically includes the `X-CSRFToken` header on every non-GET request.
@@ -100,11 +100,11 @@ The short access token lifetime limits the damage window if something goes wrong
 
 ### Token rotation
 
-**`ROTATE_REFRESH_TOKENS: True`** in `futureflower/settings.py` means every time you use the refresh token to get a new access token, you also get a *new* refresh token and the old one is retired. This limits the window of exposure for a stolen refresh token — if a stolen token is used, the legitimate user's next refresh will fail, alerting them (via logout) that something is wrong.
+**`ROTATE_REFRESH_TOKENS: True`** in `bloomprint/settings.py` means every time you use the refresh token to get a new access token, you also get a *new* refresh token and the old one is retired. This limits the window of exposure for a stolen refresh token — if a stolen token is used, the legitimate user's next refresh will fail, alerting them (via logout) that something is wrong.
 
 ### Where this lives
 
-- **`futureflower/settings.py`** — `SIMPLE_JWT` dict controls all token lifetimes and rotation settings.
+- **`bloomprint/settings.py`** — `SIMPLE_JWT` dict controls all token lifetimes and rotation settings.
 - **`users/views/token_views.py` — `CookieTokenRefreshView`** — Handles the rotation: reads the old refresh cookie, validates it, issues new access and refresh cookies.
 
 ---
@@ -120,7 +120,7 @@ Logout is now a proper server request. The server responds with `Set-Cookie` hea
 ### Where this lives
 
 - **`users/views/token_views.py` — `LogoutView`** — Calls `response.delete_cookie()` on both the access and refresh token cookies.
-- **`futureflower/urls.py`** — Registered at `POST /api/token/logout/`.
+- **`bloomprint/urls.py`** — Registered at `POST /api/token/logout/`.
 - **`frontend/src/api/auth.ts` — `logoutUser()`** — Calls the logout endpoint.
 - **`frontend/src/context/AuthContext.tsx` — `logout()`** — Calls `logoutUser()` before clearing local user state.
 
@@ -134,7 +134,7 @@ Passwords are never stored in plain text. Django uses **PBKDF2** with a SHA-256 
 
 ### Validation rules
 
-Set in `futureflower/settings.py` under `AUTH_PASSWORD_VALIDATORS`:
+Set in `bloomprint/settings.py` under `AUTH_PASSWORD_VALIDATORS`:
 - **UserAttributeSimilarityValidator** — rejects passwords that are too similar to the user's name or email
 - **MinimumLengthValidator** — enforces a minimum character count
 - **CommonPasswordValidator** — rejects passwords on a list of the most commonly used passwords (e.g. "password123")
@@ -150,7 +150,7 @@ Without rate limiting, an attacker can hammer your API — attempting millions o
 
 ### The defence
 
-**`DEFAULT_THROTTLE_RATES`** in `futureflower/settings.py`:
+**`DEFAULT_THROTTLE_RATES`** in `bloomprint/settings.py`:
 - Anonymous users: 200 requests per day
 - Authenticated users: 500 requests per day
 
@@ -176,7 +176,7 @@ The attacker learns nothing.
 
 ## 9. Security Headers
 
-Provided automatically by **`django.middleware.security.SecurityMiddleware`** (in `futureflower/settings.py`):
+Provided automatically by **`django.middleware.security.SecurityMiddleware`** (in `bloomprint/settings.py`):
 
 | Header | What it does |
 |---|---|

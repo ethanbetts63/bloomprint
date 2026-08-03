@@ -1,7 +1,7 @@
 import OccasionLandingPage, { type OccasionLandingPageConfig } from '@/components/marketing/OccasionLandingPage';
 import { defaultTrustPoints } from '@/components/marketing/occasionLandingContent';
 import type { FaqItem } from '@/types/FaqItem';
-import { WhyFutureFlowerSection } from '@/components/marketing/WhyFutureFlowerSection';
+import { WhyBloomPrintSection } from '@/components/marketing/WhyBloomPrintSection';
 import { getRouteMetadata } from "@/lib/routeMetadata";
 
 export const metadata = getRouteMetadata("/");
@@ -25,7 +25,7 @@ const homeFaqs: FaqItem[] = [
   {
     question: 'Where do you deliver?',
     answer:
-      'FutureFlower is focused on Australia. Availability can depend on the delivery location and florist coverage.',
+      'Bloom Print is focused on Australia. Availability can depend on the delivery location and florist coverage.',
   },
 ];
 
@@ -68,6 +68,6 @@ const config: OccasionLandingPageConfig = {
 
 export default function Page() {
   return (
-  <OccasionLandingPage config={config} beforeFaq={<WhyFutureFlowerSection />} />
+  <OccasionLandingPage config={config} beforeFaq={<WhyBloomPrintSection />} />
 );
 }

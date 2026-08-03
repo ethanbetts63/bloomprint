@@ -68,7 +68,7 @@ const BestFlowerDeliveryMelbourne = () => {
             <li>Easy Flowers is the most affordable option for simple and quick deliveries.</li>
           </ul>
           <p>Whether you’re celebrating a milestone, sending a heartfelt message, or ordering flowers for the first time, one of these services will fit your needs.</p>
-          <p>If you want the florist to design around the person rather than copy a catalog image, <a href="/" className="underline hover:opacity-70">FutureFlower</a> is worth exploring. You set the occasion, budget, date, and preferences, and a local florist makes a custom bouquet from fresh available stems.</p>
+          <p>If you want the florist to design around the person rather than copy a catalog image, <a href="/" className="underline hover:opacity-70">Bloom Print</a> is worth exploring. You set the occasion, budget, date, and preferences, and a local florist makes a custom bouquet from fresh available stems.</p>
         </div>
       </ArticleLayout>
       <section>
