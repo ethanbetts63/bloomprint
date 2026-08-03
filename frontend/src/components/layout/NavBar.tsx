@@ -77,11 +77,11 @@ const NavBar = () => {
             <img
               src={assetSrc(logo)}
               srcSet={`${assetSrc(logo128)} 128w, ${assetSrc(logo192)} 192w, ${assetSrc(logo256)} 256w`}
-              sizes="48px"
+              sizes="56px"
               alt=""
               width="367"
               height="367"
-              className="h-12 w-12 object-contain"
+              className="h-14 w-14 object-contain"
             />
             <span className="hidden sm:block md:hidden font-playfair-display font-bold text-2xl text-black tracking-widest leading-none">
               BLOOMPRINT
@@ -111,7 +111,7 @@ const NavBar = () => {
                 // would do nothing at all for anyone already sitting on the form.
                 if (revealOrderForm()) event.preventDefault();
               }}
-              className="inline-flex items-center bg-black text-white font-bold px-4 py-1.5 text-xs tracking-widest uppercase"
+              className="inline-flex items-center bg-brand-blue text-white font-bold px-4 py-1.5 text-xs tracking-widest uppercase"
             >
               Order
             </Link>
