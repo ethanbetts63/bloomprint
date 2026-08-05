@@ -8,7 +8,7 @@ import {
   AdminDetailSection, AdminDetailTable, AdminInlineLink,
 } from '@/components/dashboard/AdminDetail';
 import {
-  DashboardStatusPill, dashboardLabel, formatDashboardCurrency, formatDashboardDateLong,
+  DashboardStatusPill, formatDashboardCurrency, formatDashboardDateLong,
 } from '@/components/dashboard/DashboardData';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { errorMessage } from '@/lib/errors';
@@ -63,24 +63,30 @@ export default function AdminUserDetailPage() {
         </AdminDetailGrid>
       </AdminDetailSection>
 
-      <AdminDetailSection title="Plans" description={`${user.plans.length} ${user.plans.length === 1 ? 'plan' : 'plans'}`} className="xl:col-span-2">
+      <AdminDetailSection
+        title="Orders"
+        description={`${user.orders.length} ${user.orders.length === 1 ? 'order' : 'orders'} matched on this email address`}
+        className="xl:col-span-2"
+      >
         <AdminDetailTable
-          headers={['Plan', 'Recipient', 'Total', 'Status', 'Created', 'Action']}
-          empty={user.plans.length === 0}
-          emptyMessage="This user has no plans."
+          headers={['Order', 'Recipient', 'Total', 'Status', 'Created', 'Action']}
+          empty={user.orders.length === 0}
+          emptyMessage="No orders were placed with this email address."
           minWidth={820}
         >
-          {user.plans.map((plan) => {
-            const recipient = [plan.recipient_first_name, plan.recipient_last_name].filter(Boolean).join(' ');
+          {user.orders.map((order) => {
+            const recipient = [order.recipient_first_name, order.recipient_last_name].filter(Boolean).join(' ');
             return (
-              <TableRow key={`${plan.plan_type}-${plan.id}`} className="border-slate-100 hover:bg-slate-50">
-                <TableCell className="font-medium text-slate-900">{dashboardLabel(plan.plan_type)} #{plan.id}</TableCell>
+              <TableRow key={order.id} className="border-slate-100 hover:bg-slate-50">
+                <TableCell className="font-medium text-slate-900">
+                  {order.order_type === 'recurring' ? 'Subscription' : 'One-off'} #{order.id}
+                </TableCell>
                 <TableCell className="text-slate-700">{recipient || '—'}</TableCell>
-                <TableCell className="font-semibold text-slate-950">{formatDashboardCurrency(plan.total_amount)}</TableCell>
-                <TableCell><DashboardStatusPill status={plan.status} /></TableCell>
-                <TableCell className="text-slate-600">{formatDashboardDateLong(plan.created_at)}</TableCell>
+                <TableCell className="font-semibold text-slate-950">{formatDashboardCurrency(order.total_amount)}</TableCell>
+                <TableCell><DashboardStatusPill status={order.status} /></TableCell>
+                <TableCell className="text-slate-600">{formatDashboardDateLong(order.created_at)}</TableCell>
                 <TableCell className="text-right">
-                  <AdminInlineLink href={`/dashboard/admin/plans/${plan.id}`}>View plan</AdminInlineLink>
+                  <AdminInlineLink href={`/dashboard/admin/orders/${order.id}`}>View order</AdminInlineLink>
                 </TableCell>
               </TableRow>
             );

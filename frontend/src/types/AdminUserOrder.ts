@@ -1,6 +1,6 @@
-export interface AdminUserPlan {
+export interface AdminUserOrder {
   id: number;
-  plan_type: 'upfront' | 'subscription';
+  order_type: 'one_time' | 'recurring';
   status: string;
   total_amount: string | null;
   created_at: string;

@@ -21,7 +21,8 @@ type MenuItem = { href: string; label: string };
 const ADMIN_LINKS: MenuItem[] = [
   { href: '/dashboard/admin', label: 'Admin Dashboard' },
   { href: '/dashboard/admin/accounts', label: 'Admin Florists & Affiliates' },
-  { href: '/dashboard/admin/plans', label: 'Admin Plan List' },
+  { href: '/dashboard/admin/events', label: 'Admin Event List' },
+  { href: '/dashboard/admin/orders', label: 'Admin Order List' },
   { href: '/dashboard/admin/users', label: 'Admin User List' },
   { href: '/dashboard/admin/payouts', label: 'Admin Payouts' },
 ];

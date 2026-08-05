@@ -1,4 +1,4 @@
-import type { AdminUserPlan } from './AdminUserPlan';
+import type { AdminUserOrder } from './AdminUserOrder';
 
 export interface AdminUserDetail {
   id: number;
@@ -13,5 +13,5 @@ export interface AdminUserDetail {
   deleted_at: string | null;
   role: import('./UserProfile').UserRole;
   referred_by: string | null;
-  plans: AdminUserPlan[];
+  orders: AdminUserOrder[];
 }

@@ -28,7 +28,6 @@ export interface AdminEvent {
   // Preferences
   flower_notes: string | null;
   // Customer
-  customer_id: number;
   customer_first_name: string;
   customer_last_name: string;
   customer_email: string;

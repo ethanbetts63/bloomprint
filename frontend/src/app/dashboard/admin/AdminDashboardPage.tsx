@@ -37,11 +37,21 @@ function personName(firstName: string, lastName: string): string {
   return `${firstName} ${lastName}`.trim() || '—';
 }
 
+// Each overview queue is a preset view of the full Events table, so "view all"
+// drops you into the same rows with the filters already applied.
+const QUEUE_HREF: Record<EventQueue, string> = {
+  to_order: '/dashboard/admin/events?status=scheduled&window=next_14',
+  ordered: '/dashboard/admin/events?status=ordered',
+  delivered: '/dashboard/admin/events?status=delivered&ordering=-delivery_date',
+};
+
 function EventTable({ title, events, queue }: { title: string; events: AdminEvent[]; queue: EventQueue }) {
   return (
     <DashboardOverviewTable
       title={title}
       count={events.length}
+      viewAllHref={QUEUE_HREF[queue]}
+      viewAllLabel="View all events"
       headers={['Recipient', 'Delivery', 'Location', 'Budget', queue === 'to_order' ? 'Timing' : 'Status', 'Actions']}
       empty={events.length === 0}
       emptyMessage="No events currently in this queue."

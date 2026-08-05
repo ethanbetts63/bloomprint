@@ -38,7 +38,7 @@ export default function AdminEventDetailPage() {
   }, [eventId]);
 
   if (loading) return <AdminDetailLoading />;
-  if (error || !event) return <AdminDetailError message={error ?? 'Event not found.'} backHref="/dashboard/admin" />;
+  if (error || !event) return <AdminDetailError message={error ?? 'Event not found.'} backHref="/dashboard/admin/events" />;
 
   const recipientName = `${event.recipient_first_name} ${event.recipient_last_name}`.trim();
   const customerName = `${event.customer_first_name} ${event.customer_last_name}`.trim();
@@ -56,8 +56,8 @@ export default function AdminEventDetailPage() {
     <AdminDetailPage
       title={`Delivery event #${event.id}`}
       description={`${recipientName} · ${formatDeliveryDate(event.delivery_date)}`}
-      backHref="/dashboard/admin"
-      backLabel="Back to overview"
+      backHref="/dashboard/admin/events"
+      backLabel="Back to events"
       actions={actions}
     >
       <AdminDetailSection title="Delivery">
@@ -75,11 +75,11 @@ export default function AdminEventDetailPage() {
         <AdminDetailGrid>
           <AdminDetailField label="Budget" value={formatDashboardCurrency(event.budget)} />
           <AdminDetailField label="Total amount" value={formatDashboardCurrency(event.total_amount)} />
-          <AdminDetailField label="Plan type" value={dashboardLabel(event.order_type)} />
+          <AdminDetailField label="Order type" value={event.order_type === 'recurring' ? 'Subscription' : 'One-off'} />
           <AdminDetailField label="Frequency" value={dashboardLabel(event.frequency)} />
           <AdminDetailField
-            label="Plan"
-            value={<AdminInlineLink href={`/dashboard/admin/plans/${event.order_id}`}>View plan #{event.order_id}</AdminInlineLink>}
+            label="Order"
+            value={<AdminInlineLink href={`/dashboard/admin/orders/${event.order_id}`}>View order #{event.order_id}</AdminInlineLink>}
           />
         </AdminDetailGrid>
       </AdminDetailSection>

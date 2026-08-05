@@ -43,12 +43,19 @@ class TestAdminOrderListView:
         ids = {o['id'] for o in response.data['results']}
         assert ids == {active.pk, pending.pk}
 
-    def test_filter_by_plan_type(self):
+    def test_filter_by_order_type_recurring(self):
         recurring = OrderFactory(billing_mode='recurring')
         OrderFactory(billing_mode='one_time')
-        response = self.client.get(URL, {'plan_type': 'recurring'})
+        response = self.client.get(URL, {'order_type': 'recurring'})
         ids = [o['id'] for o in response.data['results']]
         assert ids == [recurring.pk]
+
+    def test_filter_by_order_type_one_time(self):
+        one_time = OrderFactory(billing_mode='one_time')
+        OrderFactory(billing_mode='recurring')
+        response = self.client.get(URL, {'order_type': 'one_time'})
+        ids = [o['id'] for o in response.data['results']]
+        assert ids == [one_time.pk]
 
     def test_search_by_customer_email(self):
         match = OrderFactory(customer_email='findme@example.com')
@@ -56,6 +63,26 @@ class TestAdminOrderListView:
         response = self.client.get(URL, {'search': 'findme'})
         ids = [o['id'] for o in response.data['results']]
         assert ids == [match.pk]
+
+    def test_search_by_recipient_last_name(self):
+        match = OrderFactory(recipient_last_name='UniqueRecipient')
+        OrderFactory(recipient_last_name='Other')
+        response = self.client.get(URL, {'search': 'UniqueRecipient'})
+        ids = [o['id'] for o in response.data['results']]
+        assert ids == [match.pk]
+
+    def test_ordering_by_recipient(self):
+        alpha = OrderFactory(recipient_last_name='Alpha')
+        zeta = OrderFactory(recipient_last_name='Zeta')
+        response = self.client.get(URL, {'ordering': 'recipient'})
+        ids = [o['id'] for o in response.data['results']]
+        assert ids == [alpha.pk, zeta.pk]
+
+    def test_empty_list_when_no_orders(self):
+        response = self.client.get(URL)
+        assert response.status_code == 200
+        assert response.data['count'] == 0
+        assert response.data['results'] == []
 
     def test_ordering_by_total_ascending(self):
         # total_amount is derived from budget in Order.save(), so drive it via budget.

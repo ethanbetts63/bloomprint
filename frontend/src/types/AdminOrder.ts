@@ -1,6 +1,6 @@
-export interface AdminPlan {
+export interface AdminOrder {
   id: number;
-  plan_type: 'one_time' | 'recurring';
+  order_type: 'one_time' | 'recurring';
   status: 'pending_payment' | 'active' | 'completed' | 'cancelled' | 'refunded';
   budget: string;
   total_amount: string;

@@ -2,8 +2,9 @@ import { authedFetch } from './apiClient';
 import type { AdminDashboard } from '@/types/AdminDashboard';
 import type { AdminEvent } from '@/types/AdminEvent';
 import type { AdminBusinessAccount } from '@/types/AdminBusinessAccount';
-import type { AdminPlan } from '@/types/AdminPlan';
-import type { AdminPlanDetail } from '@/types/AdminPlanDetail';
+import type { AdminEventListItem } from '@/types/AdminEventListItem';
+import type { AdminOrder } from '@/types/AdminOrder';
+import type { AdminOrderDetail } from '@/types/AdminOrderDetail';
 import type { AdminUser } from '@/types/AdminUser';
 import type { AdminUserDetail } from '@/types/AdminUserDetail';
 import type { MarkOrderedPayload } from '@/types/MarkOrderedPayload';
@@ -52,13 +53,16 @@ export async function markEventDelivered(id: number, payload: MarkDeliveredPaylo
 }
 
 export interface AdminListParams {
-  status?: string; type?: string; search?: string; ordering?: string; page?: number; pageSize?: number;
+  status?: string; type?: string; window?: string; search?: string; ordering?: string; page?: number; pageSize?: number;
 }
 
 function adminListQuery(params: AdminListParams): string {
   const query = new URLSearchParams();
+  // 'all' is the table's "no filter" sentinel and must never reach the API —
+  // the backend would filter on the literal string and return nothing.
   if (params.status && params.status !== 'all') query.set('status', params.status);
   if (params.type && params.type !== 'all') query.set('type', params.type);
+  if (params.window && params.window !== 'all') query.set('window', params.window);
   if (params.search) query.set('search', params.search);
   if (params.ordering) query.set('ordering', params.ordering);
   if (params.page) query.set('page', String(params.page));
@@ -94,9 +98,15 @@ export async function denyBusinessAccount(id: number): Promise<AdminBusinessAcco
   return res.json();
 }
 
-export async function getAdminPlanDetail(planId: string | number): Promise<AdminPlanDetail> {
-  const res = await authedFetch(`/api/data/admin/plans/${planId}/`);
-  if (!res.ok) throw new Error('Failed to fetch plan');
+export async function getAdminEvents(params: AdminListParams = {}): Promise<Paginated<AdminEventListItem>> {
+  const res = await authedFetch(`/api/data/admin/events/${adminListQuery(params)}`);
+  if (!res.ok) throw new Error('Failed to fetch events');
+  return res.json();
+}
+
+export async function getAdminOrderDetail(orderId: string | number): Promise<AdminOrderDetail> {
+  const res = await authedFetch(`/api/data/admin/orders/${orderId}/`);
+  if (!res.ok) throw new Error('Failed to fetch order');
   return res.json();
 }
 
@@ -159,25 +169,11 @@ export async function denyCommission(id: number): Promise<CommissionActionResult
   return res.json();
 }
 
-export async function getAdminPlans(params: AdminListParams = {}): Promise<Paginated<AdminPlan>> {
+export async function getAdminOrders(params: AdminListParams = {}): Promise<Paginated<AdminOrder>> {
   const query = new URLSearchParams(adminListQuery(params).replace(/^\?/, ''));
-  if (params.type && params.type !== 'all') { query.delete('type'); query.set('plan_type', params.type); }
+  if (params.type && params.type !== 'all') { query.delete('type'); query.set('order_type', params.type); }
   const value = query.toString();
-  const res = await authedFetch(`/api/data/admin/plans/${value ? `?${value}` : ''}`);
-  if (!res.ok) throw new Error('Failed to fetch plans');
-  return res.json();
-}
-
-export async function getAdminOrders(params: AdminListParams = {}): Promise<Paginated<AdminPlan>> {
-  const qs = new URLSearchParams();
-  if (params.status) qs.set('status', params.status);
-  if (params.type && params.type !== 'all') qs.set('plan_type', params.type);
-  if (params.search) qs.set('search', params.search);
-  if (params.ordering) qs.set('ordering', params.ordering);
-  if (params.page) qs.set('page', String(params.page));
-  if (params.pageSize) qs.set('page_size', String(params.pageSize));
-  const query = qs.toString();
-  const res = await authedFetch(`/api/data/admin/orders/${query ? `?${query}` : ''}`);
+  const res = await authedFetch(`/api/data/admin/orders/${value ? `?${value}` : ''}`);
   if (!res.ok) throw new Error('Failed to fetch orders');
   return res.json();
 }

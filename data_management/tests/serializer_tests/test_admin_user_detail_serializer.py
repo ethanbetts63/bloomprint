@@ -16,7 +16,33 @@ def test_admin_user_detail_serializer_basic():
     assert data['email'] == user.email
     assert data['role'] == 'customer'
     assert data['referred_by'] is None
-    assert data['plans'] == []
+    assert data['orders'] == []
+
+
+@pytest.mark.django_db
+def test_admin_user_detail_serializer_matches_orders_by_email():
+    """
+    Orders have no FK to User, so they are matched back to an account on the
+    customer_email snapshotted at checkout — case-insensitively.
+    """
+    user = UserFactory(email='buyer@example.com')
+    mine = OrderFactory(customer_email='BUYER@example.com', billing_mode='recurring')
+    OrderFactory(customer_email='someone.else@example.com')
+
+    data = AdminUserDetailSerializer(user).data
+    assert [o['id'] for o in data['orders']] == [mine.pk]
+    assert data['orders'][0]['order_type'] == 'recurring'
+    assert data['orders'][0]['status'] == mine.status
+
+
+@pytest.mark.django_db
+def test_admin_user_detail_serializer_orders_newest_first():
+    user = UserFactory(email='buyer@example.com')
+    older = OrderFactory(customer_email='buyer@example.com')
+    newer = OrderFactory(customer_email='buyer@example.com')
+
+    data = AdminUserDetailSerializer(user).data
+    assert [o['id'] for o in data['orders']] == [newer.pk, older.pk]
 
 @pytest.mark.django_db
 def test_admin_user_detail_serializer_affiliate_role():

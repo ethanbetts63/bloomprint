@@ -3,7 +3,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAdminUser
 
 from events.models import Order
-from data_management.serializers.admin_plan_serializer import AdminPlanSerializer
+from data_management.serializers.admin_order_serializer import AdminOrderSerializer
 from config.pagination import DashboardPagination
 
 
@@ -12,8 +12,11 @@ from config.pagination import DashboardPagination
 ORDERING_MAP = {
     'created_at': ('created_at',),
     'total': ('total_amount',),
+    'budget': ('budget',),
     'status': ('status',),
+    'order_type': ('billing_mode',),
     'customer_name': ('customer_last_name', 'customer_first_name'),
+    'recipient': ('recipient_last_name', 'recipient_first_name'),
 }
 
 
@@ -21,15 +24,18 @@ class AdminOrderListView(ListAPIView):
     """
     Paginated, filterable, sortable order list backing the admin Orders table.
 
+    An order is the commercial record — who paid, how much, where it goes. The
+    deliveries it schedules are Events, listed separately at admin/events/.
+
     Query params:
-      status     comma-separated statuses (e.g. "active,pending_payment")
-      plan_type  billing_mode ("one_time" | "recurring")
-      search     matches customer/recipient name or customer email
-      ordering   one of ORDERING_MAP keys, optionally "-" prefixed (default -created_at)
-      page       1-based page number
+      status      comma-separated statuses (e.g. "active,pending_payment")
+      order_type  billing_mode ("one_time" | "recurring")
+      search      matches customer/recipient name or customer email
+      ordering    one of ORDERING_MAP keys, optionally "-" prefixed (default -created_at)
+      page        1-based page number
     """
     permission_classes = [IsAdminUser]
-    serializer_class = AdminPlanSerializer
+    serializer_class = AdminOrderSerializer
     pagination_class = DashboardPagination
 
     def get_queryset(self):
@@ -42,9 +48,9 @@ class AdminOrderListView(ListAPIView):
             if statuses:
                 qs = qs.filter(status__in=statuses)
 
-        plan_type = params.get('plan_type', '').strip()
-        if plan_type:
-            qs = qs.filter(billing_mode=plan_type)
+        order_type = params.get('order_type', '').strip()
+        if order_type:
+            qs = qs.filter(billing_mode=order_type)
 
         search = params.get('search', '').strip()
         if search:

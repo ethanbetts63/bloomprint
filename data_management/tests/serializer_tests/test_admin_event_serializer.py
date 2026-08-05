@@ -28,6 +28,6 @@ def test_admin_event_serializer_fields():
     assert data['recipient_first_name'] == "Jane"
     assert data['recipient_last_name'] == "Doe"
     assert data['delivery_notes'] == "Leave at door"
-    assert data['order_type'] == "One-time"
+    assert data['order_type'] == "one_time"
     assert data['flower_notes'] == "Occasion / vibe: Romance"
     assert data['customer_email'] == order.customer_email

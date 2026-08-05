@@ -1,8 +1,8 @@
-import type { AdminPlanEvent } from './AdminPlanEvent';
+import type { AdminOrderEvent } from './AdminOrderEvent';
 
-export interface AdminPlanDetail {
+export interface AdminOrderDetail {
   id: number;
-  plan_type: 'one_time' | 'recurring';
+  order_type: 'one_time' | 'recurring';
   status: 'pending_payment' | 'active' | 'completed' | 'cancelled' | 'refunded';
   budget: string | null;
   total_amount: string | null;
@@ -20,9 +20,8 @@ export interface AdminPlanDetail {
   delivery_notes: string | null;
   preferred_delivery_time: string | null;
   flower_notes: string | null;
-  customer_id: number;
   customer_first_name: string;
   customer_last_name: string;
   customer_email: string;
-  events: AdminPlanEvent[];
+  events: AdminOrderEvent[];
 }

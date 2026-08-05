@@ -5,14 +5,14 @@ from events.tests.factories.order_factory import OrderFactory
 
 
 @pytest.mark.django_db
-class TestAdminPlanDetailView:
+class TestAdminOrderDetailView:
     def setup_method(self):
         self.client = APIClient()
         self.admin = UserFactory(is_staff=True, is_superuser=True)
         self.client.force_authenticate(user=self.admin)
 
     def _url(self, pk):
-        return f'/api/data/admin/plans/{pk}/'
+        return f'/api/data/admin/orders/{pk}/'
 
     def test_returns_one_time_order(self):
         plan = OrderFactory(billing_mode='one_time')

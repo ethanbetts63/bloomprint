@@ -10,10 +10,10 @@ const nav: DashboardNavSection[] = [
     ],
   },
   {
-    label: 'Orders',
+    label: 'Fulfilment',
     items: [
+      { href: '/dashboard/admin/events', label: 'Events', icon: CalendarRange },
       { href: '/dashboard/admin/orders', label: 'Orders', icon: ClipboardList },
-      { href: '/dashboard/admin/plans', label: 'Plans', icon: CalendarRange },
     ],
   },
   {
