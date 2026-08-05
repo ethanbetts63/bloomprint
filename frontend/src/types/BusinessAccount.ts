@@ -47,10 +47,15 @@ export interface Commission {
 
 export interface DeliveryRequestSummary {
   id: number;
-  event_id: number;
+  /** Quotable delivery reference (e.g. BP-K4F9Q2). Never the database id. */
+  reference: string;
   delivery_date: string;
   recipient_name: string;
-  budget?: string;
+  /** What the florist has to spend on flowers, after commission. */
+  florist_budget?: string;
+  delivery_fee?: string;
+  /** florist_budget + delivery_fee — what the florist invoices. */
+  florist_total?: string;
   status: 'pending' | 'accepted' | 'declined' | 'expired';
   token: string;
   expires_at: string | null;

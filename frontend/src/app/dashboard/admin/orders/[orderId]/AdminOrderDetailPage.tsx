@@ -85,12 +85,13 @@ export default function AdminOrderDetailPage() {
         className="xl:col-span-2"
       >
         <AdminDetailTable
-          headers={['Delivery date', 'Status', 'Action']}
+          headers={['Reference', 'Delivery date', 'Status', 'Action']}
           empty={order.events.length === 0}
           emptyMessage="No deliveries are attached to this order."
         >
           {order.events.map((event) => (
             <TableRow key={event.id} className="border-slate-100 hover:bg-slate-50">
+              <TableCell className="font-mono text-slate-700">{event.reference}</TableCell>
               <TableCell className="font-medium text-slate-900">{formatDashboardDateLong(event.delivery_date)}</TableCell>
               <TableCell><DashboardStatusPill status={event.status} /></TableCell>
               <TableCell className="text-right">

@@ -8,6 +8,10 @@ export interface AdminEvent {
   delivered_at: string | null;
   delivery_evidence_text: string | null;
   // Order fields
+  reference: string;
+  florist_budget: string | null;
+  platform_commission: string | null;
+  delivery_fee: string | null;
   order_id: number;
   order_type: string;
   budget: string;

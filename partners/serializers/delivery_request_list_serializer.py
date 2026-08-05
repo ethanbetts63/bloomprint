@@ -4,15 +4,32 @@ from partners.models import DeliveryRequest
 
 
 class DeliveryRequestListSerializer(serializers.ModelSerializer):
-    event_id = serializers.IntegerField(source='event.id')
+    """
+    What a florist sees for a delivery offered to them.
+
+    Deliberately exposes the event's reference rather than its primary key, and
+    the florist's own budget rather than the customer's — a florist quoting
+    "Event #7" reveals Bloom Print's volume, and a florist shown the customer's
+    budget would expect to be paid it.
+    """
+    reference = serializers.CharField(source='event.reference', read_only=True)
     delivery_date = serializers.DateField(source='event.delivery_date')
     recipient_name = serializers.SerializerMethodField()
-    budget = serializers.DecimalField(source='event.order.budget', max_digits=10, decimal_places=2)
+    florist_budget = serializers.DecimalField(
+        source='event.florist_budget', max_digits=10, decimal_places=2, read_only=True
+    )
+    delivery_fee = serializers.DecimalField(
+        source='event.delivery_fee', max_digits=10, decimal_places=2, read_only=True
+    )
+    florist_total = serializers.DecimalField(
+        source='event.florist_total', max_digits=10, decimal_places=2, read_only=True
+    )
 
     class Meta:
         model = DeliveryRequest
         fields = [
-            'id', 'event_id', 'delivery_date', 'recipient_name', 'budget',
+            'id', 'reference', 'delivery_date', 'recipient_name',
+            'florist_budget', 'delivery_fee', 'florist_total',
             'status', 'token', 'expires_at', 'created_at',
         ]
 

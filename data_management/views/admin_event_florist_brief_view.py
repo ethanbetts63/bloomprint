@@ -26,7 +26,8 @@ class AdminEventFloristBriefView(APIView):
             return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
 
         pdf_bytes = build_florist_brief(event)
-        filename = f"bloomprint-florist-brief-delivery-{event.pk}.pdf"
+        slug = (event.reference or f'delivery-{event.pk}').lower()
+        filename = f"bloomprint-florist-brief-{slug}.pdf"
         response = HttpResponse(pdf_bytes, content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
         response['Content-Length'] = str(len(pdf_bytes))

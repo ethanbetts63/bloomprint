@@ -26,13 +26,40 @@ class TestAdminEventFloristBriefView:
         assert response['Content-Type'] == 'application/pdf'
         assert response.content.startswith(b'%PDF-')
 
-    def test_served_as_a_download_with_the_event_id_in_the_filename(self):
+    def test_served_as_a_download_named_by_reference(self):
         event = EventFactory()
         response = self.client.get(self._url(event.id))
 
         disposition = response['Content-Disposition']
         assert disposition.startswith('attachment;')
-        assert f'delivery-{event.id}.pdf' in disposition
+        assert event.reference.lower() in disposition
+
+    def test_shows_the_reference_and_not_the_primary_key(self):
+        """The sheet must never reveal how many deliveries Bloom Print has done."""
+        from pypdf import PdfReader
+        from io import BytesIO
+
+        order = OrderFactory(budget=Decimal('140.00'))
+        event = EventFactory(order=order, reference='BP-ZZZZZZ')
+        response = self.client.get(self._url(event.id))
+
+        text = PdfReader(BytesIO(response.content)).pages[0].extract_text()
+        assert 'BP-ZZZZZZ' in text
+        assert 'DELIVERY #' not in text.upper()
+        assert f'Order #{order.pk}' not in text
+
+    def test_shows_the_florist_money_not_just_the_customer_budget(self):
+        from pypdf import PdfReader
+        from io import BytesIO
+
+        order = OrderFactory(budget=Decimal('140.00'))
+        event = EventFactory(order=order)
+        response = self.client.get(self._url(event.id))
+
+        text = PdfReader(BytesIO(response.content)).pages[0].extract_text()
+        assert '$119.00' in text   # what the florist has to spend
+        assert '$140.00' in text   # the customer's budget, shown for transparency
+        assert '$21.00' in text    # Bloom Print's commission
 
     def test_requires_admin(self):
         event = EventFactory()

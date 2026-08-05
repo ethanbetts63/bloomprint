@@ -37,11 +37,11 @@ export default function AdminEventDetailPage() {
     setBriefError(null);
     let objectUrl: string | null = null;
     try {
-      const blob = await getAdminEventFloristBrief(id);
+      const { blob, filename } = await getAdminEventFloristBrief(id);
       objectUrl = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = objectUrl;
-      link.download = `bloomprint-florist-brief-delivery-${id}.pdf`;
+      link.download = filename;
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -89,7 +89,7 @@ export default function AdminEventDetailPage() {
 
   return (
     <AdminDetailPage
-      title={`Delivery event #${event.id}`}
+      title={`Delivery ${event.reference}`}
       description={`${recipientName} · ${formatDeliveryDate(event.delivery_date)}`}
       backHref="/dashboard/admin/events"
       backLabel="Back to events"

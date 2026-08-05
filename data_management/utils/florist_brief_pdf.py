@@ -138,9 +138,16 @@ def build_florist_brief(event) -> bytes:
     order = event.order
 
     budget = order.budget or Decimal("0.00")
-    commission = calculate_florist_commission(budget)
-    flower_spend = calculate_florist_payout(budget)
-    delivery_fee = order.delivery_fee or Decimal("0.00")
+    # Prefer the snapshot frozen onto the event at creation; fall back to a live
+    # calculation only for events written before the snapshot existed.
+    commission = event.platform_commission
+    flower_spend = event.florist_budget
+    if commission is None or flower_spend is None:
+        commission = calculate_florist_commission(budget)
+        flower_spend = calculate_florist_payout(budget)
+    delivery_fee = event.delivery_fee
+    if delivery_fee is None:
+        delivery_fee = order.delivery_fee or Decimal("0.00")
     florist_total = (flower_spend + delivery_fee).quantize(Decimal("0.01"))
     # normalize() then ':f' renders 0.15 as "15" and 0.125 as "12.5", never "15.00".
     rate_pct = (Decimal(str(settings.FLORIST_COMMISSION_RATE)) * 100).quantize(Decimal('0.01')).normalize()
@@ -149,7 +156,7 @@ def build_florist_brief(event) -> bytes:
     buffer = BytesIO()
     page_width, page_height = A4
     pdf = canvas.Canvas(buffer, pagesize=A4)
-    pdf.setTitle(f"Bloom Print florist brief — delivery #{event.pk}")
+    pdf.setTitle(f"Bloom Print florist brief — {event.reference}")
     pdf.setAuthor("Bloom Print")
     pdf.setSubject(f"Delivery brief for {event.delivery_date:%d %B %Y}")
 
@@ -183,12 +190,14 @@ def build_florist_brief(event) -> bytes:
     pdf.setFillColor(MUTED)
     pdf.drawString(text_x, header_y + 11, "Florist brief — please keep this with the order")
 
-    pdf.setFont("Helvetica-Bold", 10)
+    # The reference, never the primary key — and no order number at all: the
+    # florist has no relationship with the order, only with this delivery.
+    pdf.setFont("Helvetica-Bold", 13)
     pdf.setFillColor(INK)
-    pdf.drawRightString(page_width - margin, header_y + 26, f"DELIVERY #{event.pk}")
-    pdf.setFont("Helvetica", 9)
+    pdf.drawRightString(page_width - margin, header_y + 26, event.reference or "—")
+    pdf.setFont("Helvetica", 8.5)
     pdf.setFillColor(MUTED)
-    pdf.drawRightString(page_width - margin, header_y + 11, f"Order #{order.pk}")
+    pdf.drawRightString(page_width - margin, header_y + 11, "Quote this reference")
 
     pdf.setStrokeColor(LINE)
     pdf.setLineWidth(1)
@@ -296,7 +305,7 @@ def build_florist_brief(event) -> bytes:
     # leave a hole in the middle of the page.
     qr_panel_height = 132
     qr_panel_y = margin + 26
-    strip_height = 62
+    strip_height = 74  # fits three lines in the narrowest cell without touching the border
     strip_y = max(min(y, ry) - 18 - strip_height, qr_panel_y + qr_panel_height + 18)
 
     pdf.setStrokeColor(LINE)
@@ -304,9 +313,9 @@ def build_florist_brief(event) -> bytes:
     pdf.roundRect(margin, strip_y, content_width, strip_height, 8, fill=0, stroke=1)
 
     terms = [
-        ("Flat 15% commission", "No monthly fees, no listing fees, nothing to join."),
-        ("Say no any time", "Pass on any order, with no penalty for declining."),
-        ("Your design", "The brief is guidance, not a recipe to copy."),
+        ("Deliver as you", "Your logo, your card, your name at the door — not ours."),
+        ("We handle refunds", "Any complaint comes to us. We sort the refund or redelivery."),
+        ("Match it, or decline", "Get as close to the preferences as you reasonably can. If you can't, decline."),
     ]
     cell_width = content_width / 3
     for index, (title, detail) in enumerate(terms):
@@ -355,13 +364,9 @@ def build_florist_brief(event) -> bytes:
     pdf.setFont("Helvetica", 7.5)
     pdf.setFillColor(MUTED)
     pdf.drawString(margin, margin - 8, "Bloom Print — bloomprint.com.au")
-    # Deliberately no customer contact details: this sheet goes to a third party
-    # and the florist needs the recipient, not the buyer.
-    pdf.drawRightString(
-        page_width - margin,
-        margin - 8,
-        f"Quote against delivery #{event.pk} (order #{order.pk})",
-    )
+    # Deliberately no customer contact details and no internal IDs: this sheet
+    # goes to a third party and the florist needs the recipient, not the buyer.
+    pdf.drawRightString(page_width - margin, margin - 8, f"Invoice against {event.reference}")
 
     pdf.showPage()
     pdf.save()

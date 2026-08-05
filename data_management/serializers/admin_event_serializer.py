@@ -30,9 +30,10 @@ class AdminEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = [
-            'id', 'delivery_date', 'status', 'message',
+            'id', 'reference', 'delivery_date', 'status', 'message',
             'ordered_at', 'ordering_evidence_text',
             'delivered_at', 'delivery_evidence_text',
+            'florist_budget', 'platform_commission', 'delivery_fee',
             'order_id', 'order_type', 'budget', 'total_amount', 'frequency',
             'start_date', 'preferred_delivery_time', 'delivery_notes',
             'recipient_first_name', 'recipient_last_name', 'recipient_street_address',

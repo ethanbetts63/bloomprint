@@ -93,7 +93,7 @@ export default function AdminEventsPage() {
       header: 'Delivery',
       render: (item) => (
         <>
-          <span className="font-mono font-semibold text-slate-950">#{item.id}</span>
+          <span className="font-mono font-semibold text-slate-950">{item.reference}</span>
           <div className="text-xs text-slate-500">Order #{item.order_id}</div>
         </>
       ),

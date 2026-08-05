@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, XCircle, MapPin, Calendar, DollarSign } from 'lucide-react';
+import { CheckCircle, XCircle, MapPin, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 import { getDeliveryRequestByToken, respondToDeliveryRequest, markDeliveryComplete } from '@/api/businessAccounts';
 import type { DeliveryRequestDetail } from '@/types';
@@ -90,15 +90,48 @@ const DeliveryRequestPage = () => {
                 <CardTitle className="text-3xl md:text-4xl font-bold font-playfair-display">Delivery Request</CardTitle>
                 <Badge variant="outline" className="text-sm capitalize">{request.status}</Badge>
               </div>
-              <CardDescription>Review the delivery details below.</CardDescription>
+              <CardDescription>
+                Review the delivery details below. Quote <span className="font-mono font-semibold">{request.reference}</span> on your invoice.
+              </CardDescription>
             </CardHeader>
 
             <CardContent className="space-y-6 px-4 md:px-8">
+              {/* The florist's own money, with the full breakdown — the same
+                  figures as the printed brief, so the two can never disagree. */}
+              <div className="rounded-xl border border-black/10 bg-[#eaf1e7] p-4 md:p-5">
+                <div className="flex flex-wrap items-end justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-[#12613a]">
+                      Flowers to the value of
+                    </p>
+                    <p className="mt-1 text-3xl md:text-4xl font-bold font-playfair-display">
+                      ${Number(request.florist_budget).toFixed(2)}
+                    </p>
+                  </div>
+                  <dl className="text-sm space-y-1 min-w-[15rem]">
+                    <div className="flex justify-between gap-6">
+                      <dt className="text-muted-foreground">Delivery fee (yours in full)</dt>
+                      <dd>${Number(request.delivery_fee).toFixed(2)}</dd>
+                    </div>
+                    <div className="flex justify-between gap-6 border-t border-black/10 pt-1 font-semibold">
+                      <dt>You invoice Bloom Print</dt>
+                      <dd>${Number(request.florist_total).toFixed(2)}</dd>
+                    </div>
+                  </dl>
+                </div>
+                <p className="mt-3 text-sm text-black/70">
+                  Design freely to this value — no set recipe, no stem count, no vase requirement.
+                </p>
+              </div>
+
               <div className="flex items-center gap-3">
                 <Calendar className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm text-muted-foreground">Delivery Date</p>
                   <p className="font-semibold">{request.delivery_date}</p>
+                  {request.preferred_delivery_time && (
+                    <p className="text-sm capitalize">Preferred: {request.preferred_delivery_time.replace(/_/g, ' ')}</p>
+                  )}
                 </div>
               </div>
 
@@ -107,6 +140,9 @@ const DeliveryRequestPage = () => {
                 <div>
                   <p className="text-sm text-muted-foreground">Delivery Location</p>
                   <p className="font-semibold">{request.recipient_name}</p>
+                  {request.recipient_street_address && (
+                    <p className="text-sm">{request.recipient_street_address}</p>
+                  )}
                   <p className="text-sm">
                     {[request.recipient_suburb, request.recipient_city, request.recipient_state, request.recipient_postcode]
                       .filter(Boolean).join(', ')}
@@ -115,27 +151,31 @@ const DeliveryRequestPage = () => {
                 </div>
               </div>
 
-              {request.budget && (
-                <div className="flex items-center gap-3">
-                  <DollarSign className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Budget</p>
-                    <p className="font-semibold">${Number(request.budget).toFixed(2)}</p>
-                  </div>
+              {request.occasion && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Occasion</p>
+                  <p className="text-sm mt-1">{request.occasion}</p>
+                </div>
+              )}
+
+              {request.flower_notes && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Flower Preferences</p>
+                  <p className="text-sm mt-1 whitespace-pre-wrap">{request.flower_notes}</p>
                 </div>
               )}
 
               {request.delivery_notes && (
                 <div>
                   <p className="text-sm text-muted-foreground">Delivery Notes</p>
-                  <p className="text-sm mt-1">{request.delivery_notes}</p>
+                  <p className="text-sm mt-1 whitespace-pre-wrap">{request.delivery_notes}</p>
                 </div>
               )}
 
               {request.message && (
                 <div>
                   <p className="text-sm text-muted-foreground">Card Message</p>
-                  <p className="text-sm mt-1 italic">"{request.message}"</p>
+                  <p className="text-sm mt-1 italic whitespace-pre-wrap">&ldquo;{request.message}&rdquo;</p>
                 </div>
               )}
 

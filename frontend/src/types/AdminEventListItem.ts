@@ -4,6 +4,7 @@ export interface AdminEventListItem {
   status: 'scheduled' | 'ordered' | 'delivered' | 'cancelled';
   ordered_at: string | null;
   delivered_at: string | null;
+  reference: string;
   order_id: number;
   order_type: 'one_time' | 'recurring';
   budget: string;

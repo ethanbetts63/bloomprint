@@ -25,6 +25,7 @@ class AdminEventListSerializer(serializers.ModelSerializer):
         model = Event
         fields = [
             'id',
+            'reference',
             'delivery_date',
             'status',
             'ordered_at',

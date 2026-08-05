@@ -24,6 +24,7 @@ class AdminOrderDetailSerializer(serializers.ModelSerializer):
         return [
             {
                 'id': e.id,
+                'reference': e.reference,
                 'delivery_date': str(e.delivery_date),
                 'status': e.status,
             }
