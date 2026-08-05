@@ -15,7 +15,7 @@ export const cityCoverage = {
     city: 'Perth',
     state: 'Western Australia',
     introduction:
-      'Bloom Print arranges florist-led delivery throughout metropolitan Perth, from the coast to the eastern hills and from Joondalup to Rockingham. Common delivery areas include the suburbs below.',
+      'Bloom Print is building a network of independent florists across metropolitan Perth, from the coast to the eastern hills and from Joondalup to Rockingham. The suburbs below are the areas we are working to cover.',
     regions: [
       {
         name: 'Perth CBD and inner suburbs',
@@ -63,7 +63,7 @@ export const cityCoverage = {
     city: 'Sydney',
     state: 'New South Wales',
     introduction:
-      'Bloom Print coordinates local florist delivery across Greater Sydney, including the CBD, eastern suburbs, Inner West, North Shore, Northern Beaches, western Sydney and the south.',
+      'Bloom Print is building a network of independent florists across Greater Sydney, including the CBD, eastern suburbs, Inner West, North Shore, Northern Beaches, western Sydney and the south. The suburbs below are the areas we are working to cover.',
     regions: [
       {
         name: 'Sydney CBD and eastern suburbs',
@@ -119,7 +119,7 @@ export const cityCoverage = {
     city: 'Melbourne',
     state: 'Victoria',
     introduction:
-      'Bloom Print organises florist-led delivery across metropolitan Melbourne, covering the inner city, bayside, northern, eastern, south-eastern and western suburbs.',
+      'Bloom Print is building a network of independent florists across metropolitan Melbourne, spanning the inner city, bayside, northern, eastern, south-eastern and western suburbs. The suburbs below are the areas we are working to cover.',
     regions: [
       {
         name: 'Melbourne CBD and inner north',
@@ -175,7 +175,7 @@ export const cityCoverage = {
     city: 'Brisbane',
     state: 'Queensland',
     introduction:
-      'Bloom Print matches orders with local florists across Greater Brisbane, including the inner city, northside, southside, bayside and western suburbs.',
+      'Bloom Print is building a network of independent florists across Greater Brisbane, including the inner city, northside, southside, bayside and western suburbs. The suburbs below are the areas we are working to cover.',
     regions: [
       {
         name: 'Brisbane CBD and inner suburbs',
@@ -223,7 +223,7 @@ export const cityCoverage = {
     city: 'Adelaide',
     state: 'South Australia',
     introduction:
-      'Bloom Print coordinates local florist delivery throughout metropolitan Adelaide, from the CBD and inner suburbs to the coast, Adelaide Hills, northern and southern suburbs.',
+      'Bloom Print is building a network of independent florists throughout metropolitan Adelaide, from the CBD and inner suburbs to the coast, Adelaide Hills, northern and southern suburbs. The suburbs below are the areas we are working to cover.',
     regions: [
       {
         name: 'Adelaide CBD and inner suburbs',
@@ -270,7 +270,7 @@ export const cityCoverage = {
     city: 'Hobart',
     state: 'Tasmania',
     introduction:
-      'Bloom Print arranges local florist delivery across Greater Hobart, including the central suburbs, northern corridor, Eastern Shore and Kingborough area.',
+      'Bloom Print is building a network of independent florists across Greater Hobart, including the central suburbs, northern corridor, Eastern Shore and Kingborough area. The suburbs below are the areas we are working to cover.',
     regions: [
       {
         name: 'Central and inner Hobart',

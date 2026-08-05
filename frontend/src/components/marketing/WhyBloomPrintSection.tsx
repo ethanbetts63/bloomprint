@@ -19,7 +19,7 @@ const reasons = [
   {
     icon: Flower2,
     title: 'Designed by a florist',
-    text: 'Every arrangement is made by a local florist, not copied from a fixed warehouse catalogue.',
+    text: 'Your arrangement is made by an independent florist, never copied from a fixed warehouse catalogue.',
   },
   {
     icon: MapPin,
@@ -69,7 +69,7 @@ export const WhyBloomPrintSection = () => (
             Flower delivery across Australia
           </h3>
           <p className="mt-3 leading-relaxed text-black/60">
-            Send a florist-led arrangement to recipients across Australia&apos;s major cities. Choose a city to see local delivery information and the suburbs currently covered.
+            Send a florist-led arrangement to recipients across Australia&apos;s major cities. Choose a city to see local delivery information and the suburbs we&apos;re working to cover.
           </p>
 
           <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">

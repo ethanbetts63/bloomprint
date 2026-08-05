@@ -79,8 +79,8 @@ const config: OccasionLandingPageConfig = {
     },
     {
       icon: MapPin,
-      title: 'Made in Adelaide',
-      text: 'Every order is made and delivered by a local Adelaide florist — their name on the delivery, your money in their till.',
+      title: 'Designed in Adelaide',
+      text: 'Your order is made and delivered by an independent Adelaide florist — never a warehouse. Their name on the delivery, your money in their till.',
     },
     {
       icon: ShieldCheck,
@@ -102,7 +102,7 @@ const config: OccasionLandingPageConfig = {
     {
       icon: Flower2,
       audience: 'Better for you',
-      text: 'You get fresh Adelaide flowers chosen for the occasion, budget, and delivery date.',
+      text: 'You get fresh flowers chosen for the occasion, budget, and delivery date.',
     },
   ],
   howItWorksHeading: 'Three steps between you and Adelaide flowers.',

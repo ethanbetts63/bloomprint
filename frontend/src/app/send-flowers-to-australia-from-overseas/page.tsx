@@ -80,9 +80,9 @@ const config: OccasionLandingPageConfig = {
   heroTitle: 'Send flowers to Australia from overseas.',
   heroSubtext:
     'Order from anywhere in the world. Choose the occasion, budget, delivery date, and preferences, and a local Australian florist will create and deliver the arrangement.',
-  imageOverlayTitle: 'Made in Australia, not shipped across borders.',
+  imageOverlayTitle: 'Arranged in Australia, not shipped across borders.',
   imageOverlayText:
-    'Your order is prepared near the recipient by an independent Australian florist using fresh, locally available flowers.',
+    'Your order is prepared near the recipient by an independent Australian florist from the freshest stock available to them.',
   trustPoints: [
     {
       icon: Globe2,

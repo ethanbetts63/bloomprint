@@ -28,6 +28,13 @@ export async function getAdminEvent(id: number): Promise<AdminEvent> {
   return res.json();
 }
 
+/** The printable one-page brief an admin hands to a florist. Returns raw PDF bytes. */
+export async function getAdminEventFloristBrief(id: number): Promise<Blob> {
+  const res = await authedFetch(`/api/data/admin/events/${id}/florist-brief/`);
+  if (!res.ok) throw new Error('Failed to generate the florist brief');
+  return res.blob();
+}
+
 export async function markEventOrdered(id: number, payload: MarkOrderedPayload): Promise<AdminEvent> {
   const res = await authedFetch(`/api/data/admin/events/${id}/mark-ordered/`, {
     method: 'POST',

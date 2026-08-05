@@ -36,6 +36,15 @@ MIN_BUDGET = 65
 DELIVERY_INCLUDED_THRESHOLD = 65
 DELIVERY_FEE = 20
 
+# Bloom Print's cut of the bouquet budget. The delivery fee is not commissioned —
+# it passes to the florist in full. Quoted to florists as a flat 15%.
+FLORIST_COMMISSION_RATE = os.environ.get("FLORIST_COMMISSION_RATE", "0.15")
+
+# Where the florist-brief QR code sends a florist who scans it.
+FLORIST_SIGNUP_URL = os.environ.get(
+    "FLORIST_SIGNUP_URL", "https://www.bloomprint.com.au/florists"
+)
+
 DEBUG = os.getenv('DEBUG') == 'True'
 
 ALLOWED_HOSTS = ['ethanbetts.pythonanywhere.com', 'api.bloomprint.com.au', 'www.bloomprint.com.au', '127.0.0.1', 'localhost']

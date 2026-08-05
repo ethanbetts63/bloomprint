@@ -15,7 +15,7 @@ export const CityCoverageSection = ({ coverage }: CityCoverageSectionProps) => (
       <div className="max-w-3xl">
         <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-black/45">
           <MapPin className="h-4 w-4" aria-hidden="true" />
-          Areas we serve
+          Where we&apos;re building coverage
         </p>
         <h2
           id={`${coverage.city.toLowerCase()}-coverage-heading`}
@@ -24,6 +24,7 @@ export const CityCoverageSection = ({ coverage }: CityCoverageSectionProps) => (
           Flower delivery across {coverage.city} and surrounding suburbs
         </h2>
         <p className="mt-4 leading-relaxed text-black/65">{coverage.introduction}</p>
+
       </div>
 
       <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">

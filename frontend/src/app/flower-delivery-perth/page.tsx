@@ -70,7 +70,7 @@ const config: OccasionLandingPageConfig = {
     'Choose the occasion, budget, and preferences. A local Perth florist designs a bouquet that fits — made fresh, not picked from a warehouse catalog.',
   imageOverlayTitle: 'A brief, not a catalog order.',
   imageOverlayText:
-    'Your Perth florist uses your notes to make the right call on colour, style, and seasonal WA flowers.',
+    'Your Perth florist uses your notes to make the right call on colour, style, and the best of what is in season.',
   trustPoints: [
     {
       icon: Sparkles,
@@ -79,8 +79,8 @@ const config: OccasionLandingPageConfig = {
     },
     {
       icon: MapPin,
-      title: 'Made in Perth',
-      text: 'Every order is made and delivered by a local Perth florist — their name on the delivery, your money in their till.',
+      title: 'Designed in Perth',
+      text: 'Your order is made and delivered by an independent Perth florist — never a warehouse. Their name on the delivery, your money in their till.',
     },
     {
       icon: ShieldCheck,
@@ -102,7 +102,7 @@ const config: OccasionLandingPageConfig = {
     {
       icon: Flower2,
       audience: 'Better for you',
-      text: 'You get fresh Perth flowers chosen for the occasion, budget, and delivery date.',
+      text: 'You get fresh flowers chosen for the occasion, budget, and delivery date.',
     },
   ],
   howItWorksHeading: 'Three steps between you and Perth flowers.',
@@ -113,7 +113,7 @@ const config: OccasionLandingPageConfig = {
     },
     {
       title: 'A Perth florist designs it',
-      text: 'We pass your brief to a florist near the delivery address. They design something suitable from the best of what\'s in season in WA.',
+      text: 'We pass your brief to a florist near the delivery address. They design something suitable from the best of what\'s in season.',
     },
     {
       title: 'Delivered on your date',

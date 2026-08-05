@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { getAdminEvent } from '@/api/admin';
+import { FileDown, Loader2 } from 'lucide-react';
+import { getAdminEvent, getAdminEventFloristBrief } from '@/api/admin';
 import {
   AdminDetailError, AdminDetailField, AdminDetailGrid, AdminDetailLoading, AdminDetailPage,
   AdminDetailSection, AdminInlineLink,
@@ -28,6 +29,29 @@ export default function AdminEventDetailPage() {
   const [event, setEvent] = useState<AdminEvent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [briefLoading, setBriefLoading] = useState(false);
+  const [briefError, setBriefError] = useState<string | null>(null);
+
+  async function downloadBrief(id: number) {
+    setBriefLoading(true);
+    setBriefError(null);
+    let objectUrl: string | null = null;
+    try {
+      const blob = await getAdminEventFloristBrief(id);
+      objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = `bloomprint-florist-brief-delivery-${id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (reason) {
+      setBriefError(errorMessage(reason));
+    } finally {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      setBriefLoading(false);
+    }
+  }
 
   useEffect(() => {
     if (!eventId) return;
@@ -46,11 +70,22 @@ export default function AdminEventDetailPage() {
     event.recipient_street_address, event.recipient_suburb, event.recipient_city,
     event.recipient_state, event.recipient_postcode, event.recipient_country,
   ].filter(Boolean).join(', ');
-  const actions = event.status === 'scheduled' ? (
-    <Button asChild><Link href={`/dashboard/admin/events/${event.id}/mark-ordered`}>Place order</Link></Button>
-  ) : event.status === 'ordered' ? (
-    <Button asChild><Link href={`/dashboard/admin/events/${event.id}/mark-delivered`}>Confirm delivery</Link></Button>
-  ) : undefined;
+  const actions = (
+    <div className="flex flex-wrap items-center gap-2">
+      <Button variant="outline" onClick={() => downloadBrief(event.id)} disabled={briefLoading}>
+        {briefLoading
+          ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+          : <FileDown className="mr-2 h-4 w-4" aria-hidden="true" />}
+        Florist brief
+      </Button>
+      {event.status === 'scheduled' && (
+        <Button asChild><Link href={`/dashboard/admin/events/${event.id}/mark-ordered`}>Place order</Link></Button>
+      )}
+      {event.status === 'ordered' && (
+        <Button asChild><Link href={`/dashboard/admin/events/${event.id}/mark-delivered`}>Confirm delivery</Link></Button>
+      )}
+    </div>
+  );
 
   return (
     <AdminDetailPage
@@ -60,6 +95,12 @@ export default function AdminEventDetailPage() {
       backLabel="Back to events"
       actions={actions}
     >
+      {briefError && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 xl:col-span-2">
+          {briefError}
+        </div>
+      )}
+
       <AdminDetailSection title="Delivery">
         <AdminDetailGrid>
           <AdminDetailField label="Recipient" value={recipientName} />

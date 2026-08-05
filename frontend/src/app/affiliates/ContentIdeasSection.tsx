@@ -12,7 +12,7 @@ const angles = [
   {
     label: 'The "Support local" angle',
     description:
-      'Every order is made and delivered by a real local florist under their own name — not a warehouse box with a courier label.',
+      'Orders are made and delivered by an independent local florist under their own name — not a warehouse box with a courier label.',
   },
   {
     label: 'The unboxing',

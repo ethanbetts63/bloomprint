@@ -8,8 +8,8 @@ export const defaultTrustPoints = [
   },
   {
     icon: MapPin,
-    title: 'Always supporting local',
-    text: 'Every order is made and delivered by a local Australian florist — their name on the delivery, your money in their till.',
+    title: 'Independent florists only',
+    text: 'Your order is made and delivered by an independent Australian florist — never a warehouse. Their name on the delivery, your money in their till.',
   },
   {
     icon: ShieldCheck,
