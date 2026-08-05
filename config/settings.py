@@ -38,7 +38,7 @@ DELIVERY_FEE = 20
 
 DEBUG = os.getenv('DEBUG') == 'True'
 
-ALLOWED_HOSTS = ['ethanbetts.pythonanywhere.com', 'api.bloomprint.app', 'www.bloomprint.app', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['ethanbetts.pythonanywhere.com', 'api.bloomprint.com.au', 'www.bloomprint.com.au', '127.0.0.1', 'localhost']
 
 CSRF_TRUSTED_ORIGINS = ['https://www.bloomprint.app']
 
