@@ -47,7 +47,7 @@ def build_outreach_draft(event):
 
     body = (
         "Hi there,\n\n"
-        f"We have a flower delivery in {area or 'your area'} on {event.delivery_date} "
+        f"We have a custom flower delivery order in {area or 'your area'} on {event.delivery_date} "
         f"and we're looking for a local florist to make it.\n\n"
         f"You would be paid ${money['florist_total']} for it. "
         f"{brief_line}\n"
