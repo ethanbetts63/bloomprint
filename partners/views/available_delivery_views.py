@@ -161,7 +161,6 @@ class ClaimDeliveryView(APIView):
             {
                 'status': 'claimed',
                 'delivery_request_id': delivery_request.id,
-                'token': delivery_request.token,
                 'reference': event.reference,
             },
             status=status.HTTP_201_CREATED,

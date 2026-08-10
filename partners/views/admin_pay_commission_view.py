@@ -1,13 +1,20 @@
-import stripe
-from django.conf import settings
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAdminUser
-from partners.models import BusinessAccount, Commission, Payout, PayoutLineItem
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from partners.models import BusinessAccount, Commission
+from partners.utils.payouts import PayoutError, pay_commission
 
 
 class AdminPayCommissionView(APIView):
+    """
+    The Pay Out button on a business account's detail page.
+
+    Same action as AdminApproveCommissionView, reached from the account rather
+    than the commission, so the URL carries both ids. Both delegate to
+    pay_commission so the two entry points cannot drift.
+    """
     permission_classes = [IsAdminUser]
 
     def post(self, request, pk, commission_id):
@@ -17,69 +24,19 @@ class AdminPayCommissionView(APIView):
             return Response({'detail': 'Business account not found.'}, status=status.HTTP_404_NOT_FOUND)
 
         try:
-            commission = Commission.objects.select_related('event', 'event__order').get(
-                pk=commission_id, business_account=account
-            )
+            commission = Commission.objects.select_related(
+                'business_account', 'event', 'event__order'
+            ).get(pk=commission_id, business_account=account)
         except Commission.DoesNotExist:
             return Response({'detail': 'Commission not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        if commission.status in ('processing', 'paid', 'denied'):
-            return Response({'detail': 'Commission already paid or in progress.'}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not account.stripe_connect_onboarding_complete:
-            return Response(
-                {'detail': 'Business account has not completed Stripe onboarding.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        payout_type = 'fulfillment' if commission.commission_type == 'fulfillment' else 'commission'
-
-        # Get currency from the event's order if possible, default to aud
-        currency = 'aud'
-        if commission.event:
-            raw = getattr(commission.event.order, 'currency', None)
-            if raw:
-                currency = raw.lower()
-
-        stripe.api_key = settings.STRIPE_SECRET_KEY
-
         try:
-            transfer = stripe.Transfer.create(
-                amount=int(commission.amount * 100),
-                currency=currency,
-                destination=account.stripe_connect_account_id,
-                transfer_group=f"commission_{commission.id}",
-            )
-        except stripe.error.StripeError as e:
-            err = getattr(e, 'user_message', None) or str(e)
-            return Response({'detail': err}, status=status.HTTP_400_BAD_REQUEST)
-
-        payout = Payout.objects.create(
-            business_account=account,
-            payout_type=payout_type,
-            amount=commission.amount,
-            currency=currency.upper(),
-            stripe_transfer_id=transfer.id,
-            status='processing',
-        )
-
-        description = (
-            f"Delivery payment for event {commission.event_id}"
-            if commission.commission_type == 'fulfillment'
-            else f"Commission for event {commission.event_id}"
-        )
-        PayoutLineItem.objects.create(
-            payout=payout,
-            commission=commission,
-            amount=commission.amount,
-            description=description,
-        )
-
-        commission.status = 'processing'
-        commission.save()
+            payout = pay_commission(commission)
+        except PayoutError as exc:
+            return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({
             'status': 'processing',
-            'stripe_transfer_id': transfer.id,
+            'stripe_transfer_id': payout.stripe_transfer_id,
             'payout_id': payout.id,
         })

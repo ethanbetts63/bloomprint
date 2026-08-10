@@ -78,19 +78,6 @@ class TestCommissionModel:
 @pytest.mark.django_db
 class TestDeliveryRequestModel:
 
-    def test_token_auto_generated_on_save(self):
-        dr = DeliveryRequestFactory()
-        assert dr.token
-        assert len(dr.token) > 10
-
-    def test_token_not_regenerated_on_update(self):
-        dr = DeliveryRequestFactory()
-        original_token = dr.token
-        dr.status = 'accepted'
-        dr.save()
-        dr.refresh_from_db()
-        assert dr.token == original_token
-
     def test_str_representation(self):
         dr = DeliveryRequestFactory()
         s = str(dr)
@@ -100,11 +87,6 @@ class TestDeliveryRequestModel:
         """A DeliveryRequest only exists because a florist claimed the delivery."""
         dr = DeliveryRequestFactory()
         assert dr.status == 'accepted'
-
-    def test_token_is_unique(self):
-        dr1 = DeliveryRequestFactory()
-        dr2 = DeliveryRequestFactory()
-        assert dr1.token != dr2.token
 
 
 @pytest.mark.django_db

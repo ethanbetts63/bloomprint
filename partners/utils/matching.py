@@ -11,6 +11,19 @@ from datetime import date
 
 from partners.models import BusinessAccount
 
+
+def active_florist_for(user):
+    """
+    The requesting user's florist account, or None.
+
+    Every florist-facing view gates on this. Three views previously each decided
+    for themselves whether 'active' mattered, and one forgot — a suspended
+    florist could still list their claims.
+    """
+    return BusinessAccount.objects.filter(
+        user=user, account_type='florist', status='active'
+    ).first()
+
 EARTH_RADIUS_KM = 6371
 
 # No florist serves a radius larger than this, so the bounding-box prefilter can

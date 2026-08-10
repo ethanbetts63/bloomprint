@@ -1,203 +1,144 @@
 # Payouts
 
-## Overview
+How money reaches a partner. Two kinds of partner get paid, for different reasons:
 
-Two types of partners can receive payouts:
+- **Florists** — paid for each delivery they claim and fulfil.
+- **Affiliates** — paid a referral commission when a customer they referred pays.
 
-- **Affiliates (referral / non-delivery partners)** — earn a commission each time a customer they referred makes a payment.
-- **Florists (delivery partners)** — earn a commission when a customer they signed up declines a delivery request, or a delivery payment when they fulfil one.
-
-All payments move via **Stripe Connect**. Customer money lands in our platform balance first. We initiate transfers to each partner's connected Express account at our discretion. Stripe then automatically moves the money to the partner's bank (typically 2 business days).
+Florists do **not** earn referral commissions, and affiliates never fulfil
+deliveries. All money moves via Stripe Connect: customer payments land in the
+Bloom Print platform balance, and admin initiates a transfer to the partner's
+connected Express account per payout.
 
 ---
 
-## Data Model
+## The money split
+
+Defined once in `events/utils/fee_calc.py` and surfaced through
+`Event.money_breakdown()`, which is the single source for the florist brief PDF,
+the claim board, the job sheet, and the payable.
+
+| Piece | Rule |
+|---|---|
+| `budget` | What the customer chose for flowers |
+| `delivery_fee` | `$DELIVERY_FEE` when budget is under `$DELIVERY_INCLUDED_THRESHOLD`, otherwise `$0` — the budget absorbs delivery above the threshold |
+| `platform_commission` | `FLORIST_COMMISSION_RATE` × budget. **Never** taken on the delivery fee |
+| `florist_budget` | `budget − platform_commission` — what the florist spends on flowers |
+| `florist_total` | `florist_budget + delivery_fee` — **what the florist is paid** |
+
+Bloom Print therefore keeps exactly the commission rate of the budget on every
+order, and the delivery fee passes to the florist untouched. Below the delivery
+threshold the florist is paid *more* than the budget, because the customer paid
+the fee on top.
+
+These figures are **snapshotted onto the Event at creation** (`florist_budget`,
+`platform_commission`, `delivery_fee`). Changing the rate later cannot alter what
+a florist was already promised.
+
+> **Margin warning.** The affiliate referral tiers in
+> `partners/utils/commission_utils.py` were set against a 15% commission rate.
+> At 10% they equal the entire platform commission at $100, $150 and $250, so a
+> referred order nets roughly zero — and negative once the $5 discount code is
+> applied. Revisit the tiers or the rate before scaling affiliates.
+
+---
+
+## Data model
 
 ### `Commission`
-Records an amount owed to a partner. Created automatically when the triggering event occurs (payment, declined delivery). Admin reviews and actions these.
+Money owed to a partner. `commission_type` is either:
 
-| Field | Description |
-|---|---|
-| `partner` | FK → Partner |
-| `payment` | FK → Payment (nullable) |
-| `event` | FK → Event (nullable) |
-| `commission_type` | `referral` or `fulfillment` |
-| `amount` | Decimal |
-| `status` | `pending` → `approved` → `processing` → `paid`; or `denied` |
-| `note` | Optional text |
+- `referral` — an affiliate's cut, created automatically on payment.
+- `fulfillment` — a florist's delivery payment, created when a delivery is
+  marked delivered. Despite living on a model called Commission, this is the
+  florist's revenue, not a commission.
+
+Status: `pending → approved → processing → paid`, or `denied`.
 
 ### `Payout`
-Records a single Stripe Transfer. Created at the moment a commission is actioned by admin.
-
-| Field | Description |
-|---|---|
-| `partner` | FK → Partner |
-| `payout_type` | `commission` or `fulfillment` |
-| `amount` | Decimal |
-| `currency` | 3-letter ISO, e.g. `AUD` |
-| `stripe_transfer_id` | Stripe `tr_...` ID |
-| `status` | `pending` → `processing` → `completed`; or `failed` |
+One Stripe Transfer. Currently always one payout per delivery — `Payout` and
+`PayoutLineItem` support batching, but nothing batches.
 
 ### `PayoutLineItem`
-Links a `Payout` to the specific `Commission` (or `DeliveryRequest`) it covers. A payout may have multiple line items in future batch-pay flows, but currently is always 1:1.
+Links a `Payout` to the `Commission` it covers.
+
+### `DeliveryRequest`
+A florist's **claim** on a delivery. The name is historical: it was an offer
+under the old push-assignment model. A row exists only because a florist took the
+job, hence its single `accepted` status.
 
 ---
 
-## Phase 1 — Stripe Connect Onboarding
+## Florist payouts
 
-Every partner must have a connected Stripe Express account before they can receive money. This is set up immediately during registration, before admin approval.
+1. Customer pays → `Event(status='scheduled')`, announced to every eligible
+   florist (see `_docs/deliveries.md`).
+2. A florist claims it → `DeliveryRequest`, and `Event.status = 'claimed'` in the
+   same locked transaction.
+3. Delivery is marked delivered, by either:
+   - the florist, at `POST /api/business-accounts/delivery-requests/<id>/mark-delivered/`
+   - admin, at `POST /api/data/admin/events/<id>/mark-delivered/`
+4. Either path calls `create_fulfillment_payable()`
+   (`partners/utils/fulfillment.py`), which writes a `Commission` for
+   `florist_total`. Idempotent — both parties can mark the same delivery.
+5. Admin approves it, which fires the Stripe Transfer.
+6. The `transfer.created` webhook confirms it.
 
-### Flow
+## Affiliate commissions
 
-1. **Registration** — Partner submits the registration form. The backend creates `User`, `BusinessAccount`, and `DiscountCode` records, then immediately calls `stripe.Account.create(type='express')`. The returned account ID (e.g. `acct_123abc`) is saved to `BusinessAccount.stripe_connect_account_id`.
+Created inside the payment webhooks by `process_referral_commission()` when a
+payment succeeds. Skipped if the customer was not referred, if the referrer is a
+florist, or after the customer's third successful payment.
 
-2. **Embedded onboarding** — The backend calls `stripe.AccountSession.create()` and returns a short-lived `client_secret`. The frontend renders the Stripe embedded onboarding form using `@stripe/react-connect-js`. No redirect — partner stays on our site. They enter bank details and identity information, then land on their partner dashboard.
-
-3. **Webhook confirmation** — Stripe fires `account.updated`. If `payouts_enabled` is `True`, we set `BusinessAccount.stripe_connect_onboarding_complete = True` via `handle_account_updated()` in `payments/utils/webhook_handlers.py`.
-
-4. **Admin approval (separate)** — Admin approves the partner via the admin dashboard. This activates their discount code. No Stripe interaction at this step.
-
-5. **Incomplete onboarding banner** — If `stripe_connect_onboarding_complete` is `False`, a banner on the partner dashboard links back to `/stripe-connect/onboarding`. A new `AccountSession` is generated on each visit, so the partner can resume from where they left off.
-
-### Relevant fields on `BusinessAccount`
-- `stripe_connect_account_id` — the `acct_...` pointer used for all future transfers.
-- `stripe_connect_onboarding_complete` — `True` only after Stripe confirms `payouts_enabled` via webhook.
-
----
-
-## Phase 2 — Commission Creation
-
-### Referral commissions (affiliates)
-
-Triggered automatically inside the Stripe webhook handlers (`payments/utils/webhook_handlers.py`) whenever a payment succeeds — both one-off payments (`payment_intent.succeeded`) and recurring subscription charges (`invoice.payment_succeeded`).
-
-The utility `process_referral_commission(payment)` in `partners/utils/commission_utils.py`:
-1. Checks if the paying customer was referred by a partner (`user.referred_by_affiliate`).
-2. Skips if that partner is a delivery partner (only `affiliate` partners earn referral commissions).
-3. Skips if the customer has already made more than 3 successful payments (commission is capped at first 3 payments per customer).
-4. Reads the plan budget and looks up the commission amount from the tier table.
-5. Creates a `Commission` record with `status='pending'`.
-
-### Commission tier table
-
-Defined in `REFERRAL_COMMISSION_TIERS` in `partners/utils/commission_utils.py`:
-
-| Budget | Commission per payment |
-|--------|----------------------|
-| < $100 | $5 |
-| < $150 | $10 |
-| < $200 | $15 |
-| < $250 | $20 |
-| ≥ $250 | $25 |
-
-The commission amount is calculated at payment time from the plan budget. It is stored on `Commission.amount` and does not change if tier rates are updated later.
-
-### Declined delivery commissions (florists)
-
-When a florist declines a delivery request and the customer was originally referred by that same florist, a `Commission` record (`commission_type='referral'`, `status='pending'`) is created in `DeliveryRequestRespondView`. The amount uses the snapshotted `event.commission_amount` if set, otherwise falls back to calculating from the order budget via the tier table.
-
-### Fulfillment commissions (florists — delivery payment)
-
-The `Commission` model supports `commission_type='fulfillment'` and the admin payment flow handles it correctly (creates a `Payout` with `payout_type='fulfillment'`). **However, the automatic creation of fulfillment commissions for fulfilled deliveries is not yet implemented.** Marking an event as delivered does not yet create a Commission record. This is a planned future addition.
+Tiers (`REFERRAL_COMMISSION_TIERS`): `<$100 → $5`, `<$150 → $10`, `<$200 → $15`,
+`<$250 → $20`, `≥$250 → $25`.
 
 ---
 
-## Phase 3 — Admin Payout Management
+## Paying out
 
-### Commission status lifecycle
+`partners/utils/payouts.py::pay_commission()` is the only code that moves money.
+Both admin entry points delegate to it:
 
-```
-pending ──► approved ──► processing ──► paid
-    │                          │
-    └──────────► denied ◄───── ┘  (denied is terminal; processing cannot be denied)
-```
+| Method | URL | Description |
+|---|---|---|
+| GET | `/api/business-accounts/admin/commissions/` | All commissions, filterable by `status` and `commission_type` |
+| GET | `/api/business-accounts/admin/commissions/<id>/` | One commission |
+| POST | `/api/business-accounts/admin/commissions/<id>/approve/` | Pay it |
+| POST | `/api/business-accounts/admin/commissions/<id>/deny/` | Deny it. No Stripe call |
+| POST | `/api/business-accounts/admin/<account_id>/commissions/<id>/pay/` | Same as approve, reached from the account page |
 
-- `pending` — created automatically, awaiting admin review.
-- `approved` — optional intermediate status (can be set manually; the approve action works from either `pending` or `approved`).
-- `processing` — Stripe Transfer has been initiated; awaiting `transfer.created` webhook confirmation.
-- `paid` — confirmed by the `transfer.created` webhook. Terminal, successful state.
-- `denied` — cancelled by admin. No Stripe call made. Terminal.
+`pay_commission` refuses if the commission is already `processing`, `paid` or
+`denied`, or if the partner has not completed Stripe onboarding. On Stripe
+failure nothing is persisted, so the commission is unchanged and retryable.
+On success it creates the `Payout` and `PayoutLineItem` and moves the commission
+to `processing`.
 
-### Admin UI entry points
-
-**Dashboard** (`/dashboard/admin/`) — Shows a "Pending Payouts" section with the 5 most recent pending commissions and a count. Links to the full payout list.
-
-**Payout list** (`/dashboard/admin/payouts`) — All commissions across all partners, filterable by status (`pending / approved / processing / paid / denied`) and type (`referral / fulfillment`), ordered newest-first.
-
-**Payout detail** (`/dashboard/admin/payouts/:id`) — Full commission detail: partner link, type, amount, status badge, event link, Stripe onboarding status. Shows Approve and Deny action buttons when the commission is actionable. Shows contextual state messages when processing, paid, or denied.
-
-**Business account detail** (`/dashboard/admin/accounts/:id`) — The existing "Pay Out" button on the Commissions & Payouts section of a partner's detail page still works and uses the same processing flow.
-
-### API endpoints
-
-| Method | URL | View | Description |
-|--------|-----|------|-------------|
-| GET | `/api/business-accounts/admin/commissions/` | `AdminCommissionListView` | List all commissions. Optional `?status=` and `?commission_type=` filters. |
-| GET | `/api/business-accounts/admin/commissions/<id>/` | `AdminCommissionDetailView` | Single commission with business-account Stripe fields. |
-| POST | `/api/business-accounts/admin/commissions/<id>/approve/` | `AdminApproveCommissionView` | Fire Stripe Transfer, set status to `processing`. |
-| POST | `/api/business-accounts/admin/commissions/<id>/deny/` | `AdminDenyCommissionView` | Set status to `denied`. No Stripe call. |
-| POST | `/api/business-accounts/admin/<account_id>/commissions/<id>/pay/` | `AdminPayCommissionView` | Legacy endpoint used by the Pay Out button on the business account detail page. Same Stripe + processing flow. |
-
-All endpoints require `IsAdminUser`.
-
-### Approve flow (detail)
-
-`AdminApproveCommissionView.post()`:
-1. Rejects if `commission.status` is already `processing`, `paid`, or `denied` (HTTP 400).
-2. Rejects if `partner.stripe_connect_onboarding_complete` is `False` (HTTP 400).
-3. Calls `stripe.Transfer.create()` with:
-   - `amount` — commission amount in cents
-   - `currency` — from `event.order.currency`, defaulting to `aud`
-   - `destination` — `partner.stripe_connect_account_id`
-   - `transfer_group` — `"commission_{commission.id}"`
-4. Creates a `Payout` record (`status='processing'`).
-5. Creates a `PayoutLineItem` linking the payout to the commission.
-6. Sets `commission.status = 'processing'`.
-7. Returns `{ status, stripe_transfer_id, payout_id }`.
-
-If the Stripe call fails, nothing is persisted and the commission remains in its original status.
-
-### Deny flow (detail)
-
-`AdminDenyCommissionView.post()`:
-1. Rejects if `commission.status` is `paid` or `processing` (HTTP 400).
-2. Sets `commission.status = 'denied'`.
-3. Returns `{ status: 'denied' }`.
-
-No Stripe call is made.
-
----
-
-## Phase 4 — Webhook Confirmation
+Payouts are **manual** — there is no scheduled payout job. Admin approves each
+one.
 
 ### `transfer.created`
-
-Handled by `handle_transfer_created(transfer)` in `payments/utils/webhook_handlers.py`, dispatched from `StripeWebhookView` in `payments/views/stripe_webhook.py`.
-
-1. Looks up the `Payout` by `stripe_transfer_id`.
-2. If already `completed`, skips (idempotent).
-3. Sets `Payout.status = 'completed'`.
-4. Finds the linked `Commission` via `PayoutLineItem` and sets `Commission.status = 'paid'`.
-
-This is the step that moves a commission from `processing` to `paid`. The admin action only initiates the transfer; Stripe's webhook confirms it landed.
+`handle_transfer_created()` marks the `Payout` completed and its `Commission`
+paid. Idempotent on replay. This is what moves a commission from `processing` to
+`paid`; the admin action only initiates the transfer.
 
 ---
 
-## Partner-Facing Payout View
+## Partner-facing views
 
-Partners can see their own payout history in their dashboard. These views require only `IsAuthenticated` and scope all queries to the requesting user's partner profile.
-
-| Method | URL | View | Description |
-|--------|-----|------|-------------|
-| GET | `/api/business-accounts/payouts/` | `PayoutListView` | List of all payouts for the authenticated partner. |
-| GET | `/api/business-accounts/payouts/<id>/` | `PayoutDetailView` | Single payout with line items and `stripe_transfer_id`. |
+| Method | URL | Description |
+|---|---|---|
+| GET | `/api/business-accounts/payouts/` | The partner's own payouts |
+| GET | `/api/business-accounts/payouts/<id>/` | One payout with line items |
 
 ---
 
-## Edge Cases
+## Edge cases
 
-- **Insufficient platform balance** — Stripe Transfer fails. HTTP 400 returned. Commission remains in its previous status; nothing is persisted.
-- **Partner not onboarded** — Approve is blocked with HTTP 400 if `stripe_connect_onboarding_complete` is `False`. The Deny action does not require onboarding.
-- **Double-processing** — Both Approve and Pay Out reject if the commission is already `processing`, `paid`, or `denied`.
-- **Webhook replay** — `handle_transfer_created` is idempotent: if the payout is already `completed` it skips silently.
-- **Refunds** — Not yet handled. If a customer is refunded after a commission is `pending`, the commission should be manually denied. If already `processing` or `paid`, a manual Stripe Transfer reversal may be required.
+- **Insufficient platform balance** — the Transfer fails, HTTP 400, nothing persisted.
+- **Partner not onboarded** — approve is blocked. Deny is not.
+- **Double-marking delivered** — `create_fulfillment_payable` is idempotent.
+- **Webhook replay** — `handle_transfer_created` skips a completed payout.
+- **Mis-clicked "delivered"** — creates a payable with no un-deliver path. Known gap.
+- **Refunds** — not handled. Deny a `pending` commission manually; anything
+  already `processing` or `paid` needs a manual Stripe reversal.

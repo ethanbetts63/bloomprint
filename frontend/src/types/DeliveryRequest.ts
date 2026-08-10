@@ -3,7 +3,7 @@ import type { FloristMoneyBreakdown } from './BusinessAccount';
 /**
  * The job sheet for a delivery this florist claimed. Authenticated and scoped
  * to the caller's own claims — it carries the recipient's address and the card
- * message, which used to sit behind nothing but a guessable-length token.
+ * message, which used to sit behind nothing but an unauthenticated URL.
  */
 export interface DeliveryRequestDetail {
   id: number;
@@ -32,7 +32,6 @@ export interface DeliveryRequestDetail {
 
 export interface DeliveryRequestListItem {
   id: number;
-  token: string;
   reference: string;
   status: 'accepted';
   delivery_date: string;

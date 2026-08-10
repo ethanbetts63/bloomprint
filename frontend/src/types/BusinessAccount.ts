@@ -58,15 +58,14 @@ export interface DeliveryRequestSummary {
   florist_total?: string;
   /** Always 'accepted' — a row exists only because a florist claimed it. */
   status: 'accepted';
-  token: string;
   created_at: string;
 }
 
 /**
  * A delivery on the claim board — visible to every active florist whose service
  * area covers it, none of whom has committed to it yet. Deliberately carries no
- * street address, recipient name, or card message; those arrive with the token
- * detail once the delivery is claimed.
+ * street address, recipient name, or card message; those unlock on the job
+ * sheet once the delivery is claimed.
  */
 export interface AvailableDelivery {
   /** Event id — what the claim endpoint takes. */
@@ -103,7 +102,6 @@ export interface FloristMoneyBreakdown {
 export interface ClaimDeliveryResult {
   status: 'claimed';
   delivery_request_id: number;
-  token: string;
   reference: string;
 }
 

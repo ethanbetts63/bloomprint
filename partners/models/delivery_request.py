@@ -1,4 +1,3 @@
-import secrets
 from django.db import models
 
 
@@ -27,15 +26,9 @@ class DeliveryRequest(models.Model):
         related_name='delivery_requests'
     )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='accepted')
-    token = models.CharField(max_length=64, unique=True, db_index=True)
     responded_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"DeliveryRequest {self.id} for Event {self.event_id} → {self.business_account}"
-
-    def save(self, *args, **kwargs):
-        if not self.token:
-            self.token = secrets.token_urlsafe(32)
-        super().save(*args, **kwargs)

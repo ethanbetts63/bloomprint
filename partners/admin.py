@@ -51,7 +51,7 @@ class DeliveryRequestAdmin(admin.ModelAdmin):
     # that any more now the assignment cron is gone.
     list_display = ['id', 'event_reference', 'business_account', 'status', 'responded_at', 'created_at']
     list_filter = ['status']
-    search_fields = ['business_account__business_name', 'token', 'event__reference']
+    search_fields = ['business_account__business_name', 'event__reference']
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('event', 'business_account')

@@ -1,5 +1,6 @@
 from rest_framework.permissions import IsAuthenticated
-from partners.models import BusinessAccount, DeliveryRequest
+from partners.models import DeliveryRequest
+from partners.utils.matching import active_florist_for
 from django.db.models import Q
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import ListAPIView
@@ -23,10 +24,9 @@ class DeliveryRequestListView(ListAPIView):
     pagination_class = DashboardPagination
 
     def get_queryset(self):
-        try:
-            florist = BusinessAccount.objects.get(user=self.request.user, account_type='florist')
-        except BusinessAccount.DoesNotExist:
-            raise NotFound('No florist account was found.')
+        florist = active_florist_for(self.request.user)
+        if florist is None:
+            raise NotFound('No active florist account was found.')
 
         params = self.request.query_params
         queryset = DeliveryRequest.objects.filter(business_account=florist).select_related('event', 'event__order')

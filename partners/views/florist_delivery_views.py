@@ -15,20 +15,15 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from partners.models import BusinessAccount, DeliveryRequest
+from partners.models import DeliveryRequest
 from partners.utils.fulfillment import create_fulfillment_payable
+from partners.utils.matching import active_florist_for
 
 logger = logging.getLogger(__name__)
 
 
-def _active_florist(user):
-    return BusinessAccount.objects.filter(
-        user=user, account_type='florist', status='active'
-    ).first()
-
-
 def _own_claim_or_none(user, delivery_id):
-    florist = _active_florist(user)
+    florist = active_florist_for(user)
     if florist is None:
         return None, None
     claim = DeliveryRequest.objects.filter(

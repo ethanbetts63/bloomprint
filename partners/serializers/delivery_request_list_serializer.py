@@ -5,12 +5,15 @@ from partners.models import DeliveryRequest
 
 class DeliveryRequestListSerializer(serializers.ModelSerializer):
     """
-    What a florist sees for a delivery offered to them.
+    A row in the florist's list of deliveries they have claimed.
 
-    Deliberately exposes the event's reference rather than its primary key, and
-    the florist's own budget rather than the customer's — a florist quoting
-    "Event #7" reveals Bloom Print's volume, and a florist shown the customer's
-    budget would expect to be paid it.
+    Exposes the event's reference rather than its primary key: a florist quoting
+    "Event #7" reveals Bloom Print's volume.
+
+    Only the florist's own figures appear here, because this lists work already
+    taken. The customer's budget and our commission are shown in full on the
+    claim board and the brief, where a florist is still deciding whether the job
+    is worth taking.
     """
     reference = serializers.CharField(source='event.reference', read_only=True)
     delivery_date = serializers.DateField(source='event.delivery_date')
@@ -20,7 +23,12 @@ class DeliveryRequestListSerializer(serializers.ModelSerializer):
     florist_total = serializers.SerializerMethodField()
 
     def _money(self, obj):
-        return obj.event.money_breakdown()
+        # Cached per row: three fields read this, and recomputing the breakdown
+        # once each turned a 50-row page into 150 identical calculations.
+        cache = self.context.setdefault('_money_cache', {})
+        if obj.pk not in cache:
+            cache[obj.pk] = obj.event.money_breakdown()
+        return cache[obj.pk]
 
     def get_florist_budget(self, obj):
         return str(self._money(obj)['florist_budget'])
@@ -36,7 +44,7 @@ class DeliveryRequestListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'reference', 'delivery_date', 'recipient_name',
             'florist_budget', 'delivery_fee', 'florist_total',
-            'status', 'token', 'created_at',
+            'status', 'created_at',
         ]
 
     def get_recipient_name(self, obj):

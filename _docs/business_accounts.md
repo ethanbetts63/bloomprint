@@ -3,19 +3,19 @@
 ## Account types
 
 - **Non-delivery (referral)** — Refers customers via discount code. Earns tiered commissions on the first 3 purchases made by each referred customer.
-- **Delivery** — A florist who will eventually receive delivery fulfillment business. Has a discount code for customers but does NOT earn referral commissions. Has a service area (lat/lng pin + radius).
+- **Delivery (florist)** — Fulfils deliveries claimed from the claim board. Has a service area (lat/lng pin + radius). Florists have **nothing to do with discount codes** and earn no referral commission; they are paid per delivery. See `_docs/deliveries.md` and `_docs/payouts.md`.
 
-Both types get a discount code at registration. Both types require admin approval before their code works.
+Only affiliates get a discount code, issued at registration. Both types require admin approval (`status='active'`) before they can do anything — an affiliate's code will not validate, and a florist cannot see or claim deliveries.
 
 ## Registration Flow
 
 1. Partner type is determined by entry point: the `/florists` hero embeds the delivery registration form, and the `/affiliates` hero embeds the referral registration form. There is no separate type-selection step.
 2. Fills in account details: email, password, first name, last name, business name, phone, and country (ISO 2-letter code, used to set the Stripe Express account's country).
-3. Delivery partners additionally set their location on an interactive map (lat/lng) and configure a service radius (default 10km).
+3. Florists additionally set their location on an interactive map (lat/lng) and configure a service radius (default 10km). Business name and phone are required for florists.
 4. On submit, backend creates:
    - A User account
    - A BusinessAccount record (status: `pending`)
-   - A DiscountCode (auto-generated, `is_active=True`)
+   - A DiscountCode (affiliates only, auto-generated, `is_active=True`)
 5. Returns JWT tokens — user is logged in immediately.
 6. Redirects to `the role-specific dashboard`. Stripe Connect setup is decoupled from registration — the partner initiates it from the dashboard when ready.
 
@@ -46,7 +46,7 @@ Each partner can have multiple discount codes. One is auto-generated at registra
 2. Frontend sends `{ code, plan_id, plan_type }` to `POST /api/business-accounts/validate-discount-code/`.
 3. Backend validates the code, then persists it on the plan:
    - Sets `plan.discount_code` (FK) and `plan.discount_amount`
-   - `plan.save()` auto-computes `total_amount = subtotal - discount_amount + tax_amount`
+   - `plan.save()` auto-computes `total_amount`
    - Sets `user.referred_by_affiliate` to the code's partner (one-time, for commission tracking)
 4. Returns `{ code, discount_amount, partner_name, new_total_amount }`.
 5. Frontend re-fetches the plan to show updated totals.
@@ -74,10 +74,11 @@ When a partner's account is deleted:
 | `subtotal` | Computed price before discounts |
 | `discount_code` | FK to DiscountCode (nullable) |
 | `discount_amount` | Dollar amount of discount |
-| `tax_amount` | Placeholder for future tax |
-| `total_amount` | Auto-computed: `subtotal - discount_amount + tax_amount` |
+| `total_amount` | Auto-computed from subtotal less any discount |
 
 `total_amount` is recalculated on every `save()`. Payment intents and Stripe subscriptions read `total_amount` directly.
+
+`subtotal` is `budget + delivery_fee`. Note the florist is paid from the **budget**, not the total — see the money split in `_docs/payouts.md`.
 
 ## Checkout and Payment
 
@@ -105,7 +106,7 @@ How Referral Commissions Work
      - Budget < $250 → $20
      - Budget >= $250 → $25
    - Creates a Commission record (status: `pending`)
-4. Payouts: The `process_payouts` management command batches approved commissions into Payout records and pays them via Stripe Connect.
+4. Payouts: admin approves each commission individually, which fires a Stripe Transfer. There is no batch payout command. See `_docs/payouts.md`.
 
 ### Commission Status Lifecycle
 
@@ -123,7 +124,7 @@ Partners must complete Stripe Connect onboarding to receive payouts.
 6. `stripe_connect_onboarding_complete` is set to `True` via two paths:
    - **Webhook (primary):** Stripe fires `account.updated` when `payouts_enabled` becomes true on the connected account. `handle_account_updated` in `webhook_handlers.py` updates the flag automatically — works even if the partner abandons mid-flow and is approved later.
    - **Status poll (fallback/UI refresh):** `StripeConnectStatusView` checks `charges_enabled` + `payouts_enabled` live from Stripe and syncs the flag on demand.
-7. `process_payouts` command creates `stripe.Transfer` to the partner's connected account.
+7. `partners/utils/payouts.py::pay_commission` creates the `stripe.Transfer` to the partner's connected account.
 
 **Note:** Stripe Connect must be enabled on the platform Stripe account before Express accounts can be created. Enable it at dashboard.stripe.com/connect — this must be done separately for test and live modes.
 
@@ -138,7 +139,7 @@ Partners must complete Stripe Connect onboarding to receive payouts.
 - Earnings summary (total earned, pending, approved, paid)
 - Recent commissions (last 20)
 - Payout summary (total paid, total pending)
-- Delivery requests (delivery partners only)
+- Delivery requests (florists only)
 
 `POST /api/business-accounts/discount-codes/` — create a new discount code. Optional `name` field used to generate the code slug (falls back to business name).
 
@@ -151,30 +152,34 @@ Partners must complete Stripe Connect onboarding to receive payouts.
 4. Partners cannot use their own code
 5. `user.referred_by_affiliate` is set once on first code application and never changes
 6. Non-delivery partners earn tiered referral commissions (capped at 3 payments per customer)
-7. Delivery partners do NOT earn commissions — their benefit is receiving fulfillment business
+7. Florists do NOT earn referral commissions and hold no discount codes — they are paid per delivery they fulfil
 8. Commissions require admin approval before payout
 9. Stripe Connect onboarding required for payouts
 
 ## Key Files
 
 **Backend:**
-- `partners/models/partner.py` — Partner model
+- `partners/models/business_account.py` — BusinessAccount model (affiliate or florist)
 - `partners/models/discount_code.py` — DiscountCode model
 - `partners/models/discount_usage.py` — DiscountUsage tracking
-- `partners/models/commission.py` — Commission model
-- `partners/serializers/partner_registration_serializer.py` — Registration logic
-- `partners/views/discount_code_views.py` — Create and rename discount codes
-- `partners/serializers/validate_discount_code_serializer.py` — Code validation + plan persistence
-- `partners/utils/commission_utils.py` — Tiered commission calculation
+- `partners/models/commission.py` — Commission model (referral and fulfillment)
+- `partners/serializers/business_account_registration_serializer.py` — Registration logic
+- `partners/views/discount_code_views.py` — List and create discount codes (affiliates only)
+- `partners/serializers/validate_discount_code_serializer.py` — Code validation + order persistence
+- `partners/utils/commission_utils.py` — Tiered referral commission calculation
+- `partners/utils/payouts.py` — The only code that fires a Stripe Transfer
 - `partners/signals.py` — Soft-delete signal for discount codes
-- `payments/utils/webhook_handlers.py` — DiscountUsage + commission creation on payment success
-- `events/models/order_base.py` — Pricing fields and auto-computed total_amount
+- `payments/utils/webhook_handlers.py` — DiscountUsage + referral commission on payment success
+- `events/models/order.py` — Pricing fields and auto-computed total_amount
+- `events/utils/fee_calc.py` — The commission and delivery-fee rules
 
 **Frontend:**
-- `frontend/src/components/partner/PartnerRegistrationForm.tsx` — embedded in the `/florists` and `/affiliates` heroes via `LandingHero`
-- `frontend/src/pages/partner/PartnerDashboardPage.tsx`
-- `frontend/src/components/form_flow/DiscountCodeInput.tsx`
-- `frontend/src/components/summaries/UpfrontSummary.tsx`
-- `frontend/src/components/summaries/SubscriptionSummary.tsx`
+- `frontend/src/components/marketing/FloristAffiliateRegistrationForm.tsx` — embedded in the `/florists` and `/affiliates` heroes
+- `frontend/src/app/dashboard/florist/` — florist dashboard, deliveries, job sheet
+- `frontend/src/app/dashboard/affiliate/` — affiliate dashboard, discount codes, commissions
+- `frontend/src/components/order/DiscountCodeInput.tsx`
 - `frontend/src/api/businessAccounts.ts`
-- `frontend/src/types/Partner.ts`
+- `frontend/src/types/BusinessAccount.ts`
+
+**See also:** `_docs/deliveries.md` (matching, claiming, fulfilling) and
+`_docs/payouts.md` (the money split and how partners get paid).
