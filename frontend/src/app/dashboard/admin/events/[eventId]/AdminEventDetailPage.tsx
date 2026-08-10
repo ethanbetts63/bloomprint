@@ -10,7 +10,8 @@ import {
   AdminDetailSection, AdminInlineLink,
 } from '@/components/dashboard/AdminDetail';
 import {
-  DashboardStatusPill, dashboardLabel, formatDashboardCurrency, formatDashboardDateOnly,
+  DashboardStatusPill, dashboardLabel, formatDashboardCoordinates, formatDashboardCurrency,
+  formatDashboardDateOnly,
 } from '@/components/dashboard/DashboardData';
 import { Button } from '@/components/ui/button';
 import { errorMessage } from '@/lib/errors';
@@ -107,6 +108,11 @@ export default function AdminEventDetailPage() {
           <AdminDetailField label="Delivery date" value={formatDeliveryDate(event.delivery_date)} />
           <AdminDetailField label="Preferred delivery time" value={dashboardLabel(event.preferred_delivery_time)} />
           <AdminDetailField label="Address" value={address} wide />
+          <AdminDetailField
+            label="Coordinates"
+            value={formatDashboardCoordinates(event.latitude, event.longitude)}
+            wide
+          />
           <AdminDetailField label="Delivery notes" value={event.delivery_notes} wide />
           <AdminDetailField label="Card message" value={event.message} wide />
         </AdminDetailGrid>

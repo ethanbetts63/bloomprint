@@ -20,6 +20,10 @@ class AdminEventSerializer(serializers.ModelSerializer):
     recipient_state = serializers.CharField(source='order.recipient_state')
     recipient_postcode = serializers.CharField(source='order.recipient_postcode')
     recipient_country = serializers.CharField(source='order.recipient_country')
+    # Null means the address was never geocoded, so this delivery reaches no
+    # florist — worth seeing on the detail page rather than having to guess.
+    latitude = serializers.FloatField(source='order.latitude', allow_null=True)
+    longitude = serializers.FloatField(source='order.longitude', allow_null=True)
 
     flower_notes = serializers.CharField(source='order.flower_notes')
 
@@ -39,6 +43,7 @@ class AdminEventSerializer(serializers.ModelSerializer):
             'recipient_first_name', 'recipient_last_name', 'recipient_street_address',
             'recipient_suburb', 'recipient_city', 'recipient_state',
             'recipient_postcode', 'recipient_country',
+            'latitude', 'longitude',
             'flower_notes',
             'customer_first_name', 'customer_last_name', 'customer_email',
         ]

@@ -19,6 +19,24 @@ export function formatDashboardCurrency(value: string | null | undefined): strin
   return Number(value).toLocaleString('en-AU', { style: 'currency', currency: 'AUD' });
 }
 
+/**
+ * Renders geocoded coordinates, or says plainly that there aren't any.
+ *
+ * Florist matching is a pure distance test, so an order with no coordinates
+ * reaches nobody. "Not geocoded" is the single most useful thing an admin can
+ * see when a delivery is not showing up on any florist's board — an em dash
+ * would hide it.
+ */
+export function formatDashboardCoordinates(
+  latitude: number | null | undefined,
+  longitude: number | null | undefined,
+): string {
+  if (latitude === null || latitude === undefined || longitude === null || longitude === undefined) {
+    return 'Not geocoded — this delivery will not reach any florist';
+  }
+  return `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+}
+
 export function dashboardLabel(value: string | null | undefined): string {
   if (!value) return '—';
   return value.replace(/_/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());

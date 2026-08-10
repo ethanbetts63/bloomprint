@@ -46,9 +46,19 @@ class CommissionAdmin(admin.ModelAdmin):
 
 @admin.register(DeliveryRequest)
 class DeliveryRequestAdmin(admin.ModelAdmin):
-    list_display = ['id', 'event', 'business_account', 'status', 'expires_at', 'created_at']
+    # A row here is a claim. Since claiming is first-come-first-served, the
+    # interesting column is when it was claimed, not expires_at — nothing sets
+    # that any more now the assignment cron is gone.
+    list_display = ['id', 'event_reference', 'business_account', 'status', 'responded_at', 'created_at']
     list_filter = ['status']
-    search_fields = ['business_account__business_name', 'token']
+    search_fields = ['business_account__business_name', 'token', 'event__reference']
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('event', 'business_account')
+
+    @admin.display(description='Delivery', ordering='event__reference')
+    def event_reference(self, obj):
+        return obj.event.reference
 
 
 @admin.register(Payout)

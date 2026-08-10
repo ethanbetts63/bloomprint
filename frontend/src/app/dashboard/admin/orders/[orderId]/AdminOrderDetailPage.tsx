@@ -8,7 +8,8 @@ import {
   AdminDetailSection, AdminDetailTable, AdminInlineLink,
 } from '@/components/dashboard/AdminDetail';
 import {
-  DashboardStatusPill, dashboardLabel, formatDashboardCurrency, formatDashboardDateLong,
+  DashboardStatusPill, dashboardLabel, formatDashboardCoordinates, formatDashboardCurrency,
+  formatDashboardDateLong,
 } from '@/components/dashboard/DashboardData';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { errorMessage } from '@/lib/errors';
@@ -69,6 +70,11 @@ export default function AdminOrderDetailPage() {
           <AdminDetailField label="Name" value={recipientName} />
           <AdminDetailField label="Preferred delivery time" value={dashboardLabel(order.preferred_delivery_time)} />
           <AdminDetailField label="Address" value={address} wide />
+          <AdminDetailField
+            label="Coordinates"
+            value={formatDashboardCoordinates(order.latitude, order.longitude)}
+            wide
+          />
           <AdminDetailField label="Delivery notes" value={order.delivery_notes} wide />
         </AdminDetailGrid>
       </AdminDetailSection>

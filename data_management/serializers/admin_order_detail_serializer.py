@@ -14,6 +14,7 @@ class AdminOrderDetailSerializer(serializers.ModelSerializer):
             'recipient_first_name', 'recipient_last_name',
             'recipient_street_address', 'recipient_suburb', 'recipient_city',
             'recipient_state', 'recipient_postcode', 'recipient_country',
+            'latitude', 'longitude',
             'delivery_notes', 'preferred_delivery_time',
             'flower_notes',
             'customer_first_name', 'customer_last_name', 'customer_email',

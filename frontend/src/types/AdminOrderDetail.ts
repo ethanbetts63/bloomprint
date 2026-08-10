@@ -17,6 +17,9 @@ export interface AdminOrderDetail {
   recipient_state: string | null;
   recipient_postcode: string | null;
   recipient_country: string | null;
+  /** Geocoded from the address. Null means this order reaches no florist. */
+  latitude: number | null;
+  longitude: number | null;
   delivery_notes: string | null;
   preferred_delivery_time: string | null;
   flower_notes: string | null;
