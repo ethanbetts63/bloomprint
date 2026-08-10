@@ -123,6 +123,12 @@ def _recipient_address(order):
     return [p for p in parts if p and str(p).strip()]
 
 
+def _delivery_area(order):
+    """Suburb and state only — what a florist needs to judge the drive."""
+    parts = [order.recipient_suburb or order.recipient_city, order.recipient_state]
+    return ", ".join(part for part in parts if part) or "—"
+
+
 def _full_name(first, last):
     return f"{first or ''} {last or ''}".strip() or "—"
 
@@ -132,8 +138,25 @@ def _long_date(value):
     return f"{value:%A} {value.day} {value:%B %Y}"
 
 
-def build_florist_brief(event) -> bytes:
-    """Render the one-page A4 brief for an event and return the PDF bytes."""
+def build_florist_brief(event, variant: str = "claimed") -> bytes:
+    """
+    Render the one-page A4 brief for an event and return the PDF bytes.
+
+    Two variants, because the same document goes to different audiences:
+
+    - ``request`` — sent to every florist whose service area covers the
+      delivery, before anyone has claimed it. Shows the suburb, the date, the
+      brief and the money, and nothing that identifies the recipient. A dozen
+      florists may receive this and never claim, and an emailed PDF cannot be
+      taken back, so the recipient's name, street address, delivery notes and
+      card message are withheld until someone commits.
+    - ``claimed`` — sent to the florist who claimed it, and downloaded by admin.
+      The full brief: everything needed to actually make and deliver the order.
+    """
+    if variant not in ("request", "claimed"):
+        raise ValueError(f"Unknown brief variant {variant!r}; expected 'request' or 'claimed'.")
+
+    is_request = variant == "request"
     display, display_regular = _register_fonts()
     order = event.order
 
@@ -188,7 +211,7 @@ def build_florist_brief(event) -> bytes:
     pdf.drawString(text_x, header_y + 26, "Bloom Print")
     pdf.setFont("Helvetica", 9.5)
     pdf.setFillColor(MUTED)
-    pdf.drawString(text_x, header_y + 11, "Florist brief")
+    pdf.drawString(text_x, header_y + 11, "Delivery available to claim" if is_request else "Florist brief")
 
     # The reference, never the primary key — and no order number at all: the
     # florist has no relationship with the order, only with this delivery.
@@ -197,7 +220,10 @@ def build_florist_brief(event) -> bytes:
     pdf.drawRightString(page_width - margin, header_y + 26, event.reference or "—")
     pdf.setFont("Helvetica", 8.5)
     pdf.setFillColor(MUTED)
-    pdf.drawRightString(page_width - margin, header_y + 11, "Quote this reference")
+    pdf.drawRightString(
+        page_width - margin, header_y + 11,
+        "First to claim it gets it" if is_request else "Quote this reference",
+    )
 
     pdf.setStrokeColor(LINE)
     pdf.setLineWidth(1)
@@ -282,22 +308,42 @@ def build_florist_brief(event) -> bytes:
     y = field("Deliver on", _long_date(event.delivery_date), margin, y, column_width)
     if order.preferred_delivery_time:
         y = field("Preferred time", order.preferred_delivery_time.replace("_", " ").title(), margin, y, column_width)
-    y = field(
-        "Recipient",
-        _full_name(order.recipient_first_name, order.recipient_last_name),
-        margin, y, column_width,
-    )
-    address_lines = _recipient_address(order)
-    y = field("Address", "\n".join(address_lines) if address_lines else "—", margin, y, column_width, max_lines=5)
-    if order.delivery_notes:
-        y = field("Delivery notes", order.delivery_notes, margin, y, column_width, max_lines=5)
+
+    if is_request:
+        # Area only. Enough to judge the drive, nothing that identifies anyone.
+        y = field("Area", _delivery_area(order), margin, y, column_width)
+        y = field(
+            "Full address",
+            "Released when you claim this delivery.",
+            margin, y, column_width, max_lines=2,
+        )
+    else:
+        y = field(
+            "Recipient",
+            _full_name(order.recipient_first_name, order.recipient_last_name),
+            margin, y, column_width,
+        )
+        address_lines = _recipient_address(order)
+        y = field("Address", "\n".join(address_lines) if address_lines else "—", margin, y, column_width, max_lines=5)
+        if order.delivery_notes:
+            y = field("Delivery notes", order.delivery_notes, margin, y, column_width, max_lines=5)
 
     # Right column — the brief.
     ry = section_heading("The brief", right_x, columns_top, column_width)
     ry = field("Occasion", order.get_occasion_display() if order.occasion else "Not specified", right_x, ry, column_width)
     ry = field("Flower preferences", order.flower_notes, right_x, ry, column_width, max_lines=8)
 
-    if event.message:
+    if not is_request:
+        # The florist writes the card, so they need to know who it is from. The
+        # buyer's name is the one piece of customer detail on this sheet — no
+        # contact details, and never on the request variant.
+        ry = field(
+            "Card from",
+            _full_name(order.customer_first_name, order.customer_last_name),
+            right_x, ry, column_width,
+        )
+
+    if event.message and not is_request:
         ry = field("Card message", f"“{event.message}”", right_x, ry, column_width, max_lines=6)
 
     # ---- Terms strip --------------------------------------------------------
@@ -337,35 +383,50 @@ def build_florist_brief(event) -> bytes:
     pdf.setLineWidth(0.8)
     pdf.roundRect(margin, qr_panel_y, content_width, qr_panel_height, 10, fill=1, stroke=1)
 
+    # The QR sends the florist where they actually need to go next: an
+    # unclaimed delivery is a pitch to a florist who may not have an account
+    # yet, while a claimed one goes to someone who does and needs to manage it.
+    if is_request:
+        qr_url = settings.FLORIST_SIGNUP_URL
+        qr_title = "Claim this delivery"
+        qr_copy = (
+            "Scan to claim it on your dashboard. First to claim gets it, and the full "
+            "address and card message unlock straight away. New to Bloom Print? Set your "
+            "own coverage, claim only the orders you want, and keep your own branding — "
+            "no monthly fees, no penalties for passing."
+        )
+    else:
+        qr_url = settings.FLORIST_LOGIN_URL
+        qr_title = "Log in"
+        qr_copy = (
+            "This delivery is yours. Scan to log in, review the full details, and mark it "
+            "delivered once it is done. Quote the reference above on your invoice."
+        )
+
     qr_size = 96
     qr_x = margin + 20
     qr_y = qr_panel_y + (qr_panel_height - qr_size) / 2
-    draw_qr(pdf, settings.FLORIST_SIGNUP_URL, qr_x, qr_y, qr_size)
+    draw_qr(pdf, qr_url, qr_x, qr_y, qr_size)
 
     text_left = qr_x + qr_size + 22
     text_width = content_width - (text_left - margin) - 20
     ty = qr_panel_y + qr_panel_height - 34
     pdf.setFont(display, 16)
     pdf.setFillColor(INK)
-    pdf.drawString(text_left, ty, "Sign up or log in")
+    pdf.drawString(text_left, ty, qr_title)
     ty -= 18
-    ty = draw_paragraph(
-        pdf,
-        "Scan to join the Bloom Print florist network. Set your own coverage, accept only "
-        "the orders you want, and keep your own branding — no monthly fees, no penalties "
-        "for saying no.",
-        text_left, ty, text_width, "Helvetica", 9, 12.5, BODY,
-    )
+    ty = draw_paragraph(pdf, qr_copy, text_left, ty, text_width, "Helvetica", 9, 12.5, BODY)
     pdf.setFont("Helvetica", 7.5)
     pdf.setFillColor(MUTED)
-    pdf.drawString(text_left, qr_panel_y + 16, settings.FLORIST_SIGNUP_URL)
+    pdf.drawString(text_left, qr_panel_y + 16, qr_url)
 
     # ---- Footer -------------------------------------------------------------
     pdf.setFont("Helvetica", 7.5)
     pdf.setFillColor(MUTED)
     pdf.drawString(margin, margin - 8, "Bloom Print — bloomprint.com.au")
-    # Deliberately no customer contact details and no internal IDs: this sheet
-    # goes to a third party and the florist needs the recipient, not the buyer.
+    # The buyer's name appears on the claimed variant so the florist can sign
+    # the card, but never their contact details, and never any internal ID:
+    # this sheet goes to a third party.
     pdf.drawRightString(page_width - margin, margin - 8, f"Invoice against {event.reference}")
 
     pdf.showPage()

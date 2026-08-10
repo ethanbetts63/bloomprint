@@ -1,3 +1,5 @@
+import logging
+
 from django.db import transaction
 from django.utils import timezone
 from rest_framework import status
@@ -10,6 +12,8 @@ from config.pagination import DashboardPagination
 from partners.models import BusinessAccount, DeliveryRequest
 from partners.serializers.available_delivery_serializer import AvailableDeliverySerializer
 from partners.utils.matching import claimable_events_for_florist, event_is_claimable, florist_covers_event
+
+logger = logging.getLogger(__name__)
 
 
 def _florist_or_none(user):
@@ -85,6 +89,17 @@ class ClaimDeliveryView(APIView):
                 business_account=florist,
                 status='accepted',
                 responded_at=timezone.now(),
+            )
+
+        # Outside the transaction: the claim is already committed and must not
+        # be rolled back because an email failed. The florist can always read
+        # the full brief from their dashboard.
+        try:
+            from data_management.utils.notification_factory import notify_florist_of_claim
+            notify_florist_of_claim(delivery_request)
+        except Exception:
+            logger.exception(
+                "Claim %s succeeded but the confirmation email failed.", delivery_request.pk
             )
 
         return Response(

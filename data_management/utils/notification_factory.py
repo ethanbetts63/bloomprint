@@ -1,7 +1,10 @@
+import logging
 from datetime import date, timedelta
 from django.conf import settings
 from data_management.models import Notification
 from data_management.utils import sms_messages
+
+logger = logging.getLogger(__name__)
 
 
 def _build_event_body(event):
@@ -117,10 +120,71 @@ def notify_florists_of_new_delivery(event):
             status='pending',
         )
     )
+
+    # Built once and reused for every recipient — it is the same document, and
+    # rendering a PDF per florist would be wasteful. The request variant carries
+    # no recipient PII, which matters because this reaches florists who will
+    # never claim it and cannot be unsent.
+    attachments = _brief_attachment(event, 'request')
     for notification in created:
-        send_notification(notification)
+        send_notification(notification, attachments=attachments)
 
     return created
+
+
+def _brief_attachment(event, variant):
+    """
+    Renders the florist brief, or returns None if it cannot be built.
+
+    A PDF failure must not stop the email: a florist who gets the message
+    without the attachment can still claim the delivery from their dashboard,
+    whereas no email at all means they never learn it exists.
+    """
+    from data_management.utils.florist_brief_pdf import build_florist_brief
+
+    try:
+        pdf_bytes = build_florist_brief(event, variant=variant)
+    except Exception:
+        logger.exception("Could not build %s brief for event %s", variant, event.pk)
+        return None
+
+    return [(f'bloomprint-{event.reference}.pdf', pdf_bytes, 'application/pdf')]
+
+
+def notify_florist_of_claim(delivery_request):
+    """
+    Confirms a claim to the florist who won it, with the full brief attached.
+
+    This is the moment the recipient's address and card message are released, so
+    it is the first document that carries them.
+    """
+    from data_management.utils.send_notification import send_notification
+
+    event = delivery_request.event
+    order = event.order
+    where = ', '.join(part for part in [order.recipient_suburb, order.recipient_state] if part)
+
+    notification = Notification.objects.create(
+        recipient_type='business_account',
+        recipient_business_account=delivery_request.business_account,
+        channel='email',
+        subject=f"It's yours — {event.reference} on {event.delivery_date}",
+        body=(
+            f"Congratulations, you claimed this delivery.\n\n"
+            f"Reference: {event.reference}\n"
+            f"Deliver on: {event.delivery_date}\n"
+            f"Area: {where or 'See attached brief'}\n"
+            f"You will be paid: ${event.florist_total}\n\n"
+            f"The attached brief has the full delivery address, the card message, and "
+            f"everything else you need. Quote {event.reference} on your invoice.\n\n"
+            f"Mark it delivered when it is done:\n{settings.FLORIST_LOGIN_URL}\n"
+        ),
+        scheduled_for=date.today(),
+        related_event=event,
+    )
+
+    send_notification(notification, attachments=_brief_attachment(event, 'claimed'))
+    return notification
 
 
 def cancel_event_notifications(event):

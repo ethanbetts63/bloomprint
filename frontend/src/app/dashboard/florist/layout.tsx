@@ -1,6 +1,6 @@
 'use client';
 
-import { BadgeDollarSign, Building2, LayoutDashboard, Truck, Wallet } from 'lucide-react';
+import { Building2, LayoutDashboard, Truck, Wallet } from 'lucide-react';
 import DashboardShell, { type DashboardNavSection } from '@/components/dashboard/DashboardShell';
 
 const nav: DashboardNavSection[] = [
@@ -10,10 +10,11 @@ const nav: DashboardNavSection[] = [
     ],
   },
   {
+    // No commissions here: florists are paid per delivery they fulfil, not
+    // referral commission. That is an affiliate concept.
     label: 'Work',
     items: [
       { href: '/dashboard/florist/deliveries', label: 'Deliveries', icon: Truck },
-      { href: '/dashboard/florist/commissions', label: 'Commissions', icon: BadgeDollarSign },
     ],
   },
   { label: 'Account', items: [

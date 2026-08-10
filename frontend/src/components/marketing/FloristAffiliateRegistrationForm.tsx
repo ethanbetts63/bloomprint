@@ -107,6 +107,12 @@ const FloristAffiliateRegistrationForm = ({ accountType, className = '' }: Flori
       toast.error('Please fill in all required fields.');
       return;
     }
+    // The Continue button is type="button", so the inputs' `required`
+    // attributes never fire on this step — check them here or they do nothing.
+    if (isDelivery && (!form.business_name.trim() || !form.phone.trim())) {
+      toast.error('Please enter your business name and phone number.');
+      return;
+    }
     if (form.password !== form.confirm_password) {
       toast.error('Passwords do not match.');
       return;
@@ -182,12 +188,33 @@ const FloristAffiliateRegistrationForm = ({ accountType, className = '' }: Flori
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="business_name">{isDelivery ? 'Business Name' : 'Business/Podcast/Social Name'}</Label>
-            <Input id="business_name" name="business_name" value={form.business_name} onChange={handleChange} />
+            {/* Required for florists: the business name is what a customer
+                sees as the delivering florist, and the phone is how we reach
+                them about a delivery in progress. An affiliate may genuinely
+                have neither. */}
+            <Label htmlFor="business_name">
+              {isDelivery ? 'Business Name' : 'Business/Podcast/Social Name'}
+              {isDelivery && <span className="text-red-500">*</span>}
+            </Label>
+            <Input
+              id="business_name"
+              name="business_name"
+              value={form.business_name}
+              onChange={handleChange}
+              required={isDelivery}
+            />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
-            <Input id="phone" name="phone" value={form.phone} onChange={handleChange} />
+            <Label htmlFor="phone">
+              Phone{isDelivery && <span className="text-red-500">*</span>}
+            </Label>
+            <Input
+              id="phone"
+              name="phone"
+              value={form.phone}
+              onChange={handleChange}
+              required={isDelivery}
+            />
           </div>
         </div>
         </>

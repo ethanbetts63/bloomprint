@@ -30,7 +30,13 @@ def resolve_recipient(notification):
     return None, None
 
 
-def send_notification(notification):
+def send_notification(notification, attachments=None):
+    """
+    See below. `attachments` is an optional list of (filename, bytes, mimetype)
+    tuples, used for the florist brief PDF. They are passed straight to Mailgun
+    and never persisted — a re-send from the cron rebuilds them or goes without,
+    which is why the brief is regenerated from the event rather than stored.
+    """
     """
     Resolves recipient, sends via Mailgun (email) or Twilio (SMS).
     Updates notification.status, notification.sent_at, notification.error_message.
@@ -46,6 +52,10 @@ def send_notification(notification):
             context = {'subject': notification.subject, 'body': notification.body}
             html_body = render_to_string('notifications/emails/admin_notification.html', context)
             text_body = render_to_string('notifications/emails/admin_notification.txt', context)
+            files = [
+                ("attachment", (filename, content, mimetype))
+                for filename, content, mimetype in (attachments or [])
+            ]
             response = requests.post(
                 f"https://api.mailgun.net/v3/{settings.MAILGUN_DOMAIN}/messages",
                 auth=("api", settings.MAILGUN_API_KEY),
@@ -56,7 +66,8 @@ def send_notification(notification):
                     "text": text_body,
                     "html": html_body,
                 },
-                timeout=10,
+                files=files or None,
+                timeout=30 if files else 10,
             )
             response.raise_for_status()
 

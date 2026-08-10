@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
-import { getDashboardAccount, getDashboardCommissions, getFloristDeliveryRequests } from '@/api/businessAccounts';
+import { getDashboardAccount, getFloristDeliveryRequests } from '@/api/businessAccounts';
 import {
   DashboardStatusPill, formatDashboardCurrency, formatDashboardDateLong, formatDashboardDateOnly,
 } from '@/components/dashboard/DashboardData';
@@ -12,7 +12,7 @@ import DashboardSummary, { DashboardMetric } from '@/components/dashboard/Dashbo
 import StripePayoutSetupNotice from '@/components/dashboard/StripePayoutSetupNotice';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { errorMessage } from '@/lib/errors';
-import type { Commission, DashboardAccount, DeliveryRequestSummary } from '@/types';
+import type { DashboardAccount, DeliveryRequestSummary } from '@/types';
 
 function formatDeliveryDate(value: string): string {
   return formatDashboardDateOnly(value);
@@ -23,10 +23,10 @@ function FloristSummary({ account }: { account: DashboardAccount }) {
     <DashboardSummary description="Current account, service area, and earnings.">
       <DashboardMetric label="Account" value={<DashboardStatusPill status={account.status} />} />
       <DashboardMetric label="Service radius" value={`${account.service_radius_km} km`} />
-      <DashboardMetric label="Earned" value={formatDashboardCurrency(account.commission_summary.total_earned)} />
-      <DashboardMetric label="Awaiting approval" value={formatDashboardCurrency(account.commission_summary.total_pending)} />
-      <DashboardMetric label="Approved for payout" value={formatDashboardCurrency(account.commission_summary.total_approved)} />
+      {/* Payouts, not commissions: a florist is paid for deliveries they
+          fulfil. Referral commission is an affiliate concept. */}
       <DashboardMetric label="Paid out" value={formatDashboardCurrency(account.payout_summary.total_paid)} />
+      <DashboardMetric label="Awaiting payout" value={formatDashboardCurrency(account.payout_summary.total_pending)} />
     </DashboardSummary>
   );
 }
@@ -35,8 +35,6 @@ export default function FloristDashboardPage() {
   const [account, setAccount] = useState<DashboardAccount | null>(null);
   const [deliveries, setDeliveries] = useState<DeliveryRequestSummary[]>([]);
   const [deliveryCount, setDeliveryCount] = useState(0);
-  const [commissions, setCommissions] = useState<Commission[]>([]);
-  const [commissionCount, setCommissionCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   // Bumped after a successful claim so the "My deliveries" table picks up the
@@ -45,14 +43,14 @@ export default function FloristDashboardPage() {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([getDashboardAccount(), getFloristDeliveryRequests({ pageSize: 5 }), getDashboardCommissions({ pageSize: 5 })])
-      .then(([dashboard, deliveryPage, commissionPage]) => {
+    Promise.all([getDashboardAccount(), getFloristDeliveryRequests({ pageSize: 5 })])
+      .then(([dashboard, deliveryPage]) => {
         if (cancelled) return;
         if (dashboard.account_type !== 'florist') {
           setError('This dashboard is only available to florists.');
           return;
         }
-        setAccount(dashboard); setDeliveries(deliveryPage.results); setDeliveryCount(deliveryPage.count); setCommissions(commissionPage.results); setCommissionCount(commissionPage.count);
+        setAccount(dashboard); setDeliveries(deliveryPage.results); setDeliveryCount(deliveryPage.count);
         setError(null);
       })
       .catch((reason) => { if (!cancelled) setError(errorMessage(reason) || 'Failed to load dashboard.'); })
@@ -115,26 +113,6 @@ export default function FloristDashboardPage() {
             ))}
           </DashboardOverviewTable>
 
-          <DashboardOverviewTable
-            title="Recent commissions"
-            count={commissionCount}
-            viewAllHref="/dashboard/florist/commissions"
-            viewAllLabel="View all commissions"
-            headers={['Type', 'Amount', 'Status', 'Created']}
-            empty={commissions.length === 0}
-            emptyMessage="No commissions yet."
-          >
-            {commissions.map((commission) => (
-              <TableRow key={commission.id} className="border-slate-100 hover:bg-slate-50">
-                <TableCell className="font-medium text-slate-900">
-                  {commission.commission_type === 'fulfillment' ? 'Delivery payment' : 'Referral commission'}
-                </TableCell>
-                <TableCell className="font-semibold text-slate-950">{formatDashboardCurrency(commission.amount)}</TableCell>
-                <TableCell><DashboardStatusPill status={commission.status} /></TableCell>
-                <TableCell className="text-right text-slate-600">{formatDashboardDateLong(commission.created_at)}</TableCell>
-              </TableRow>
-            ))}
-          </DashboardOverviewTable>
         </div>
       )}
     </div>

@@ -42,9 +42,14 @@ DELIVERY_FEE = 20
 # only, and Event snapshots the florist's figures at creation.
 FLORIST_COMMISSION_RATE = os.environ.get("FLORIST_COMMISSION_RATE", "0.10")
 
-# Where the florist-brief QR code sends a florist who scans it.
+# Where the florist-brief QR code sends a florist who scans it. An unclaimed
+# delivery points at the signup page, since the reader may not have an account;
+# a claimed one points at login, since they certainly do.
 FLORIST_SIGNUP_URL = os.environ.get(
     "FLORIST_SIGNUP_URL", "https://www.bloomprint.com.au/florists"
+)
+FLORIST_LOGIN_URL = os.environ.get(
+    "FLORIST_LOGIN_URL", "https://www.bloomprint.com.au/login"
 )
 
 DEBUG = os.getenv('DEBUG') == 'True'
