@@ -19,6 +19,16 @@ from data_management.models import Notification
 logger = logging.getLogger(__name__)
 
 
+def _long_date(value):
+    """
+    Day-month-year, as a florist reads it: '13 August 2026'.
+
+    Built by hand rather than with %-d, which Windows does not support — the
+    same reason florist_brief_pdf._long_date is written this way.
+    """
+    return f"{value.day} {value:%B %Y}"
+
+
 def _area(order):
     return ', '.join(part for part in [order.recipient_suburb, order.recipient_state] if part)
 
@@ -35,7 +45,10 @@ def build_outreach_draft(event):
     area = _area(order)
     money = event.money_breakdown()
 
-    subject = f"Flower delivery in {area or 'your area'} on {event.delivery_date} — ${money['florist_total']}"
+    subject = (
+        f"Flower delivery in {area or 'your area'} on {_long_date(event.delivery_date)} "
+        f"— ${money['florist_total']}"
+    )
 
     occasion = order.get_occasion_display() if order.occasion else None
     brief_line = (
@@ -47,7 +60,8 @@ def build_outreach_draft(event):
 
     body = (
         "Hi there,\n\n"
-        f"We have a custom flower delivery order in {area or 'your area'} on {event.delivery_date} "
+        f"We have a custom flower delivery order in {area or 'your area'} "
+        f"on {_long_date(event.delivery_date)} "
         f"and we're looking for a local florist to make it.\n\n"
         f"You would be paid ${money['florist_total']} for it. "
         f"{brief_line}\n"
@@ -62,7 +76,7 @@ def build_outreach_draft(event):
         "questions and we'll answer them. There's no fee's or catches. All the "
         "information is on the florist page. We just need someone to delivery "
         "in your area and I liked the look of your site.\n\n"
-        "If you sign up, I'll send you order offers in your area automatically going forward. "
+        "If your in, I'll send you order offers in your area automatically going forward and I'll send you the the full brief for this order. I leave out the personal info on outreach. "
         "We pay before delivery normally through stripe but sometimes for first time florists "
         "we do it through any method that suits you so just let me know. \n\n "
 
