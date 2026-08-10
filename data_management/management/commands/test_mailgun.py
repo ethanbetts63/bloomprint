@@ -1,16 +1,21 @@
-import os
 import requests
+from django.conf import settings
 from django.core.management.base import BaseCommand
 
 class Command(BaseCommand):
     help = 'Sends a test email using Mailgun.'
 
     def handle(self, *args, **options):
-        self.stdout.write("Sending test email with Mailgun...")
-        
-        api_key = os.getenv('MAILGUN_API_KEY')
-        domain = 'mail.bloomprint.com.au'
-        
+        api_key = settings.MAILGUN_API_KEY
+        domain = settings.MAILGUN_DOMAIN
+
+        if not domain or not api_key:
+            self.stderr.write(self.style.ERROR(
+                "MAILGUN_DOMAIN and MAILGUN_API_KEY must both be set in the environment."))
+            return
+
+        self.stdout.write(f"Sending test email with Mailgun via {domain}...")
+
         response = requests.post(
             f"https://api.mailgun.net/v3/{domain}/messages",
             auth=("api", api_key),
