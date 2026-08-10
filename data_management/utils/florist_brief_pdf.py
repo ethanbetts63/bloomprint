@@ -27,13 +27,15 @@ ASSETS = ROOT / "frontend" / "src" / "assets"
 LOGO_PATH = ASSETS / "bloomprint_logo.png"
 FONT_DIR = ASSETS / "fonts" / "Playfair_Display" / "static"
 
-# Deliberately monochrome: the brief is printed and faxed around florist shops,
-# and a tinted panel with a coloured edge bar survives neither well.
+CREAM = colors.HexColor("#f8f3ef")
 WHITE = colors.white
 INK = colors.HexColor("#171717")
 BODY = colors.HexColor("#44403c")
 MUTED = colors.HexColor("#78716c")
-LINE = colors.HexColor("#d4d4d4")
+LINE = colors.HexColor("#e2ddd8")
+GREEN = colors.HexColor("#3cdd7a")
+GREEN_DEEP = colors.HexColor("#12613a")
+GREEN_TINT = colors.HexColor("#eaf1e7")
 
 # Playfair for display type to match the site, Helvetica for everything else.
 DISPLAY = "Helvetica-Bold"
@@ -174,7 +176,7 @@ def build_florist_brief(event, variant: str = "claimed") -> bytes:
     pdf.setAuthor("Bloomprint")
     pdf.setSubject(f"Delivery brief for {event.delivery_date:%d %B %Y}")
 
-    pdf.setFillColor(WHITE)
+    pdf.setFillColor(CREAM)
     pdf.rect(0, 0, page_width, page_height, fill=1, stroke=0)
 
     margin = 42
@@ -223,13 +225,14 @@ def build_florist_brief(event, variant: str = "claimed") -> bytes:
     # ---- The money panel ----------------------------------------------------
     panel_height = 118
     panel_y = header_y - 22 - panel_height
-    pdf.setStrokeColor(LINE)
-    pdf.setLineWidth(0.8)
-    pdf.roundRect(margin, panel_y, content_width, panel_height, 10, fill=0, stroke=1)
+    pdf.setFillColor(GREEN_TINT)
+    pdf.roundRect(margin, panel_y, content_width, panel_height, 10, fill=1, stroke=0)
+    pdf.setFillColor(GREEN)
+    pdf.roundRect(margin, panel_y, 5, panel_height, 2.5, fill=1, stroke=0)
 
     pad = 22
     pdf.setFont("Helvetica-Bold", 8.5)
-    pdf.setFillColor(MUTED)
+    pdf.setFillColor(GREEN_DEEP)
     pdf.drawString(margin + pad, panel_y + panel_height - 26, "FLOWERS TO THE VALUE OF")
 
     pdf.setFont(display, 42)
@@ -258,7 +261,7 @@ def build_florist_brief(event, variant: str = "claimed") -> bytes:
     for index, (label, value) in enumerate(rows):
         final = index == len(rows) - 1
         if final:
-            pdf.setStrokeColor(LINE)
+            pdf.setStrokeColor(colors.HexColor("#c9d6c4"))
             pdf.setLineWidth(0.8)
             pdf.line(label_x - 96, row_y + 12, value_x, row_y + 12)
             row_y -= 4
@@ -278,7 +281,7 @@ def build_florist_brief(event, variant: str = "claimed") -> bytes:
 
     def section_heading(text, x, y, width):
         pdf.setFont("Helvetica-Bold", 8.5)
-        pdf.setFillColor(MUTED)
+        pdf.setFillColor(GREEN_DEEP)
         pdf.drawString(x, y, text.upper())
         pdf.setStrokeColor(LINE)
         pdf.setLineWidth(0.8)
