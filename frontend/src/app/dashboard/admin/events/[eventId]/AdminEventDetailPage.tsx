@@ -13,6 +13,7 @@ import {
   DashboardStatusPill, dashboardLabel, formatDashboardCoordinates, formatDashboardCurrency,
   formatDashboardDateOnly,
 } from '@/components/dashboard/DashboardData';
+import MessageHistorySection from '@/components/dashboard/MessageHistorySection';
 import { Button } from '@/components/ui/button';
 import { errorMessage } from '@/lib/errors';
 import type { AdminEvent } from '@/types/AdminEvent';
@@ -171,6 +172,10 @@ export default function AdminEventDetailPage() {
           />
         </AdminDetailGrid>
       </AdminDetailSection>
+
+      <div className="xl:col-span-2">
+        <MessageHistorySection relatedEvent={event.id} />
+      </div>
     </AdminDetailPage>
   );
 }

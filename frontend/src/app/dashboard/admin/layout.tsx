@@ -1,6 +1,6 @@
 'use client';
 
-import { LayoutDashboard, ClipboardList, CalendarRange, Users, Store, Wallet } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, CalendarRange, Users, Store, Wallet, Mail } from 'lucide-react';
 import DashboardShell, { type DashboardNavSection } from '@/components/dashboard/DashboardShell';
 
 const nav: DashboardNavSection[] = [
@@ -14,6 +14,7 @@ const nav: DashboardNavSection[] = [
     items: [
       { href: '/dashboard/admin/events', label: 'Events', icon: CalendarRange },
       { href: '/dashboard/admin/orders', label: 'Orders', icon: ClipboardList },
+      { href: '/dashboard/admin/messages', label: 'Messages', icon: Mail },
     ],
   },
   {

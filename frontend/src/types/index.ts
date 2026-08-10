@@ -60,6 +60,7 @@ export type { AdminBusinessAccount } from './AdminBusinessAccount';
 export type { AdminCommission } from './AdminCommission';
 export type { AdminEventListItem } from './AdminEventListItem';
 export type { FloristOutreachDraft } from './FloristOutreachDraft';
+export type { AdminMessage, AdminMessageDetail } from './AdminMessage';
 export type { AdminOrder } from './AdminOrder';
 export type { AdminOrderEvent } from './AdminOrderEvent';
 export type { AdminOrderDetail } from './AdminOrderDetail';

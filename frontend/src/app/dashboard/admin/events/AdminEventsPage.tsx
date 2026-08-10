@@ -15,7 +15,7 @@ const PAGE_SIZE = 50;
 
 const STATUS_OPTIONS = [
   { value: 'all', label: 'All statuses' },
-  { value: 'scheduled,ordered', label: 'Needs action (scheduled + ordered)' },
+  { value: 'scheduled,claimed', label: 'Needs action (scheduled + claimed)' },
   { value: 'scheduled', label: 'Scheduled' },
   { value: 'claimed', label: 'Claimed' },
   { value: 'delivered', label: 'Delivered' },
@@ -36,21 +36,21 @@ const WINDOW_OPTIONS = [
 // overview queues do.
 const STATUS_ROW: Record<string, string> = {
   scheduled: 'bg-amber-50 hover:bg-amber-100',
-  ordered: 'bg-sky-50 hover:bg-sky-100',
+  claimed: 'bg-sky-50 hover:bg-sky-100',
   delivered: 'bg-emerald-50 hover:bg-emerald-100',
   cancelled: 'bg-slate-100 hover:bg-slate-200',
 };
 
 const STATUS_SWATCH: Record<string, string> = {
   scheduled: 'bg-amber-300',
-  ordered: 'bg-sky-300',
+  claimed: 'bg-sky-300',
   delivered: 'bg-emerald-300',
   cancelled: 'bg-slate-400',
 };
 
 const STATUS_LABEL: Record<string, string> = {
   scheduled: 'Scheduled',
-  ordered: 'Ordered',
+  claimed: 'Claimed',
   delivered: 'Delivered',
   cancelled: 'Cancelled',
 };

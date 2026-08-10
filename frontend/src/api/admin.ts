@@ -12,6 +12,7 @@ import type { AdminCommission } from '@/types/AdminCommission';
 import type { PayCommissionResult } from '@/types/PayCommissionResult';
 import type { CommissionActionResult } from '@/types/CommissionActionResult';
 import type { FloristOutreachDraft } from '@/types/FloristOutreachDraft';
+import type { AdminMessage, AdminMessageDetail } from '@/types/AdminMessage';
 import type { Paginated } from '@/types/Paginated';
 
 export type { PayCommissionResult, CommissionActionResult };
@@ -203,5 +204,45 @@ export async function getAdminOrders(params: AdminListParams = {}): Promise<Pagi
   const value = query.toString();
   const res = await authedFetch(`/api/data/admin/orders/${value ? `?${value}` : ''}`);
   if (!res.ok) throw new Error('Failed to fetch orders');
+  return res.json();
+}
+
+/**
+ * The outbound message log. Pass `related_event` to scope it to one delivery,
+ * which is what the history box on the event page does.
+ */
+export async function getAdminMessages(params: {
+  relatedEvent?: number;
+  status?: string;
+  channel?: string;
+  recipientType?: string;
+  search?: string;
+  ordering?: string;
+  page?: number;
+  pageSize?: number;
+} = {}): Promise<Paginated<AdminMessage>> {
+  const query = new URLSearchParams();
+  const entries: Record<string, string | number | undefined> = {
+    related_event: params.relatedEvent,
+    status: params.status,
+    channel: params.channel,
+    recipient_type: params.recipientType,
+    search: params.search,
+    ordering: params.ordering,
+    page: params.page,
+    page_size: params.pageSize,
+  };
+  Object.entries(entries).forEach(([key, value]) => {
+    if (value !== undefined && value !== '' && value !== 'all') query.set(key, String(value));
+  });
+  const suffix = query.toString() ? `?${query.toString()}` : '';
+  const res = await authedFetch(`/api/data/admin/messages/${suffix}`);
+  if (!res.ok) throw new Error('Failed to load messages');
+  return res.json();
+}
+
+export async function getAdminMessage(id: number): Promise<AdminMessageDetail> {
+  const res = await authedFetch(`/api/data/admin/messages/${id}/`);
+  if (!res.ok) throw new Error('Failed to load message');
   return res.json();
 }
