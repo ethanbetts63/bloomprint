@@ -39,10 +39,10 @@ def build_outreach_draft(event):
 
     occasion = order.get_occasion_display() if order.occasion else None
     brief_line = (
-        f"It's for {occasion.lower()}." if occasion else "The occasion hasn't been specified."
+        f"It's for a {occasion.lower()}." if occasion else ""
     )
     preferences = (
-        f"\nThe customer asked for: {order.flower_notes}\n" if order.flower_notes else ''
+        f"\nThe customer gave the following preferences: {order.flower_notes}\n" if order.flower_notes else ''
     )
 
     body = (
@@ -56,12 +56,17 @@ def build_outreach_draft(event):
         "requirement — you design it from whatever is good on the day. You deliver "
         "under your own name and branding, with your own card. The customer never "
         "sees ours.\n\n"
-        "Full details are in the attached brief.\n\n"
+        "More details are in the attached brief. Full ad\n\n"
         f"If you'd like to take it, you can sign up at {settings.FLORIST_SIGNUP_URL} "
         "and claim it from your dashboard. Or just reply to this email with any "
-        "questions and we'll answer them.\n\n"
-        "Thanks,\n"
-        "Bloom Print\n"
+        "questions and we'll answer them. There's no fee's or catches. All the "
+        "information is on the florist page. We just need someone to delivery "
+        "in your area and I liked the look of your site.\n\n"
+        "\n\n If you sign up, I'll just send you order offers in your area automatically."
+
+        "Kind regards,\n"
+        "Ethan Betts\n"
+        "Bloomprint\n"
     )
 
     return {
