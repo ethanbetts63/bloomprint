@@ -39,6 +39,8 @@ export type {
   CommissionSummary,
   Commission,
   DeliveryRequestSummary,
+  AvailableDelivery,
+  ClaimDeliveryResult,
   PayoutSummary,
   DiscountCodeValidation,
   DiscountValidationResult,

@@ -62,6 +62,36 @@ export interface DeliveryRequestSummary {
   created_at: string;
 }
 
+/**
+ * A delivery on the claim board — visible to every active florist whose service
+ * area covers it, none of whom has committed to it yet. Deliberately carries no
+ * street address, recipient name, or card message; those arrive with the token
+ * detail once the delivery is claimed.
+ */
+export interface AvailableDelivery {
+  /** Event id — what the claim endpoint takes. */
+  id: number;
+  /** Quotable delivery reference (e.g. BP-K4F9Q2). */
+  reference: string;
+  delivery_date: string;
+  suburb: string | null;
+  state: string | null;
+  postcode: string | null;
+  occasion: string | null;
+  flower_notes: string | null;
+  florist_budget: string | null;
+  delivery_fee: string | null;
+  /** florist_budget + delivery_fee — what the florist would invoice. */
+  florist_total: string | null;
+}
+
+export interface ClaimDeliveryResult {
+  status: 'claimed';
+  delivery_request_id: number;
+  token: string;
+  reference: string;
+}
+
 export interface PayoutSummary {
   total_paid: string;
   total_pending: string;

@@ -138,6 +138,20 @@ class Order(models.Model):
     recipient_postcode = models.CharField(max_length=20, blank=True, null=True, help_text="Recipient's postal code.")
     recipient_country = models.CharField(max_length=100, blank=True, null=True, help_text="Recipient's country.")
 
+    # Geocoded from the recipient address. Florist matching is purely a distance
+    # test against these, so an order without them can never reach a florist —
+    # treat a null pair as an admin flag, not a benign default.
+    latitude = models.FloatField(
+        null=True, blank=True,
+        help_text="Geocoded latitude of the recipient address. Null means the address "
+                  "has not been geocoded, and the order cannot be matched to a florist."
+    )
+    longitude = models.FloatField(
+        null=True, blank=True,
+        help_text="Geocoded longitude of the recipient address. Null means the address "
+                  "has not been geocoded, and the order cannot be matched to a florist."
+    )
+
     delivery_notes = models.TextField(
         blank=True,
         null=True,

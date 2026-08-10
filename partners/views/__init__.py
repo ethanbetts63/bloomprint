@@ -4,10 +4,10 @@ from .commission_list_view import CommissionListView
 from .business_account_update_view import BusinessAccountUpdateView
 from .delivery_request_views import (
     DeliveryRequestDetailView,
-    DeliveryRequestRespondView,
     DeliveryRequestListView,
     DeliveryRequestMarkDeliveredView,
 )
+from .available_delivery_views import AvailableDeliveryListView, ClaimDeliveryView
 from .stripe_connect_onboard_view import StripeConnectOnboardView
 from .stripe_connect_status_view import StripeConnectStatusView
 from .payout_views import PayoutListView, PayoutDetailView

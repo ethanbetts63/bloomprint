@@ -3,9 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from partners.models import BusinessAccount, DeliveryRequest, Commission
-from partners.utils.commission_utils import get_referral_commission_amount
 from decimal import Decimal
+from partners.models import BusinessAccount, DeliveryRequest
 from django.db.models import Q
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import ListAPIView
@@ -59,65 +58,6 @@ class DeliveryRequestDetailView(APIView):
             'event_status': event.status,
             'expires_at': dr.expires_at,
         })
-
-
-class DeliveryRequestRespondView(APIView):
-    authentication_classes = []
-    permission_classes = [AllowAny]
-
-    def post(self, request, token):
-        try:
-            dr = DeliveryRequest.objects.select_related(
-                'event', 'event__order', 'business_account'
-            ).get(token=token)
-        except DeliveryRequest.DoesNotExist:
-            return Response({"error": "Delivery request not found."}, status=status.HTTP_404_NOT_FOUND)
-
-        if dr.status != 'pending':
-            return Response(
-                {"error": f"This request has already been {dr.status}."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        action = request.data.get('action')
-        if action not in ('accept', 'decline'):
-            return Response(
-                {"error": "Action must be 'accept' or 'decline'."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        dr.responded_at = timezone.now()
-
-        if action == 'accept':
-            dr.status = 'accepted'
-            dr.save()
-            return Response({"status": "accepted"})
-
-        # Decline
-        dr.status = 'declined'
-        dr.save()
-
-        # If the order was referred by this affiliate, create a commission.
-        order = dr.event.order
-        if order.referred_by_affiliate_id == dr.business_account_id:
-            budget = getattr(order, 'budget', None)
-            if budget:
-                # Use snapshotted commission_amount from event if available, else calculate
-                commission_amount = dr.event.commission_amount or get_referral_commission_amount(budget)
-                Commission.objects.create(
-                    business_account=dr.business_account,
-                    event=dr.event,
-                    commission_type='referral',
-                    amount=commission_amount,
-                    status='pending',
-                    note='Commission for declined delivery of referred customer',
-                )
-
-        # Trigger reassignment
-        from partners.utils.reassignment import reassign_delivery_request
-        reassign_delivery_request(dr.event, excluded_business_account_ids=[dr.business_account_id])
-
-        return Response({"status": "declined"})
 
 
 DELIVERY_ORDERING_MAP = {

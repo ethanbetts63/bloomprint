@@ -50,6 +50,30 @@ class OrderSerializer(serializers.ModelSerializer):
     def get_discount_code_display(self, obj):
         return obj.discount_code.code if obj.discount_code else None
 
+    # Any of these changing invalidates the coordinates we hold.
+    ADDRESS_FIELDS = (
+        'recipient_street_address', 'recipient_suburb', 'recipient_city',
+        'recipient_state', 'recipient_postcode', 'recipient_country',
+    )
+
+    def update(self, instance, validated_data):
+        address_changed = any(
+            field in validated_data and validated_data[field] != getattr(instance, field)
+            for field in self.ADDRESS_FIELDS
+        )
+
+        order = super().update(instance, validated_data)
+
+        # Geocode here rather than at payment time: florist matching is a pure
+        # distance test, so an order with no coordinates reaches nobody. Doing
+        # it while the address is being edited means a failure is visible and
+        # fixable now, instead of surfacing as silence after the customer pays.
+        if address_changed or (order.latitude is None and order.recipient_suburb):
+            from events.utils.geocoding import geocode_order
+            geocode_order(order)
+
+        return order
+
     def validate_budget(self, value):
         if value is not None and value < settings.MIN_BUDGET:
             raise serializers.ValidationError(

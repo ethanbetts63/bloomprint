@@ -2,7 +2,9 @@ import { authedFetch } from './apiClient';
 import { handleResponse } from './helpers';
 import type {
   AuthResponse,
+  AvailableDelivery,
   BusinessDetailsUpdate,
+  ClaimDeliveryResult,
   Commission,
   DashboardAccount,
   DeliveryRequestDetail,
@@ -68,9 +70,20 @@ export async function getDeliveryRequestByToken(token: string): Promise<Delivery
   return handleResponse(await fetch(`/api/business-accounts/delivery-requests/${token}/details/`));
 }
 
-export async function respondToDeliveryRequest(token: string, action: 'accept' | 'decline'): Promise<{ status: string }> {
-  const response = await authedFetch(`/api/business-accounts/delivery-requests/${token}/respond/`, { method: 'POST', body: JSON.stringify({ action }) });
-  return handleResponse(response);
+/** The claim board: unclaimed deliveries inside this florist's service area. */
+export async function getAvailableDeliveries(params: ListParams = {}): Promise<Paginated<AvailableDelivery>> {
+  const query = queryString({ page: params.page, page_size: params.pageSize });
+  return handleResponse(await authedFetch(`/api/business-accounts/available-deliveries/${query}`));
+}
+
+/**
+ * Claim a delivery. First come, first served — a 409 means another florist got
+ * there first, which is an expected outcome rather than an error to retry.
+ */
+export async function claimDelivery(eventId: number): Promise<ClaimDeliveryResult> {
+  return handleResponse(
+    await authedFetch(`/api/business-accounts/available-deliveries/${eventId}/claim/`, { method: 'POST' }),
+  );
 }
 
 export async function markDeliveryComplete(token: string): Promise<{ status: string }> {

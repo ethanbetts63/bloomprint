@@ -5,9 +5,10 @@ from partners.views import (
     CommissionListView,
     BusinessAccountUpdateView,
     DeliveryRequestDetailView,
-    DeliveryRequestRespondView,
     DeliveryRequestListView,
     DeliveryRequestMarkDeliveredView,
+    AvailableDeliveryListView,
+    ClaimDeliveryView,
     StripeConnectOnboardView,
     StripeConnectStatusView,
     PayoutListView,
@@ -31,9 +32,11 @@ urlpatterns = [
     path('update/', BusinessAccountUpdateView.as_view(), name='business-account-update'),
     path('discount-codes/', AffiliateDiscountCodeListCreateView.as_view(), name='affiliate-discount-code-list-create'),
 
+    path('available-deliveries/', AvailableDeliveryListView.as_view(), name='available-delivery-list'),
+    path('available-deliveries/<int:event_id>/claim/', ClaimDeliveryView.as_view(), name='claim-delivery'),
+
     path('delivery-requests/', DeliveryRequestListView.as_view(), name='delivery-request-list'),
     path('delivery-requests/<str:token>/details/', DeliveryRequestDetailView.as_view(), name='delivery-request-detail'),
-    path('delivery-requests/<str:token>/respond/', DeliveryRequestRespondView.as_view(), name='delivery-request-respond'),
     path('delivery-requests/<str:token>/mark-delivered/', DeliveryRequestMarkDeliveredView.as_view(), name='delivery-request-mark-delivered'),
 
     path('admin/commissions/', AdminCommissionListView.as_view(), name='admin-commission-list'),

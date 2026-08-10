@@ -6,7 +6,11 @@ from events.models import Order, Event
 from payments.utils.subscription_dates import get_next_delivery_date
 from payments.utils.send_admin_payment_notification import send_admin_payment_notification
 from payments.utils.send_customer_payment_notification import send_customer_payment_notification
-from data_management.utils.notification_factory import create_admin_event_notifications, create_customer_delivery_day_notification
+from data_management.utils.notification_factory import (
+    create_admin_event_notifications,
+    create_customer_delivery_day_notification,
+    notify_florists_of_new_delivery,
+)
 
 
 def _activate_order(order):
@@ -35,6 +39,7 @@ def _create_first_event(order, payment_intent_id):
     )
     create_admin_event_notifications(event)
     create_customer_delivery_day_notification(event)
+    notify_florists_of_new_delivery(event)
     send_customer_payment_notification(order)
     send_admin_payment_notification(payment_intent_id, order=order)
 

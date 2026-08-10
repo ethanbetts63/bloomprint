@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+from django.conf import settings
 from data_management.models import Notification
 from data_management.utils import sms_messages
 
@@ -55,6 +56,71 @@ def create_admin_event_notifications(event):
 
     if notifications_to_create:
         Notification.objects.bulk_create(notifications_to_create)
+
+
+def notify_florists_of_new_delivery(event):
+    """
+    Announces a newly paid-for delivery to every florist who can claim it.
+
+    Rows are created first and sent immediately afterwards, rather than left for
+    the send_notifications cron: the whole point of the claim board is that the
+    fastest florist wins, and a queue that drains once a day would decide that
+    race by cron schedule. Sends that fail stay 'pending' so the cron still
+    picks them up — a Mailgun outage delays the announcement instead of losing
+    it. The board itself is live the moment the event exists, independent of
+    any of this.
+
+    Returns the notifications created, for the caller to log or assert on.
+    """
+    from data_management.utils.send_notification import send_notification
+    from partners.utils.matching import eligible_florists_for_event
+
+    florists = eligible_florists_for_event(event)
+    if not florists:
+        return []
+
+    order = event.order
+    where = ', '.join(part for part in [order.recipient_suburb, order.recipient_state] if part)
+    subject = f"New delivery available in {where or 'your area'} — {event.delivery_date}"
+    body = (
+        f"A new Bloom Print delivery is available to claim.\n\n"
+        f"Reference: {event.reference}\n"
+        f"Area: {where or 'Not specified'}\n"
+        f"Delivery date: {event.delivery_date}\n"
+        f"Occasion: {order.occasion or 'Not specified'}\n"
+        f"Brief: {order.flower_notes or 'Not specified'}\n"
+        f"You would be paid: ${event.florist_total}\n\n"
+        f"Deliveries are first come, first served. Claim it from your dashboard:\n"
+        f"{settings.SITE_URL}/dashboard/florist\n"
+    )
+
+    notifications = [
+        Notification(
+            recipient_type='business_account',
+            recipient_business_account=florist,
+            channel='email',
+            subject=subject,
+            body=body,
+            scheduled_for=date.today(),
+            related_event=event,
+        )
+        for florist in florists
+    ]
+    Notification.objects.bulk_create(notifications)
+
+    # bulk_create does not populate PKs on every backend, and send_notification
+    # saves the row it is given. Re-read so each has an identity to update.
+    created = list(
+        Notification.objects.filter(
+            related_event=event,
+            recipient_type='business_account',
+            status='pending',
+        )
+    )
+    for notification in created:
+        send_notification(notification)
+
+    return created
 
 
 def cancel_event_notifications(event):

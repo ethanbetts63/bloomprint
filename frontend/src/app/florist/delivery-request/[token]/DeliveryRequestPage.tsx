@@ -5,9 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, XCircle, MapPin, Calendar } from 'lucide-react';
+import { CheckCircle, MapPin, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
-import { getDeliveryRequestByToken, respondToDeliveryRequest, markDeliveryComplete } from '@/api/businessAccounts';
+import { getDeliveryRequestByToken, markDeliveryComplete } from '@/api/businessAccounts';
 import type { DeliveryRequestDetail } from '@/types';
 import { errorMessage } from '@/lib/errors';
 
@@ -33,21 +33,6 @@ const DeliveryRequestPage = () => {
     };
     fetchRequest();
   }, [token]);
-
-  const handleRespond = async (action: 'accept' | 'decline') => {
-    if (!token) return;
-    setIsResponding(true);
-    try {
-      await respondToDeliveryRequest(token, action);
-      toast.success(action === 'accept' ? 'Delivery accepted!' : 'Delivery declined.');
-      const data = await getDeliveryRequestByToken(token);
-      setRequest(data);
-    } catch (err) {
-      toast.error('Failed to respond', { description: errorMessage(err) });
-    } finally {
-      setIsResponding(false);
-    }
-  };
 
   const handleMarkDelivered = async () => {
     if (!token) return;
@@ -176,28 +161,6 @@ const DeliveryRequestPage = () => {
                 <div>
                   <p className="text-sm text-muted-foreground">Card Message</p>
                   <p className="text-sm mt-1 italic whitespace-pre-wrap">&ldquo;{request.message}&rdquo;</p>
-                </div>
-              )}
-
-              {request.status === 'pending' && (
-                <div className="flex gap-4 pt-4 border-t">
-                  <Button
-                    className="flex-1"
-                    onClick={() => handleRespond('accept')}
-                    disabled={isResponding}
-                  >
-                    {isResponding ? <Spinner className="h-4 w-4 mr-2 text-current" /> : <CheckCircle className="h-4 w-4 mr-2" />}
-                    Accept
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() => handleRespond('decline')}
-                    disabled={isResponding}
-                  >
-                    {isResponding ? <Spinner className="h-4 w-4 mr-2 text-current" /> : <XCircle className="h-4 w-4 mr-2" />}
-                    Decline
-                  </Button>
                 </div>
               )}
 
