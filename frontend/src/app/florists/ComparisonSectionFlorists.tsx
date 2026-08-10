@@ -1,7 +1,7 @@
 import { ComparisonBarChart, floristComparisonBars, floristComparisonLegend } from './ComparisonBarChart';
 
 const rows = [
-  { feature: 'Commission',       them: '25-50% per order',              us: '15%' },
+  { feature: 'Commission',       them: '25-50% per order',              us: '10%' },
   { feature: 'Monthly Fees',     them: 'Often $100–$200+ monthly',      us: '$0' },
   { feature: 'Order Rejection',  them: '$5–25 penalty for rejecting', us: 'No penalty — just say no' },
   { feature: 'Delivery Fee',     them: 'Often retain delivery margin',  us: 'We retain none of it' },
@@ -31,7 +31,7 @@ const ComparisonSection = () => (
           <div className="mt-6 pt-2 border-t border-black/10">
             <p className="text-sm font-semibold text-black/80 italic">Then how do you make money?</p>
             <p className="mt-2 text-sm text-black/70 leading-relaxed">
-              No catch, our business model is florist first. We charge a flat 15% per order. No hidden "marketing fees," no monthly subscriptions, and no penalties for saying no. We'd rather be a partner than a tax collector.</p>
+              No catch, our business model is florist first. We charge a flat 10% per order. No hidden "marketing fees," no monthly subscriptions, and no penalties for saying no. We'd rather be a partner than a tax collector.</p>
           </div>
         </div>
       </div>

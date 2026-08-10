@@ -57,9 +57,9 @@ class TestAdminEventFloristBriefView:
         response = self.client.get(self._url(event.id))
 
         text = PdfReader(BytesIO(response.content)).pages[0].extract_text()
-        assert '$119.00' in text   # what the florist has to spend
+        assert '$126.00' in text   # what the florist has to spend
         assert '$140.00' in text   # the customer's budget, shown for transparency
-        assert '$21.00' in text    # Bloom Print's commission
+        assert '$14.00' in text    # Bloom Print's commission
 
     def test_requires_admin(self):
         event = EventFactory()

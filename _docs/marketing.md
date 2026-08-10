@@ -62,7 +62,7 @@ python manage.py send_outreach --count 5
 | Variable | Where needed | Purpose |
 |---|---|---|
 | `INTERNAL_API_KEY` | Local + server | Shared secret for the upload endpoint |
-| `MARKETING_SERVER_URL` | Local only | Upload destination (defaults to `https://www.bloomprint.app`) |
+| `MARKETING_SERVER_URL` | Local only | Upload destination (defaults to `https://www.bloomprint.com.au`) |
 
 ## JSONL Entry Format
 

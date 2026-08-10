@@ -25,7 +25,7 @@ export default function Page() {
         "provider": {
             "@type": "Organization",
             "name": "Bloom Print",
-            "url": "https://www.bloomprint.app"
+            "url": "https://www.bloomprint.com.au"
         },
         "areaServed": [
             { "@type": "Country", "name": "Australia" }

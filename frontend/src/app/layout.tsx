@@ -17,7 +17,7 @@ import { buildWebsiteSchema, buildOrganizationSchema } from '@/lib/seo';
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.bloomprint.app",
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.bloomprint.com.au",
   ),
   title: {
     default: "Bloom Print | Australian Florist-Led Flower Delivery",

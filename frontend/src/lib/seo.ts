@@ -1,5 +1,5 @@
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bloomprint.app';
+  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bloomprint.com.au';
 
 export const SITE_NAME = 'Bloom Print';
 

@@ -27,6 +27,12 @@ class ValidateDiscountCodeSerializer(serializers.Serializer):
         if discount_code.business_account.status != 'active':
             raise serializers.ValidationError("This discount code is not currently valid.")
 
+        # Codes belong to affiliates only. Registration no longer issues them to
+        # florists, but legacy florist codes still exist in the DB and must not
+        # redeem.
+        if discount_code.business_account.account_type != 'affiliate':
+            raise serializers.ValidationError("This discount code is not currently valid.")
+
         return value
 
     def apply_discount(self, order):

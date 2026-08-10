@@ -81,6 +81,22 @@ class TestBusinessAccountRegistrationSerializer:
         partner = BusinessAccount.objects.get(user=user)
         assert DiscountCode.objects.filter(business_account=partner).exists()
 
+    def test_florist_registration_creates_no_discount_code(self):
+        """Florists earn from fulfilment, not referrals — they get no code."""
+        data = _valid_data(
+            account_type='florist',
+            business_name='Petal Pushers',
+            latitude=40.7128,
+            longitude=-74.0060,
+        )
+        serializer = BusinessAccountRegistrationSerializer(data=data)
+        assert serializer.is_valid(), serializer.errors
+        user = serializer.save()
+
+        partner = BusinessAccount.objects.get(user=user)
+        assert partner.account_type == 'florist'
+        assert not DiscountCode.objects.filter(business_account=partner).exists()
+
     def test_create_normalizes_email_to_lowercase(self):
         data = _valid_data(email='TestEmail@Example.COM')
         with patch('stripe.Account.create') as mock_stripe:

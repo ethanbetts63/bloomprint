@@ -45,6 +45,16 @@ class TestValidateDiscountCodeSerializer:
 
         assert not serializer.is_valid()
 
+    def test_florist_owned_code_fails(self):
+        """Legacy codes attached to a florist must not redeem."""
+        partner = BusinessAccountFactory(status='active', account_type='florist')
+        dc = DiscountCodeFactory(business_account=partner, is_active=True)
+
+        serializer = serializer_for(dc.code)
+
+        assert not serializer.is_valid()
+        assert 'code' in serializer.errors
+
     def test_empty_code_passes_validation(self):
         serializer = serializer_for('')
 

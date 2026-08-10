@@ -36,9 +36,14 @@ class StripeConnectOnboardView(APIView):
                     'mcc': '7311',
                 }
 
-            account = stripe.Account.create(**account_kwargs)
-            account.stripe_connect_account_id = account.id
-            account.save()
+            # Keep the Stripe resource in its own name. Binding it to `account`
+            # shadowed the BusinessAccount, so the acct_ id was set on the Stripe
+            # object and pushed back to the API instead of being written to the
+            # DB — leaving the column NULL and minting a fresh orphan Express
+            # account on every retry.
+            stripe_account = stripe.Account.create(**account_kwargs)
+            account.stripe_connect_account_id = stripe_account.id
+            account.save(update_fields=['stripe_connect_account_id', 'updated_at'])
 
         account_link = stripe.AccountLink.create(
             account=account.stripe_connect_account_id,

@@ -1,8 +1,22 @@
 import pytest
+import stripe
 from rest_framework.test import APIClient
 from partners.tests.factories.business_account_factory import BusinessAccountFactory
 from users.tests.factories.user_factory import UserFactory
-import stripe
+
+
+def stripe_account(**fields):
+    """
+    A real stripe.Account, not a MagicMock.
+
+    MagicMock answers to any attribute, which is exactly what let the views
+    shadow the BusinessAccount with the Stripe resource and still pass. A real
+    resource raises AttributeError for fields Stripe does not return, so these
+    tests fail if the shadowing comes back.
+    """
+    return stripe.Account.construct_from(
+        {'id': 'acct_123', 'object': 'account', **fields}, 'sk_test'
+    )
 
 
 @pytest.mark.django_db
@@ -15,9 +29,8 @@ class TestStripeConnectViews:
     # --- Onboard view ---
 
     def test_onboard_view_success(self, mocker):
-        partner = BusinessAccountFactory(user=self.user)
-        mock_acc = mocker.patch('stripe.Account.create')
-        mock_acc.return_value = mocker.MagicMock(id='acct_123')
+        partner = BusinessAccountFactory(user=self.user, stripe_connect_account_id=None)
+        mocker.patch('stripe.Account.create', return_value=stripe_account())
 
         mock_link = mocker.patch('stripe.AccountLink.create')
         mock_link.return_value = mocker.MagicMock(url='https://connect.stripe.com/onboard/acct_123')
@@ -28,6 +41,17 @@ class TestStripeConnectViews:
 
         partner.refresh_from_db()
         assert partner.stripe_connect_account_id == 'acct_123'
+
+    def test_onboard_view_links_against_the_persisted_account_id(self, mocker):
+        """The AccountLink must target the id we just saved, not a stale value."""
+        BusinessAccountFactory(user=self.user, stripe_connect_account_id=None)
+        mocker.patch('stripe.Account.create', return_value=stripe_account())
+        mock_link = mocker.patch('stripe.AccountLink.create')
+        mock_link.return_value = mocker.MagicMock(url='https://connect.stripe.com/onboard/acct_123')
+
+        self.client.post('/api/business-accounts/stripe-connect/onboard/')
+
+        assert mock_link.call_args.kwargs['account'] == 'acct_123'
 
     def test_onboard_view_uses_existing_account_id(self, mocker):
         """If partner already has a stripe_connect_account_id, no new account is created."""
@@ -51,8 +75,7 @@ class TestStripeConnectViews:
 
     def test_onboard_view_no_partner_returns_404(self, mocker):
         """User with no Partner record gets a 404."""
-        mocker.patch('stripe.Account.create', return_value=mocker.MagicMock(id='acct_new'))
-        mocker.patch('stripe.AccountSession.create', return_value=mocker.MagicMock(client_secret='s'))
+        mocker.patch('stripe.Account.create', return_value=stripe_account())
         # self.user has no partner profile
         response = self.client.post('/api/business-accounts/stripe-connect/onboard/')
         assert response.status_code == 404
@@ -61,15 +84,16 @@ class TestStripeConnectViews:
 
     def test_status_view_success(self, mocker):
         partner = BusinessAccountFactory(user=self.user, stripe_connect_account_id='acct_123')
-        mock_retrieve = mocker.patch('stripe.Account.retrieve')
-        mock_retrieve.return_value = mocker.MagicMock(
-            charges_enabled=True,
-            payouts_enabled=True
+        mocker.patch(
+            'stripe.Account.retrieve',
+            return_value=stripe_account(charges_enabled=True, payouts_enabled=True),
         )
 
         response = self.client.get('/api/business-accounts/stripe-connect/status/')
         assert response.status_code == 200
         assert response.data['onboarding_complete'] is True
+        assert response.data['charges_enabled'] is True
+        assert response.data['payouts_enabled'] is True
 
         partner.refresh_from_db()
         assert partner.stripe_connect_onboarding_complete is True
@@ -80,10 +104,28 @@ class TestStripeConnectViews:
             stripe_connect_account_id='acct_123',
             stripe_connect_onboarding_complete=False,
         )
-        mock_retrieve = mocker.patch('stripe.Account.retrieve')
-        mock_retrieve.return_value = mocker.MagicMock(
-            charges_enabled=False,
-            payouts_enabled=False,
+        mocker.patch(
+            'stripe.Account.retrieve',
+            return_value=stripe_account(charges_enabled=False, payouts_enabled=False),
+        )
+
+        response = self.client.get('/api/business-accounts/stripe-connect/status/')
+        assert response.status_code == 200
+        assert response.data['onboarding_complete'] is False
+
+        partner.refresh_from_db()
+        assert partner.stripe_connect_onboarding_complete is False
+
+    def test_status_view_charges_without_payouts_is_incomplete(self, mocker):
+        """Payouts are the thing we care about; charges alone is not enough."""
+        partner = BusinessAccountFactory(
+            user=self.user,
+            stripe_connect_account_id='acct_123',
+            stripe_connect_onboarding_complete=False,
+        )
+        mocker.patch(
+            'stripe.Account.retrieve',
+            return_value=stripe_account(charges_enabled=True, payouts_enabled=False),
         )
 
         response = self.client.get('/api/business-accounts/stripe-connect/status/')

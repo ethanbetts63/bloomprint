@@ -64,17 +64,17 @@ class TestEventMoneySnapshot:
         order = OrderFactory(budget=Decimal('140.00'), status='active')
         event = EventFactory(order=order)
 
-        assert event.platform_commission == Decimal('21.00')
-        assert event.florist_budget == Decimal('119.00')
+        assert event.platform_commission == Decimal('14.00')
+        assert event.florist_budget == Decimal('126.00')
 
     def test_florist_total_adds_the_delivery_fee(self):
         # Below the threshold, so a delivery fee is charged on top.
         order = OrderFactory(budget=Decimal('60.00'))
         event = EventFactory(order=order)
 
-        assert event.florist_budget == Decimal('51.00')
+        assert event.florist_budget == Decimal('54.00')
         assert event.delivery_fee == Decimal('20.00')
-        assert event.florist_total == Decimal('71.00')
+        assert event.florist_total == Decimal('74.00')
 
     def test_delivery_fee_is_zero_when_absorbed_by_the_budget(self):
         order = OrderFactory(budget=Decimal('120.00'))
@@ -92,7 +92,7 @@ class TestEventMoneySnapshot:
         order.save()
         event.refresh_from_db()
 
-        assert event.florist_budget == Decimal('119.00')
+        assert event.florist_budget == Decimal('126.00')
 
     def test_handles_an_order_with_no_budget(self):
         order = OrderFactory(budget=None)

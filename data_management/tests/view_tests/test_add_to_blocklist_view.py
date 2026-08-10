@@ -26,7 +26,7 @@ def test_add_to_blocklist_success(api_client):
     response = api_client.get(url)
 
     assert response.status_code == 302
-    assert response.url == 'https://www.bloomprint.app/blocklist-success/'
+    assert response.url == 'https://www.bloomprint.com.au/blocklist-success/'
     assert BlockedEmail.objects.filter(email=email_to_block).exists()
 
 def test_add_to_blocklist_idempotent(api_client):

@@ -37,8 +37,10 @@ DELIVERY_INCLUDED_THRESHOLD = 65
 DELIVERY_FEE = 20
 
 # Bloom Print's cut of the bouquet budget. The delivery fee is not commissioned —
-# it passes to the florist in full. Quoted to florists as a flat 15%.
-FLORIST_COMMISSION_RATE = os.environ.get("FLORIST_COMMISSION_RATE", "0.15")
+# it passes to the florist in full. Quoted to florists as a flat 10%.
+# Changing this only affects new orders: Order reprices while pending_payment
+# only, and Event snapshots the florist's figures at creation.
+FLORIST_COMMISSION_RATE = os.environ.get("FLORIST_COMMISSION_RATE", "0.10")
 
 # Where the florist-brief QR code sends a florist who scans it.
 FLORIST_SIGNUP_URL = os.environ.get(
@@ -49,7 +51,7 @@ DEBUG = os.getenv('DEBUG') == 'True'
 
 ALLOWED_HOSTS = ['ethanbetts.pythonanywhere.com', 'api.bloomprint.com.au', 'www.bloomprint.com.au', '127.0.0.1', 'localhost']
 
-CSRF_TRUSTED_ORIGINS = ['https://www.bloomprint.app']
+CSRF_TRUSTED_ORIGINS = ['https://www.bloomprint.com.au']
 
 if DEBUG:
     CSRF_TRUSTED_ORIGINS.extend([
@@ -202,7 +204,7 @@ DEFAULT_FROM_EMAIL = "Bloom Print <postmaster@mail.bloomprint.app>"
 TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
 
 INTERNAL_API_KEY    = os.environ.get("INTERNAL_API_KEY")
-MARKETING_SERVER_URL = os.environ.get("MARKETING_SERVER_URL", "https://www.bloomprint.app")
+MARKETING_SERVER_URL = os.environ.get("MARKETING_SERVER_URL", "https://www.bloomprint.com.au")
 TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
 TWILIO_PHONE_NUMBER = os.environ.get("TWILIO_PHONE_NUMBER")
 TWILIO_MESSAGING_SERVICE_SID = os.environ.get("TWILIO_MESSAGING_SERVICE_SID")

@@ -254,14 +254,26 @@ const FloristAffiliateRegistrationForm = ({ accountType, className = '' }: Flori
         )}
 
         {isDelivery && step === 1 ? (
-          <button
-            type="button"
-            onClick={handleContinue}
-            className="flex w-full items-center justify-between rounded-lg bg-black px-5 py-4 text-left text-white transition hover:bg-black/85"
-          >
-            <span className="block text-sm font-semibold">Continue to store location</span>
-            <ChevronRight className="h-5 w-5 text-white/70" />
-          </button>
+          <div className="space-y-3">
+            <button
+              type="button"
+              onClick={handleContinue}
+              className="flex w-full items-center justify-between rounded-lg bg-black px-5 py-4 text-left text-white transition hover:bg-black/85"
+            >
+              <span className="block text-sm font-semibold">Continue to store location</span>
+              <ChevronRight className="h-5 w-5 text-white/70" />
+            </button>
+            <p className="text-center text-sm text-black/60">
+              Already signed up?{' '}
+              <Link
+                href="/login"
+                className="font-medium text-black underline underline-offset-2 transition hover:text-black/70"
+              >
+                Log in here
+              </Link>
+              .
+            </p>
+          </div>
         ) : (
           <div className="space-y-3">
             {isDelivery && step === 2 && (

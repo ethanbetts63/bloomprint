@@ -114,7 +114,7 @@ const DeliveryRequestPage = () => {
                       <dd>${Number(request.delivery_fee).toFixed(2)}</dd>
                     </div>
                     <div className="flex justify-between gap-6 border-t border-black/10 pt-1 font-semibold">
-                      <dt>You invoice Bloom Print</dt>
+                      <dt>Total</dt>
                       <dd>${Number(request.florist_total).toFixed(2)}</dd>
                     </div>
                   </dl>

@@ -5,31 +5,31 @@
 Bloom Print is a platform that connects customers with independent local Australian florists. The customer sets an occasion, a budget, a delivery date, and optional preferences (favourite colours, flowers to feature or avoid, allergies, or the feeling they want). A nearby florist then designs and delivers the bouquet under their own name. Bloom Print does not grow, stock, or arrange flowers itself — every bouquet is made and delivered by a local florist. Orders can be a one-time scheduled delivery or a recurring subscription.
 
 ## Main pages
-- [Corporate Flower Subscriptions](https://www.bloomprint.app/corporate-flower-subscriptions): Recurring office flower delivery for receptions, meeting rooms, client spaces, and shared workplace areas.
-- [Send Flowers to Australia from Overseas](https://www.bloomprint.app/send-flowers-to-australia-from-overseas): Order from anywhere in the world for local florist fulfilment and delivery in Australia.
-- [Home](https://www.bloomprint.app/): Start an order — choose an occasion, budget, delivery date, and preferences for a florist to work from.
-- [Pricing](https://www.bloomprint.app/pricing): Budget tiers and transparent pricing. From $100 the budget you set is the exact amount charged, with delivery included; below $100 a $20 delivery fee is added on top and shown before payment.
-- [Flower Subscription](https://www.bloomprint.app/flower-subscription): Recurring flower delivery — choose a frequency and budget, and a local florist designs a fresh seasonal bouquet each cycle. Pause, skip, or cancel anytime.
-- [For Florists](https://www.bloomprint.app/florists): How local florists partner with Bloom Print to receive and fulfil scheduled deliveries and subscriptions.
-- [Affiliates](https://www.bloomprint.app/affiliates): Referral programme — earn per delivery while giving your audience a discount on their first bouquet.
-- [Contact](https://www.bloomprint.app/contact): Get in touch with the Bloom Print team.
+- [Corporate Flower Subscriptions](https://www.bloomprint.com.au/corporate-flower-subscriptions): Recurring office flower delivery for receptions, meeting rooms, client spaces, and shared workplace areas.
+- [Send Flowers to Australia from Overseas](https://www.bloomprint.com.au/send-flowers-to-australia-from-overseas): Order from anywhere in the world for local florist fulfilment and delivery in Australia.
+- [Home](https://www.bloomprint.com.au/): Start an order — choose an occasion, budget, delivery date, and preferences for a florist to work from.
+- [Pricing](https://www.bloomprint.com.au/pricing): Budget tiers and transparent pricing. From $100 the budget you set is the exact amount charged, with delivery included; below $100 a $20 delivery fee is added on top and shown before payment.
+- [Flower Subscription](https://www.bloomprint.com.au/flower-subscription): Recurring flower delivery — choose a frequency and budget, and a local florist designs a fresh seasonal bouquet each cycle. Pause, skip, or cancel anytime.
+- [For Florists](https://www.bloomprint.com.au/florists): How local florists partner with Bloom Print to receive and fulfil scheduled deliveries and subscriptions.
+- [Affiliates](https://www.bloomprint.com.au/affiliates): Referral programme — earn per delivery while giving your audience a discount on their first bouquet.
+- [Contact](https://www.bloomprint.com.au/contact): Get in touch with the Bloom Print team.
 
 ## Flower delivery by occasion
-- [Birthday Flower Delivery](https://www.bloomprint.app/birthday-flower-delivery): Fresh birthday flowers designed by a local florist from your brief.
-- [Valentine's Day Flower Delivery](https://www.bloomprint.app/valentines-day-flower-delivery): Schedule Valentine's Day flowers ahead of the date.
-- [Mother's Day Flower Delivery](https://www.bloomprint.app/mothers-day-flower-delivery): Schedule Mother's Day flowers ahead to guarantee delivery.
+- [Birthday Flower Delivery](https://www.bloomprint.com.au/birthday-flower-delivery): Fresh birthday flowers designed by a local florist from your brief.
+- [Valentine's Day Flower Delivery](https://www.bloomprint.com.au/valentines-day-flower-delivery): Schedule Valentine's Day flowers ahead of the date.
+- [Mother's Day Flower Delivery](https://www.bloomprint.com.au/mothers-day-flower-delivery): Schedule Mother's Day flowers ahead to guarantee delivery.
 
 ## Flower delivery by location
-- [Flower Delivery Perth](https://www.bloomprint.app/flower-delivery-perth): Florist-led flower delivery in Perth, Western Australia.
+- [Flower Delivery Perth](https://www.bloomprint.com.au/flower-delivery-perth): Florist-led flower delivery in Perth, Western Australia.
 
 ## Guides and articles
-- [Articles](https://www.bloomprint.app/articles): Guides on flower delivery, subscriptions, and gifting.
-- [Best Flower Subscription Services Australia (2026)](https://www.bloomprint.app/articles/best-flower-subscription-services-au)
-- [Best Flower Delivery Services Perth (2026)](https://www.bloomprint.app/articles/best-flower-delivery-perth)
-- [Best Flower Delivery Services Sydney (2026)](https://www.bloomprint.app/articles/best-flower-delivery-sydney)
-- [Best Flower Delivery Services Melbourne (2026)](https://www.bloomprint.app/articles/best-flower-delivery-melbourne)
-- [Best Flower Delivery Services Adelaide (2026)](https://www.bloomprint.app/articles/best-flower-delivery-adelaide)
-- [Best Flower Delivery Services Darwin (2026)](https://www.bloomprint.app/articles/best-flower-delivery-darwin)
+- [Articles](https://www.bloomprint.com.au/articles): Guides on flower delivery, subscriptions, and gifting.
+- [Best Flower Subscription Services Australia (2026)](https://www.bloomprint.com.au/articles/best-flower-subscription-services-au)
+- [Best Flower Delivery Services Perth (2026)](https://www.bloomprint.com.au/articles/best-flower-delivery-perth)
+- [Best Flower Delivery Services Sydney (2026)](https://www.bloomprint.com.au/articles/best-flower-delivery-sydney)
+- [Best Flower Delivery Services Melbourne (2026)](https://www.bloomprint.com.au/articles/best-flower-delivery-melbourne)
+- [Best Flower Delivery Services Adelaide (2026)](https://www.bloomprint.com.au/articles/best-flower-delivery-adelaide)
+- [Best Flower Delivery Services Darwin (2026)](https://www.bloomprint.com.au/articles/best-flower-delivery-darwin)
 
 ## How it works
 1. Give the brief — occasion, budget, delivery date, and preferences (colours, flowers to feature or avoid, the feeling you want).

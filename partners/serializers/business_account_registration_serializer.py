@@ -76,7 +76,10 @@ class BusinessAccountRegistrationSerializer(serializers.Serializer):
 
         account = BusinessAccount.objects.create(**account_fields)
 
-        code = DiscountCode.generate_code(validated_data.get('business_name', ''))
-        DiscountCode.objects.create(business_account=account, code=code, discount_amount=5)
+        # Only affiliates deal in discount codes. Florists earn from fulfilment,
+        # not referrals, so they get no code at registration.
+        if account.account_type == 'affiliate':
+            code = DiscountCode.generate_code(validated_data.get('business_name', ''))
+            DiscountCode.objects.create(business_account=account, code=code, discount_amount=5)
 
         return user

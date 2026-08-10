@@ -23,16 +23,20 @@ class StripeConnectStatusView(APIView):
                 'has_account': False,
             })
 
-        account = stripe.Account.retrieve(account.stripe_connect_account_id)
-        is_complete = account.charges_enabled and account.payouts_enabled
+        # Same shadowing trap as the onboard view: the Stripe resource must not
+        # be bound to `account`, or the reads below hit the Stripe object (which
+        # raises AttributeError for our own fields) instead of the model.
+        stripe_account = stripe.Account.retrieve(account.stripe_connect_account_id)
+        charges_enabled = bool(stripe_account.charges_enabled)
+        payouts_enabled = bool(stripe_account.payouts_enabled)
 
-        if is_complete and not account.stripe_connect_onboarding_complete:
+        if charges_enabled and payouts_enabled and not account.stripe_connect_onboarding_complete:
             account.stripe_connect_onboarding_complete = True
-            account.save()
+            account.save(update_fields=['stripe_connect_onboarding_complete', 'updated_at'])
 
         return Response({
             'onboarding_complete': account.stripe_connect_onboarding_complete,
             'has_account': True,
-            'charges_enabled': account.charges_enabled,
-            'payouts_enabled': account.payouts_enabled,
+            'charges_enabled': charges_enabled,
+            'payouts_enabled': payouts_enabled,
         })

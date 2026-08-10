@@ -149,7 +149,7 @@ def build_florist_brief(event) -> bytes:
     if delivery_fee is None:
         delivery_fee = order.delivery_fee or Decimal("0.00")
     florist_total = (flower_spend + delivery_fee).quantize(Decimal("0.01"))
-    # normalize() then ':f' renders 0.15 as "15" and 0.125 as "12.5", never "15.00".
+    # normalize() then ':f' renders 0.10 as "10" and 0.125 as "12.5", never "10.00".
     rate_pct = (Decimal(str(settings.FLORIST_COMMISSION_RATE)) * 100).quantize(Decimal('0.01')).normalize()
     rate_label = f"{rate_pct:f}%"
 
@@ -188,7 +188,7 @@ def build_florist_brief(event) -> bytes:
     pdf.drawString(text_x, header_y + 26, "Bloom Print")
     pdf.setFont("Helvetica", 9.5)
     pdf.setFillColor(MUTED)
-    pdf.drawString(text_x, header_y + 11, "Florist brief — please keep this with the order")
+    pdf.drawString(text_x, header_y + 11, "Florist brief")
 
     # The reference, never the primary key — and no order number at all: the
     # florist has no relationship with the order, only with this delivery.
@@ -234,7 +234,7 @@ def build_florist_brief(event) -> bytes:
         rows.append(("Delivery fee (paid to you in full)", f"+{money(delivery_fee)}"))
     else:
         rows.append(("Delivery", "Included in the budget"))
-    rows.append(("You invoice Bloom Print", money(florist_total)))
+    rows.append(("Total", money(florist_total)))
 
     row_y = panel_y + panel_height - 28
     value_x = page_width - margin - pad
