@@ -27,14 +27,7 @@ class AvailableDeliverySerializer(serializers.ModelSerializer):
     # budget, our cut, and what the florist keeps. Showing the commission openly
     # is the point — a florist should be able to check our arithmetic before
     # deciding whether the job is worth claiming.
-    budget = serializers.DecimalField(
-        source='order.budget', max_digits=10, decimal_places=2, read_only=True
-    )
-    platform_commission = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
-    commission_rate = serializers.SerializerMethodField()
-    florist_budget = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
-    delivery_fee = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
-    florist_total = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    money = serializers.SerializerMethodField()
 
     class Meta:
         model = Event
@@ -42,14 +35,12 @@ class AvailableDeliverySerializer(serializers.ModelSerializer):
             'id', 'reference', 'delivery_date', 'preferred_delivery_time',
             'suburb', 'state', 'postcode',
             'occasion', 'flower_notes',
-            'budget', 'platform_commission', 'commission_rate',
-            'florist_budget', 'delivery_fee', 'florist_total',
+            'money',
         ]
 
-    def get_commission_rate(self, obj):
-        """The rate as a percentage string, e.g. "10%" — same label as the brief."""
-        from decimal import Decimal
-        from django.conf import settings
-
-        rate = (Decimal(str(settings.FLORIST_COMMISSION_RATE)) * 100).quantize(Decimal('0.01')).normalize()
-        return f'{rate:f}%'
+    def get_money(self, obj):
+        """
+        The same breakdown the brief prints, from the same source, so a florist
+        comparing the PDF against the dashboard can never see two answers.
+        """
+        return {key: str(value) for key, value in obj.money_breakdown().items()}

@@ -122,12 +122,23 @@ class TestAvailableDeliveryDetailView:
         event = event_at(*NEARBY)
         self.client.force_authenticate(user=florist.user)
 
-        data = self.client.get(self.detail_url(event)).data
+        money = self.client.get(self.detail_url(event)).data['money']
 
         for field in ('budget', 'platform_commission', 'commission_rate',
                       'florist_budget', 'delivery_fee', 'florist_total'):
-            assert field in data, field
-        assert data['commission_rate'].endswith('%')
+            assert field in money, field
+        assert money['commission_rate'].endswith('%')
+
+    def test_money_matches_the_brief(self):
+        """One source, so the PDF and the dashboard cannot show different figures."""
+        florist = florist_at(*ROCKINGHAM)
+        event = event_at(*NEARBY)
+        self.client.force_authenticate(user=florist.user)
+
+        money = self.client.get(self.detail_url(event)).data['money']
+
+        expected = {key: str(value) for key, value in event.money_breakdown().items()}
+        assert money == expected
 
     def test_still_withholds_recipient_pii(self):
         florist = florist_at(*ROCKINGHAM)

@@ -15,22 +15,28 @@ class DeliveryRequestListSerializer(serializers.ModelSerializer):
     reference = serializers.CharField(source='event.reference', read_only=True)
     delivery_date = serializers.DateField(source='event.delivery_date')
     recipient_name = serializers.SerializerMethodField()
-    florist_budget = serializers.DecimalField(
-        source='event.florist_budget', max_digits=10, decimal_places=2, read_only=True
-    )
-    delivery_fee = serializers.DecimalField(
-        source='event.delivery_fee', max_digits=10, decimal_places=2, read_only=True
-    )
-    florist_total = serializers.DecimalField(
-        source='event.florist_total', max_digits=10, decimal_places=2, read_only=True
-    )
+    florist_budget = serializers.SerializerMethodField()
+    delivery_fee = serializers.SerializerMethodField()
+    florist_total = serializers.SerializerMethodField()
+
+    def _money(self, obj):
+        return obj.event.money_breakdown()
+
+    def get_florist_budget(self, obj):
+        return str(self._money(obj)['florist_budget'])
+
+    def get_delivery_fee(self, obj):
+        return str(self._money(obj)['delivery_fee'])
+
+    def get_florist_total(self, obj):
+        return str(self._money(obj)['florist_total'])
 
     class Meta:
         model = DeliveryRequest
         fields = [
             'id', 'reference', 'delivery_date', 'recipient_name',
             'florist_budget', 'delivery_fee', 'florist_total',
-            'status', 'token', 'expires_at', 'created_at',
+            'status', 'token', 'created_at',
         ]
 
     def get_recipient_name(self, obj):

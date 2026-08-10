@@ -36,3 +36,17 @@ def calculate_florist_payout(budget: Decimal) -> Decimal:
     if not budget:
         return Decimal('0.00')
     return (Decimal(budget) - calculate_florist_commission(budget)).quantize(Decimal('0.01'))
+
+
+def commission_rate_label() -> str:
+    """
+    The commission rate as a percentage label, e.g. "10%".
+
+    Lives here so the brief PDF and the claim board cannot drift apart: a
+    florist comparing the two should never see two different rates.
+
+    normalize() then ':f' renders 0.10 as "10" and 0.125 as "12.5", never
+    "10.00".
+    """
+    rate = (Decimal(str(settings.FLORIST_COMMISSION_RATE)) * 100).quantize(Decimal('0.01')).normalize()
+    return f'{rate:f}%'

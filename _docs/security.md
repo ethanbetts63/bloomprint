@@ -57,7 +57,7 @@ Each cookie is set with three flags beyond HttpOnly:
 
 ### The threat
 
-CSRF is the flip side of using cookies. Because the browser sends cookies *automatically* with every request to your domain, an attacker on `evil.com` can craft a hidden form that submits to `bloomprint.app/api/users/delete/`. The user's browser will helpfully attach the auth cookie, and the server has no way to tell the request didn't come from your own frontend.
+CSRF is the flip side of using cookies. Because the browser sends cookies *automatically* with every request to your domain, an attacker on `evil.com` can craft a hidden form that submits to `bloomprint.com.au/api/users/delete/`. The user's browser will helpfully attach the auth cookie, and the server has no way to tell the request didn't come from your own frontend.
 
 HttpOnly cookies solve XSS but introduce this new risk.
 
@@ -67,7 +67,7 @@ A CSRF token is a second, random value that the server sets as a *readable* cook
 
 The server checks: "did this request include the CSRF token that I set in the cookie?" A request from `evil.com` cannot include this header because:
 1. The attacker's page is on a different domain
-2. The browser's same-origin policy prevents `evil.com` from reading cookies belonging to `bloomprint.app`
+2. The browser's same-origin policy prevents `evil.com` from reading cookies belonging to `bloomprint.com.au`
 
 So the attacker can trigger the request but can't include the token, and the server rejects it.
 

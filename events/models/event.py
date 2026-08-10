@@ -2,7 +2,11 @@ from decimal import Decimal
 
 from django.db import models
 
-from events.utils.fee_calc import calculate_florist_commission, calculate_florist_payout
+from events.utils.fee_calc import (
+    calculate_florist_commission,
+    calculate_florist_payout,
+    commission_rate_label,
+)
 from events.utils.reference import generate_unique_reference
 
 
@@ -51,14 +55,6 @@ class Event(models.Model):
     ordering_evidence_text = models.TextField(null=True, blank=True)
     delivered_at = models.DateTimeField(null=True, blank=True)
     delivery_evidence_text = models.TextField(null=True, blank=True)
-    commission_amount = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        null=True,
-        blank=True,
-        help_text="Snapshotted AFFILIATE REFERRAL commission for this delivery, set at "
-                  "creation. Not Bloom Print's own cut — that is platform_commission."
-    )
     florist_budget = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -89,6 +85,38 @@ class Event(models.Model):
     def florist_total(self):
         """What the florist invoices Bloom Print: their flower budget plus delivery."""
         return (self.florist_budget or Decimal('0.00')) + (self.delivery_fee or Decimal('0.00'))
+
+    def money_breakdown(self):
+        """
+        The full florist-facing money split for this delivery.
+
+        Single source for the brief PDF, the claim board, and the claim detail
+        page. They previously each derived this, and disagreed: the PDF fell
+        back to a live calculation when the snapshot was null while the
+        serializers emitted null, so a pre-snapshot event showed correct figures
+        on paper and blanks in the API.
+
+        Snapshots win when present — they are what the florist was promised, and
+        a later rate change must not rewrite history.
+        """
+        budget = self.order.budget or Decimal('0.00')
+        commission = self.platform_commission
+        flower_spend = self.florist_budget
+        if commission is None or flower_spend is None:
+            commission = calculate_florist_commission(budget)
+            flower_spend = calculate_florist_payout(budget)
+        delivery_fee = self.delivery_fee
+        if delivery_fee is None:
+            delivery_fee = self.order.delivery_fee or Decimal('0.00')
+
+        return {
+            'budget': budget,
+            'platform_commission': commission,
+            'commission_rate': commission_rate_label(),
+            'florist_budget': flower_spend,
+            'delivery_fee': delivery_fee,
+            'florist_total': (flower_spend + delivery_fee).quantize(Decimal('0.01')),
+        }
 
     def save(self, *args, **kwargs):
         if not self.reference:

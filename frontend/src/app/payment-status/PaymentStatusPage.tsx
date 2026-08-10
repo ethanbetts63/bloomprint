@@ -53,7 +53,7 @@ const UniversalPaymentStatusPage = () => {
                 const order = await getGuestOrder();
                 if (order.status === 'active') {
                     clearInterval(pollIntervalRef.current!);
-                    setMessage('Payment confirmed. For refunds or subscription changes, contact our support team at admin@bloomprint.app from the email address used at checkout.');
+                    setMessage('Payment confirmed. For refunds or subscription changes, contact our support team at admin@bloomprint.com.au from the email address used at checkout.');
                     setIsProcessing(false);
                     setIsActivating(false);
                     return;
@@ -131,7 +131,7 @@ const UniversalPaymentStatusPage = () => {
                         if (planId && planId !== "N/A") {
                             pollUntilActive();
                         } else {
-                            setMessage('Payment confirmed. For refunds or subscription changes, contact our support team at admin@bloomprint.app from the email address used at checkout.');
+                            setMessage('Payment confirmed. For refunds or subscription changes, contact our support team at admin@bloomprint.com.au from the email address used at checkout.');
                         }
                         break;
                     }

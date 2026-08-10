@@ -27,15 +27,12 @@ def _create_first_event(order, payment_intent_id):
         print(f"First event for Order (PK: {order.pk}) already exists. Skipping duplicate.")
         return
 
-    from partners.utils.commission_utils import get_referral_commission_amount
-    commission_amount = get_referral_commission_amount(order.budget) if order.budget else None
     message = order.card_message if order.billing_mode == 'one_time' else ''
 
     event = Event.objects.create(
         order=order,
         delivery_date=order.start_date,
         message=message,
-        commission_amount=commission_amount,
     )
     create_admin_event_notifications(event)
     create_customer_delivery_day_notification(event)
@@ -198,15 +195,15 @@ def handle_invoice_payment_succeeded(invoice):
             return
 
         if not Event.objects.filter(order=order, delivery_date=delivery_date).exists():
-            from partners.utils.commission_utils import get_referral_commission_amount
-            commission_amount = get_referral_commission_amount(order.budget) if order.budget else None
             new_event = Event.objects.create(
                 order=order,
                 delivery_date=delivery_date,
-                commission_amount=commission_amount,
             )
             create_admin_event_notifications(new_event)
             create_customer_delivery_day_notification(new_event)
+            # Each renewal is a fresh delivery that needs a florist, so it is
+            # announced exactly like a first one.
+            notify_florists_of_new_delivery(new_event)
             send_admin_payment_notification(payment_intent_id, order=order)
             print(f"Created new Event for recurring delivery on {delivery_date}.")
         else:

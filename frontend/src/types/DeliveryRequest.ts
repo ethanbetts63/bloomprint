@@ -23,7 +23,6 @@ export interface DeliveryRequestDetail {
   florist_total: string;
   business_account_name: string;
   event_status: string;
-  expires_at: string;
 }
 
 export interface DeliveryRequestListItem {
@@ -34,6 +33,5 @@ export interface DeliveryRequestListItem {
   delivery_date: string;
   recipient_name: string;
   florist_budget: string;
-  expires_at: string;
   created_at: string;
 }

@@ -56,9 +56,9 @@ export interface DeliveryRequestSummary {
   delivery_fee?: string;
   /** florist_budget + delivery_fee — what the florist invoices. */
   florist_total?: string;
-  status: 'pending' | 'accepted' | 'declined' | 'expired';
+  /** Always 'accepted' — a row exists only because a florist claimed it. */
+  status: 'accepted';
   token: string;
-  expires_at: string | null;
   created_at: string;
 }
 
@@ -80,15 +80,24 @@ export interface AvailableDelivery {
   occasion: string | null;
   flower_notes: string | null;
   preferred_delivery_time: string | null;
-  /** The customer's budget. Shown openly — the commission split is transparent. */
-  budget: string | null;
-  platform_commission: string | null;
-  /** Commission rate as a label, e.g. "10%". */
+  money: FloristMoneyBreakdown;
+}
+
+/**
+ * The florist-facing money split, served from one place on the backend so the
+ * brief PDF and the dashboard can never disagree. The customer's budget and our
+ * commission are shown openly — the transparency is the pitch.
+ */
+export interface FloristMoneyBreakdown {
+  budget: string;
+  platform_commission: string;
+  /** Rate as a label, e.g. "10%". */
   commission_rate: string;
-  florist_budget: string | null;
-  delivery_fee: string | null;
-  /** florist_budget + delivery_fee — what the florist would invoice. */
-  florist_total: string | null;
+  /** What the florist has to spend on flowers, after commission. */
+  florist_budget: string;
+  delivery_fee: string;
+  /** florist_budget + delivery_fee — what the florist invoices. */
+  florist_total: string;
 }
 
 export interface ClaimDeliveryResult {

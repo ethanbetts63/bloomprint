@@ -21,7 +21,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
-STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY", "")
+# No STRIPE_PUBLISHABLE_KEY here: the publishable key is only ever used by the
+# browser, and Next.js inlines it from NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY at
+# build time. Django never needs it.
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
 STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
 
@@ -206,7 +208,7 @@ SIMPLE_JWT = {
 
 MAILGUN_API_KEY = os.environ.get("MAILGUN_API_KEY")
 MAILGUN_DOMAIN = os.environ.get("MAILGUN_DOMAIN")
-DEFAULT_FROM_EMAIL = "Bloom Print <postmaster@mail.bloomprint.app>"
+DEFAULT_FROM_EMAIL = "Bloom Print <postmaster@mail.bloomprint.com.au>"
 
 TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
 

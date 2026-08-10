@@ -23,13 +23,6 @@ class TestEventModel:
         event = EventFactory(order=plan)
         assert str(plan.id) in str(event)
 
-    def test_commission_amount_can_be_null(self):
-        event = EventFactory()
-        event.commission_amount = None
-        event.save()
-        event.refresh_from_db()
-        assert event.commission_amount is None
-
     def test_message_can_be_null(self):
         event = EventFactory(message=None)
         event.refresh_from_db()

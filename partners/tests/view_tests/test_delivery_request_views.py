@@ -13,12 +13,12 @@ class TestDeliveryRequestViews:
 
     def test_list_is_paginated_scoped_and_filtered_for_florist(self):
         florist = BusinessAccountFactory(account_type='florist')
-        matching = DeliveryRequestFactory(business_account=florist, status='accepted', event__order__recipient_first_name='Alice', event__order__recipient_last_name='Flower')
-        DeliveryRequestFactory(business_account=florist, status='pending')
-        DeliveryRequestFactory(business_account=BusinessAccountFactory(account_type='florist'), status='accepted')
+        matching = DeliveryRequestFactory(business_account=florist, event__order__recipient_first_name='Alice', event__order__recipient_last_name='Flower')
+        DeliveryRequestFactory(business_account=florist, event__order__recipient_first_name='Bob', event__order__recipient_last_name='Stem')
+        DeliveryRequestFactory(business_account=BusinessAccountFactory(account_type='florist'))
         self.client.force_authenticate(user=florist.user)
 
-        response = self.client.get('/api/business-accounts/delivery-requests/?status=accepted&search=alice&ordering=recipient')
+        response = self.client.get('/api/business-accounts/delivery-requests/?search=alice&ordering=recipient')
 
         assert response.status_code == 200
         assert response.data['count'] == 1
@@ -45,8 +45,6 @@ class TestDeliveryRequestViews:
         dr.event.refresh_from_db()
         assert dr.event.status == 'delivered'
 
-    def test_mark_delivered_not_accepted_returns_400(self):
-        dr = DeliveryRequestFactory(status='pending')
-        url = f"/api/business-accounts/delivery-requests/{dr.token}/mark-delivered/"
-        response = self.client.post(url)
-        assert response.status_code == 400
+    def test_mark_delivered_unknown_token_returns_404(self):
+        response = self.client.post('/api/business-accounts/delivery-requests/nope/mark-delivered/')
+        assert response.status_code == 404

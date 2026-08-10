@@ -95,7 +95,7 @@ export default function FloristDashboardPage() {
             count={deliveryCount}
             viewAllHref="/dashboard/florist/deliveries"
             viewAllLabel="View all deliveries"
-            headers={['Recipient', 'Delivery date', 'Expires', 'Status', 'Action']}
+            headers={['Recipient', 'Delivery date', 'You earn', 'Action']}
             empty={deliveries.length === 0}
             emptyMessage="No delivery requests yet."
             minWidth={800}
@@ -104,8 +104,7 @@ export default function FloristDashboardPage() {
               <TableRow key={request.id} className="border-slate-100 hover:bg-slate-50">
                 <TableCell className="font-medium text-slate-900">{request.recipient_name || 'Recipient'}</TableCell>
                 <TableCell className="text-slate-700">{formatDeliveryDate(request.delivery_date)}</TableCell>
-                <TableCell className="text-slate-600">{formatDashboardDateLong(request.expires_at)}</TableCell>
-                <TableCell><DashboardStatusPill status={request.status} /></TableCell>
+                <TableCell className="text-slate-900">{formatDashboardCurrency(request.florist_total)}</TableCell>
                 <TableCell className="text-right">
                   <DashboardTableLink href={`/florist/delivery-request/${request.token}`}>Review</DashboardTableLink>
                 </TableCell>

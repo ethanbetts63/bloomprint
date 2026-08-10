@@ -197,7 +197,7 @@ const CorporateSubscriptionDetails = () => (
           </p>
         </div>
         <a
-          href="mailto:admin@bloomprint.app?subject=Corporate%20flower%20subscription%20enquiry"
+          href="mailto:admin@bloomprint.com.au?subject=Corporate%20flower%20subscription%20enquiry"
           className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/85"
         >
           <Mail className="h-4 w-4" aria-hidden="true" />

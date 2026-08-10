@@ -8,7 +8,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         try:
             site_to_update = Site.objects.get(domain='example.com')
-            new_domain = 'www.bloomprint.app'
+            new_domain = 'www.bloomprint.com.au'
             
             self.stdout.write(f"Found site: {site_to_update.name} with domain {site_to_update.domain}")
             

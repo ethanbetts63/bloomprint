@@ -40,6 +40,7 @@ export type {
   Commission,
   DeliveryRequestSummary,
   AvailableDelivery,
+  FloristMoneyBreakdown,
   ClaimDeliveryResult,
   PayoutSummary,
   DiscountCodeValidation,

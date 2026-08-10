@@ -71,6 +71,7 @@ export default function AvailableDeliveryDetailPage() {
   }
 
   const area = [delivery.suburb, delivery.state, delivery.postcode].filter(Boolean).join(' ');
+  const money = delivery.money;
 
   return (
     <AdminDetailPage
@@ -86,14 +87,23 @@ export default function AvailableDeliveryDetailPage() {
     >
       <AdminDetailSection title="What you'll be paid">
         <AdminDetailGrid>
-          <AdminDetailField label="Customer's budget" value={formatDashboardCurrency(delivery.budget)} />
+          <AdminDetailField label="Customer's budget" value={formatDashboardCurrency(money.budget)} />
           <AdminDetailField
-            label={`Bloom Print commission (${delivery.commission_rate})`}
-            value={`−${formatDashboardCurrency(delivery.platform_commission)}`}
+            label={`Bloom Print commission (${money.commission_rate})`}
+            value={`−${formatDashboardCurrency(money.platform_commission)}`}
           />
-          <AdminDetailField label="Flowers to the value of" value={formatDashboardCurrency(delivery.florist_budget)} />
-          <AdminDetailField label="Delivery fee (yours in full)" value={formatDashboardCurrency(delivery.delivery_fee)} />
-          <AdminDetailField label="Total to you" value={formatDashboardCurrency(delivery.florist_total)} wide />
+          <AdminDetailField label="Flowers to the value of" value={formatDashboardCurrency(money.florist_budget)} />
+          {/* A zero fee means delivery is already covered by the budget, not
+              that the florist is being paid nothing for it. Matches the brief. */}
+          {Number(money.delivery_fee) > 0 ? (
+            <AdminDetailField
+              label="Delivery fee (yours in full)"
+              value={formatDashboardCurrency(money.delivery_fee)}
+            />
+          ) : (
+            <AdminDetailField label="Delivery" value="Included in the budget" />
+          )}
+          <AdminDetailField label="Total to you" value={formatDashboardCurrency(money.florist_total)} wide />
         </AdminDetailGrid>
       </AdminDetailSection>
 

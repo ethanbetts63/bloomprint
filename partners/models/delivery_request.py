@@ -3,11 +3,17 @@ from django.db import models
 
 
 class DeliveryRequest(models.Model):
+    """
+    A florist's claim on a delivery.
+
+    Despite the name, this is a record of a delivery already taken, not an offer
+    awaiting an answer. It was an offer under the old assignment model, where
+    the platform picked one florist and waited for accept or decline; claiming
+    is first-come-first-served, so a row only ever exists because a florist took
+    the job. Hence the single status.
+    """
     STATUS_CHOICES = (
-        ('pending', 'Pending'),
         ('accepted', 'Accepted'),
-        ('declined', 'Declined'),
-        ('expired', 'Expired'),
     )
 
     event = models.ForeignKey(
@@ -20,12 +26,9 @@ class DeliveryRequest(models.Model):
         on_delete=models.CASCADE,
         related_name='delivery_requests'
     )
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='accepted')
     token = models.CharField(max_length=64, unique=True, db_index=True)
-    first_notified_at = models.DateTimeField(null=True, blank=True)
-    second_notified_at = models.DateTimeField(null=True, blank=True)
     responded_at = models.DateTimeField(null=True, blank=True)
-    expires_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

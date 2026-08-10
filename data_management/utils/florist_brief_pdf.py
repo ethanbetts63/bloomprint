@@ -21,7 +21,6 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 
-from events.utils.fee_calc import calculate_florist_commission, calculate_florist_payout
 
 ROOT = Path(settings.BASE_DIR)
 ASSETS = ROOT / "frontend" / "src" / "assets"
@@ -160,21 +159,15 @@ def build_florist_brief(event, variant: str = "claimed") -> bytes:
     display, display_regular = _register_fonts()
     order = event.order
 
-    budget = order.budget or Decimal("0.00")
-    # Prefer the snapshot frozen onto the event at creation; fall back to a live
-    # calculation only for events written before the snapshot existed.
-    commission = event.platform_commission
-    flower_spend = event.florist_budget
-    if commission is None or flower_spend is None:
-        commission = calculate_florist_commission(budget)
-        flower_spend = calculate_florist_payout(budget)
-    delivery_fee = event.delivery_fee
-    if delivery_fee is None:
-        delivery_fee = order.delivery_fee or Decimal("0.00")
-    florist_total = (flower_spend + delivery_fee).quantize(Decimal("0.01"))
-    # normalize() then ':f' renders 0.10 as "10" and 0.125 as "12.5", never "10.00".
-    rate_pct = (Decimal(str(settings.FLORIST_COMMISSION_RATE)) * 100).quantize(Decimal('0.01')).normalize()
-    rate_label = f"{rate_pct:f}%"
+    # Not named `money` — that is the currency formatter defined above, and
+    # shadowing it turns every drawString into a TypeError.
+    breakdown = event.money_breakdown()
+    budget = breakdown['budget']
+    commission = breakdown['platform_commission']
+    flower_spend = breakdown['florist_budget']
+    delivery_fee = breakdown['delivery_fee']
+    florist_total = breakdown['florist_total']
+    rate_label = breakdown['commission_rate']
 
     buffer = BytesIO()
     page_width, page_height = A4

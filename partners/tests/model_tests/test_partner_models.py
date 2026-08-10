@@ -96,9 +96,10 @@ class TestDeliveryRequestModel:
         s = str(dr)
         assert str(dr.id) in s
 
-    def test_default_status_is_pending(self):
+    def test_default_status_is_accepted(self):
+        """A DeliveryRequest only exists because a florist claimed the delivery."""
         dr = DeliveryRequestFactory()
-        assert dr.status == 'pending'
+        assert dr.status == 'accepted'
 
     def test_token_is_unique(self):
         dr1 = DeliveryRequestFactory()

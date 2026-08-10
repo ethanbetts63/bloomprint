@@ -3,8 +3,8 @@
   "model": "sites.site",
   "pk": 1,
   "fields": {
-    "domain": "www.bloomprint.app",
-    "name": "www.bloomprint.app"
+    "domain": "www.bloomprint.com.au",
+    "name": "www.bloomprint.com.au"
   }
 }
 ]

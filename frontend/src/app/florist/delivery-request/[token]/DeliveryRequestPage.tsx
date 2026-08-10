@@ -94,10 +94,19 @@ const DeliveryRequestPage = () => {
                     </p>
                   </div>
                   <dl className="text-sm space-y-1 min-w-[15rem]">
-                    <div className="flex justify-between gap-6">
-                      <dt className="text-muted-foreground">Delivery fee (yours in full)</dt>
-                      <dd>${Number(request.delivery_fee).toFixed(2)}</dd>
-                    </div>
+                    {/* A zero fee means delivery is covered by the budget, not
+                        that the florist is paid nothing for it. Matches the brief. */}
+                    {Number(request.delivery_fee ?? 0) > 0 ? (
+                      <div className="flex justify-between gap-6">
+                        <dt className="text-muted-foreground">Delivery fee (yours in full)</dt>
+                        <dd>${Number(request.delivery_fee).toFixed(2)}</dd>
+                      </div>
+                    ) : (
+                      <div className="flex justify-between gap-6">
+                        <dt className="text-muted-foreground">Delivery</dt>
+                        <dd>Included in the budget</dd>
+                      </div>
+                    )}
                     <div className="flex justify-between gap-6 border-t border-black/10 pt-1 font-semibold">
                       <dt>Total</dt>
                       <dd>${Number(request.florist_total).toFixed(2)}</dd>

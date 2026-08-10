@@ -50,13 +50,10 @@ class DeliveryRequestDetailView(APIView):
             # The brief — a florist cannot judge whether to accept without it.
             'occasion': order.get_occasion_display() if order.occasion else '',
             'flower_notes': order.flower_notes or '',
-            # The florist's money, never the customer's budget.
-            'florist_budget': str(event.florist_budget or Decimal('0.00')),
-            'delivery_fee': str(event.delivery_fee or Decimal('0.00')),
-            'florist_total': str(event.florist_total),
+            # Same breakdown as the brief, from the same source.
+            **{key: str(value) for key, value in event.money_breakdown().items()},
             'business_account_name': dr.business_account.business_name,
             'event_status': event.status,
-            'expires_at': dr.expires_at,
         })
 
 
@@ -65,7 +62,6 @@ DELIVERY_ORDERING_MAP = {
     'delivery_date': ('event__delivery_date',),
     'budget': ('event__florist_budget',),
     'status': ('status',),
-    'expires_at': ('expires_at',),
     'created_at': ('created_at',),
 }
 

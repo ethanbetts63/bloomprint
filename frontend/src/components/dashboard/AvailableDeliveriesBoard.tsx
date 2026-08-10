@@ -105,7 +105,7 @@ export default function AvailableDeliveriesBoard({ onClaimed }: { onClaimed?: ()
           <TableCell className="text-slate-700">{areaLabel(delivery)}</TableCell>
           <TableCell className="text-slate-700">{formatDashboardDateOnly(delivery.delivery_date)}</TableCell>
           <TableCell className="text-slate-600">{delivery.occasion || '—'}</TableCell>
-          <TableCell className="text-slate-900">{formatDashboardCurrency(delivery.florist_total)}</TableCell>
+          <TableCell className="text-slate-900">{formatDashboardCurrency(delivery.money.florist_total)}</TableCell>
           {/* Stop the row's navigation: clicking Claim should claim, not open
               the detail page underneath it. */}
           <TableCell className="text-right" onClick={(event) => event.stopPropagation()}>
