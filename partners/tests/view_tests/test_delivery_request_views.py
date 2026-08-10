@@ -2,12 +2,14 @@ import pytest
 from rest_framework.test import APIClient
 from partners.tests.factories.delivery_request_factory import DeliveryRequestFactory
 from partners.tests.factories.business_account_factory import BusinessAccountFactory
-from users.tests.factories.user_factory import UserFactory
-from events.tests.factories.event_factory import EventFactory
 
 
 @pytest.mark.django_db
 class TestDeliveryRequestViews:
+    """
+    The list of a florist's own claims. The job sheet and mark-delivered moved
+    to test_florist_delivery_views.py when they stopped being token-addressed.
+    """
     def setup_method(self):
         self.client = APIClient()
 
@@ -28,23 +30,3 @@ class TestDeliveryRequestViews:
         affiliate = BusinessAccountFactory(account_type='affiliate')
         self.client.force_authenticate(user=affiliate.user)
         assert self.client.get('/api/business-accounts/delivery-requests/').status_code == 404
-
-    def test_detail_view_success(self):
-        dr = DeliveryRequestFactory()
-        url = f"/api/business-accounts/delivery-requests/{dr.token}/details/"
-        response = self.client.get(url)
-        assert response.status_code == 200
-        assert response.data['id'] == dr.id
-
-    def test_mark_delivered_success(self):
-        dr = DeliveryRequestFactory(status='accepted')
-        url = f"/api/business-accounts/delivery-requests/{dr.token}/mark-delivered/"
-        response = self.client.post(url)
-
-        assert response.status_code == 200
-        dr.event.refresh_from_db()
-        assert dr.event.status == 'delivered'
-
-    def test_mark_delivered_unknown_token_returns_404(self):
-        response = self.client.post('/api/business-accounts/delivery-requests/nope/mark-delivered/')
-        assert response.status_code == 404

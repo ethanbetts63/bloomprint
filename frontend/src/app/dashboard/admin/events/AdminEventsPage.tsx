@@ -17,7 +17,7 @@ const STATUS_OPTIONS = [
   { value: 'all', label: 'All statuses' },
   { value: 'scheduled,ordered', label: 'Needs action (scheduled + ordered)' },
   { value: 'scheduled', label: 'Scheduled' },
-  { value: 'ordered', label: 'Ordered' },
+  { value: 'claimed', label: 'Claimed' },
   { value: 'delivered', label: 'Delivered' },
   { value: 'cancelled', label: 'Cancelled' },
 ];

@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAdminUser
 from rest_framework import status
 from events.models import Event
 from data_management.serializers.admin_event_serializer import AdminEventSerializer
-from partners.models import Commission, DeliveryRequest
+from partners.utils.fulfillment import create_fulfillment_payable
 
 
 class AdminMarkDeliveredView(APIView):
@@ -20,9 +20,9 @@ class AdminMarkDeliveredView(APIView):
         except Event.DoesNotExist:
             return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        if event.status != 'ordered':
+        if event.status != 'claimed':
             return Response(
-                {'detail': f"Cannot mark as delivered: event status is '{event.status}', expected 'ordered'."},
+                {'detail': f"Cannot mark as delivered: event status is '{event.status}', expected 'claimed'."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -37,20 +37,6 @@ class AdminMarkDeliveredView(APIView):
         event.delivery_evidence_text = delivery_evidence_text
         event.save()
 
-        try:
-            accepted_dr = DeliveryRequest.objects.filter(event=event, status='accepted').first()
-            if accepted_dr and not Commission.objects.filter(event=event, commission_type='fulfillment').exists():
-                budget = getattr(event.order, 'budget', None)
-                if budget:
-                    Commission.objects.create(
-                        business_account=accepted_dr.business_account,
-                        event=event,
-                        commission_type='fulfillment',
-                        amount=budget,
-                        status='pending',
-                        note='Delivery payment for fulfilled delivery',
-                    )
-        except Exception as e:
-            print(f"Error creating fulfillment commission for event {event.pk}: {e}")
+        create_fulfillment_payable(event)
 
         return Response(AdminEventSerializer(event).data)

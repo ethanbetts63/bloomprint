@@ -79,10 +79,7 @@ export default function AdminEventDetailPage() {
           : <FileDown className="mr-2 h-4 w-4" aria-hidden="true" />}
         Florist brief
       </Button>
-      {event.status === 'scheduled' && (
-        <Button asChild><Link href={`/dashboard/admin/events/${event.id}/mark-ordered`}>Place order</Link></Button>
-      )}
-      {event.status === 'ordered' && (
+      {event.status === 'claimed' && (
         <Button asChild><Link href={`/dashboard/admin/events/${event.id}/mark-delivered`}>Confirm delivery</Link></Button>
       )}
     </div>

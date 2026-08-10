@@ -130,16 +130,31 @@ class ClaimDeliveryView(APIView):
                 status='accepted',
                 responded_at=timezone.now(),
             )
+            # Set inside the same locked transaction as the claim. The event
+            # status and the claim row encode the same fact, so they must not be
+            # able to disagree — the board reads one and the payout the other.
+            event.status = 'claimed'
+            event.save(update_fields=['status', 'updated_at'])
 
         # Outside the transaction: the claim is already committed and must not
         # be rolled back because an email failed. The florist can always read
         # the full brief from their dashboard.
         try:
-            from data_management.utils.notification_factory import notify_florist_of_claim
+            from data_management.utils.notification_factory import (
+                cancel_event_notifications,
+                create_admin_delivery_day_notifications,
+                notify_florist_of_claim,
+            )
+            # The pending admin alerts for this event warn that nobody has taken
+            # it. Someone just has.
+            cancel_event_notifications(event)
+            # Admin still wants a nudge on the day, to watch that the florist
+            # actually delivers.
+            create_admin_delivery_day_notifications(event)
             notify_florist_of_claim(delivery_request)
         except Exception:
             logger.exception(
-                "Claim %s succeeded but the confirmation email failed.", delivery_request.pk
+                "Claim %s succeeded but its follow-up notifications failed.", delivery_request.pk
             )
 
         return Response(

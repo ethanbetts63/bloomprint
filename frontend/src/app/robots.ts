@@ -18,7 +18,6 @@ export default function robots(): MetadataRoute.Robots {
           "/payment-status",
           "/order/",
           "/stripe-connect/",
-          "/florist/delivery-request/",
           "/terms-and-conditions/",
         ],
       },

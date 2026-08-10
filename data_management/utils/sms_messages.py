@@ -19,16 +19,22 @@ def admin_payment_received(order, payment_id):
 
 
 def admin_event_reminder(event):
-    """Sent to admin at T-7 and T-3 days before a delivery. Action needed: order the flowers."""
+    """
+    Sent to admin at T-7 and T-3 when a delivery is still unclaimed.
+
+    Cancelled the moment a florist claims it, so receiving one means nobody has
+    taken the job and it needs a hand.
+    """
     order = event.order
     return (
-        f"Action needed: order flowers for {order.recipient_first_name} {order.recipient_last_name} "
-        f"— delivery {event.delivery_date}, ${order.budget}."
+        f"Unclaimed: no florist has taken the delivery for "
+        f"{order.recipient_first_name} {order.recipient_last_name} "
+        f"— {event.delivery_date}, {order.recipient_suburb}."
     )
 
 
 def admin_delivery_day(event):
-    """Sent to admin on delivery day once the event has been marked as ordered."""
+    """Sent to admin on delivery day, once a florist has claimed the delivery."""
     order = event.order
     return (
         f"Delivery day: {order.recipient_first_name} {order.recipient_last_name} "

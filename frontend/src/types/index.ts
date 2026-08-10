@@ -62,7 +62,6 @@ export type { AdminEventListItem } from './AdminEventListItem';
 export type { AdminOrder } from './AdminOrder';
 export type { AdminOrderEvent } from './AdminOrderEvent';
 export type { AdminOrderDetail } from './AdminOrderDetail';
-export type { MarkOrderedPayload } from './MarkOrderedPayload';
 export type { MarkDeliveredPayload } from './MarkDeliveredPayload';
 export type { ImpactTier } from './ImpactTier';
 export type { CalculatedPriceResponse } from './CalculatedPriceResponse';

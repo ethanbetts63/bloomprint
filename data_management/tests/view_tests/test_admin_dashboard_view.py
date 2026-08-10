@@ -31,30 +31,30 @@ class TestAdminDashboardView:
     def test_returns_three_buckets(self):
         response = self.client.get(self._url())
         assert response.status_code == 200
-        assert 'to_order' in response.data
-        assert 'ordered' in response.data
+        assert 'unclaimed' in response.data
+        assert 'claimed' in response.data
         assert 'delivered' in response.data
 
-    def test_to_order_includes_scheduled_within_14_days(self):
+    def test_unclaimed_includes_scheduled_within_14_days(self):
         plan = OrderFactory(billing_mode='one_time', )
         event = EventFactory(status='scheduled', order=plan, delivery_date=date.today() + timedelta(days=7))
         response = self.client.get(self._url())
-        ids = [e['id'] for e in response.data['to_order']]
+        ids = [e['id'] for e in response.data['unclaimed']]
         assert event.id in ids
 
-    def test_to_order_excludes_scheduled_beyond_14_days(self):
+    def test_unclaimed_excludes_scheduled_beyond_14_days(self):
         plan = OrderFactory(billing_mode='one_time', )
         event = EventFactory(status='scheduled', order=plan, delivery_date=date.today() + timedelta(days=20))
         response = self.client.get(self._url())
-        ids = [e['id'] for e in response.data['to_order']]
+        ids = [e['id'] for e in response.data['unclaimed']]
         assert event.id not in ids
 
-    def test_ordered_events_in_ordered_bucket(self):
+    def test_claimed_events_in_claimed_bucket(self):
         from django.utils import timezone
         plan = OrderFactory(billing_mode='one_time', )
-        event = EventFactory(status='ordered', order=plan, ordered_at=timezone.now())
+        event = EventFactory(status='claimed', order=plan, ordered_at=timezone.now())
         response = self.client.get(self._url())
-        ids = [e['id'] for e in response.data['ordered']]
+        ids = [e['id'] for e in response.data['claimed']]
         assert event.id in ids
 
     def test_delivered_events_in_delivered_bucket(self):
@@ -65,16 +65,16 @@ class TestAdminDashboardView:
         ids = [e['id'] for e in response.data['delivered']]
         assert event.id in ids
 
-    def test_to_order_excludes_ordered_events(self):
+    def test_unclaimed_excludes_claimed_events(self):
         from django.utils import timezone
         plan = OrderFactory(billing_mode='one_time', )
-        ordered = EventFactory(status='ordered', order=plan, delivery_date=date.today() + timedelta(days=5))
+        ordered = EventFactory(status='claimed', order=plan, delivery_date=date.today() + timedelta(days=5))
         response = self.client.get(self._url())
-        ids = [e['id'] for e in response.data['to_order']]
+        ids = [e['id'] for e in response.data['unclaimed']]
         assert ordered.id not in ids
 
     def test_buckets_are_lists(self):
         response = self.client.get(self._url())
-        assert isinstance(response.data['to_order'], list)
-        assert isinstance(response.data['ordered'], list)
+        assert isinstance(response.data['unclaimed'], list)
+        assert isinstance(response.data['claimed'], list)
         assert isinstance(response.data['delivered'], list)

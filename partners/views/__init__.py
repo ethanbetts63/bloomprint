@@ -2,11 +2,8 @@ from .business_account_registration_view import BusinessAccountRegistrationView
 from .business_account_dashboard_view import BusinessAccountDashboardView
 from .commission_list_view import CommissionListView
 from .business_account_update_view import BusinessAccountUpdateView
-from .delivery_request_views import (
-    DeliveryRequestDetailView,
-    DeliveryRequestListView,
-    DeliveryRequestMarkDeliveredView,
-)
+from .delivery_request_views import DeliveryRequestListView
+from .florist_delivery_views import FloristDeliveryDetailView, FloristMarkDeliveredView
 from .available_delivery_views import (
     AvailableDeliveryListView,
     AvailableDeliveryDetailView,

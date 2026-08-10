@@ -16,7 +16,7 @@ import type { AdminEvent } from '@/types/AdminEvent';
 import type { AdminBusinessAccount } from '@/types/AdminBusinessAccount';
 import { formatDashboardDateOnly } from '@/components/dashboard/DashboardData';
 
-type EventQueue = 'to_order' | 'ordered' | 'delivered';
+type EventQueue = 'unclaimed' | 'claimed' | 'delivered';
 
 function formatDeliveryDate(dateString: string): string {
   return formatDashboardDateOnly(dateString);
@@ -40,8 +40,8 @@ function personName(firstName: string, lastName: string): string {
 // Each overview queue is a preset view of the full Events table, so "view all"
 // drops you into the same rows with the filters already applied.
 const QUEUE_HREF: Record<EventQueue, string> = {
-  to_order: '/dashboard/admin/events?status=scheduled&window=next_14',
-  ordered: '/dashboard/admin/events?status=ordered',
+  unclaimed: '/dashboard/admin/events?status=scheduled&window=next_14',
+  claimed: '/dashboard/admin/events?status=claimed',
   delivered: '/dashboard/admin/events?status=delivered&ordering=-delivery_date',
 };
 
@@ -52,7 +52,7 @@ function EventTable({ title, events, queue }: { title: string; events: AdminEven
       count={events.length}
       viewAllHref={QUEUE_HREF[queue]}
       viewAllLabel="View all events"
-      headers={['Recipient', 'Delivery', 'Location', 'Budget', queue === 'to_order' ? 'Timing' : 'Status', 'Actions']}
+      headers={['Recipient', 'Delivery', 'Location', 'Budget', queue === 'unclaimed' ? 'Timing' : 'Status', 'Actions']}
       empty={events.length === 0}
       emptyMessage="No events currently in this queue."
       minWidth={900}
@@ -75,16 +75,13 @@ function EventTable({ title, events, queue }: { title: string; events: AdminEven
             <TableCell className="text-slate-700">{formatDeliveryDate(event.delivery_date)}</TableCell>
             <TableCell className="text-slate-600">{location}</TableCell>
             <TableCell className="font-semibold text-slate-950">{formatAmount(event.budget)}</TableCell>
-            <TableCell className={queue === 'to_order' && days <= 3 ? 'font-semibold text-red-600' : 'text-slate-600'}>
-              {queue === 'to_order' ? timing : queue === 'ordered' ? 'Ordered' : 'Delivered'}
+            <TableCell className={queue === 'unclaimed' && days <= 3 ? 'font-semibold text-red-600' : 'text-slate-600'}>
+              {queue === 'unclaimed' ? timing : queue === 'claimed' ? 'Claimed' : 'Delivered'}
             </TableCell>
             <TableCell>
               <div className="flex justify-end gap-2">
                 <ViewLink href={`/dashboard/admin/events/${event.id}`} />
-                {queue === 'to_order' && (
-                  <PrimaryLink href={`/dashboard/admin/events/${event.id}/mark-ordered`}>Place order</PrimaryLink>
-                )}
-                {queue === 'ordered' && (
+                {queue === 'claimed' && (
                   <PrimaryLink href={`/dashboard/admin/events/${event.id}/mark-delivered`}>Confirm delivery</PrimaryLink>
                 )}
               </div>
@@ -189,8 +186,8 @@ export default function AdminDashboardPage() {
             ))}
           </DashboardOverviewTable>
 
-          <EventTable title="To order" events={dashboard.to_order} queue="to_order" />
-          <EventTable title="Ordered" events={dashboard.ordered} queue="ordered" />
+          <EventTable title="Unclaimed" events={dashboard.unclaimed} queue="unclaimed" />
+          <EventTable title="Claimed" events={dashboard.claimed} queue="claimed" />
           <EventTable title="Delivered" events={dashboard.delivered} queue="delivered" />
         </div>
       ) : null}

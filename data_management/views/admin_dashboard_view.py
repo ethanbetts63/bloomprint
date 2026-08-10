@@ -12,16 +12,16 @@ class AdminDashboardView(APIView):
     def get(self, request):
         cutoff = date.today() + timedelta(days=14)
 
-        to_order_qs = (
+        unclaimed_qs = (
             Event.objects
             .filter(status='scheduled', delivery_date__lte=cutoff)
             .select_related('order')
             .order_by('delivery_date')
         )
 
-        ordered_qs = (
+        claimed_qs = (
             Event.objects
-            .filter(status='ordered')
+            .filter(status='claimed')
             .select_related('order')
             .order_by('delivery_date')
         )
@@ -34,7 +34,7 @@ class AdminDashboardView(APIView):
         )
 
         return Response({
-            'to_order': AdminEventSerializer(to_order_qs, many=True).data,
-            'ordered': AdminEventSerializer(ordered_qs, many=True).data,
+            'unclaimed': AdminEventSerializer(unclaimed_qs, many=True).data,
+            'claimed': AdminEventSerializer(claimed_qs, many=True).data,
             'delivered': AdminEventSerializer(delivered_qs, many=True).data,
         })

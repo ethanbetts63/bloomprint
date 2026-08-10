@@ -1,7 +1,8 @@
 import type { AdminEvent } from './AdminEvent';
 
 export interface AdminDashboard {
-  to_order: AdminEvent[];
-  ordered: AdminEvent[];
+  /** Paid for, on the claim board, nobody has taken it yet. */
+  unclaimed: AdminEvent[];
+  claimed: AdminEvent[];
   delivered: AdminEvent[];
 }

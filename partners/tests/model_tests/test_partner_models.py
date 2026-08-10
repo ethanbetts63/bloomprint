@@ -157,9 +157,10 @@ class TestPayoutModel:
         payout = PayoutFactory()
         assert payout.status == 'pending'
 
-    def test_currency_default_is_usd(self):
+    def test_currency_default_is_aud(self):
+        """Bloom Print is an Australian platform; payouts are in AUD."""
         payout = PayoutFactory()
-        assert payout.currency == 'USD'
+        assert payout.currency == 'AUD'
 
 
 @pytest.mark.django_db

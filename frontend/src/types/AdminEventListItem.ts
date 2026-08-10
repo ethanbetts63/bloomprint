@@ -1,7 +1,7 @@
 export interface AdminEventListItem {
   id: number;
   delivery_date: string;
-  status: 'scheduled' | 'ordered' | 'delivered' | 'cancelled';
+  status: 'scheduled' | 'claimed' | 'delivered' | 'cancelled';
   ordered_at: string | null;
   delivered_at: string | null;
   reference: string;

@@ -1,9 +1,17 @@
+import type { FloristMoneyBreakdown } from './BusinessAccount';
+
+/**
+ * The job sheet for a delivery this florist claimed. Authenticated and scoped
+ * to the caller's own claims — it carries the recipient's address and the card
+ * message, which used to sit behind nothing but a guessable-length token.
+ */
 export interface DeliveryRequestDetail {
   id: number;
   /** Quotable delivery reference (e.g. BP-K4F9Q2). Never the database id. */
   reference: string;
-  status: 'pending' | 'accepted' | 'declined' | 'expired';
+  status: 'accepted';
   delivery_date: string;
+  delivered_at: string | null;
   message: string;
   recipient_name: string;
   recipient_street_address: string;
@@ -16,12 +24,9 @@ export interface DeliveryRequestDetail {
   preferred_delivery_time: string;
   occasion: string;
   flower_notes: string;
-  /** What the florist has to spend on flowers, after commission. */
-  florist_budget: string;
-  delivery_fee: string;
-  /** florist_budget + delivery_fee — what the florist invoices. */
-  florist_total: string;
-  business_account_name: string;
+  /** The buyer's name, so the florist can sign the card. */
+  card_from: string;
+  money: FloristMoneyBreakdown;
   event_status: string;
 }
 
@@ -29,7 +34,7 @@ export interface DeliveryRequestListItem {
   id: number;
   token: string;
   reference: string;
-  status: 'pending' | 'accepted' | 'declined' | 'expired';
+  status: 'accepted';
   delivery_date: string;
   recipient_name: string;
   florist_budget: string;

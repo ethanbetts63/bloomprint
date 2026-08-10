@@ -9,9 +9,7 @@ see the order on their board is worse than no email at all.
 import math
 from datetime import date
 
-from django.db.models import Q
-
-from partners.models import BusinessAccount, DeliveryRequest
+from partners.models import BusinessAccount
 
 EARTH_RADIUS_KM = 6371
 
@@ -51,12 +49,15 @@ def _degree_box(latitude, longitude, radius_km):
 
 
 def event_is_claimable(event):
-    """An event is claimable while it is scheduled, future-dated, and unclaimed."""
-    if event.status != 'scheduled':
-        return False
-    if event.delivery_date < date.today():
-        return False
-    return not DeliveryRequest.objects.filter(event=event, status='accepted').exists()
+    """
+    An event is claimable while it is scheduled and future-dated.
+
+    'scheduled' is the whole test for unclaimed: claiming flips the event to
+    'claimed' inside the same transaction that writes the DeliveryRequest, so
+    the status is authoritative and there is no need to go looking for a claim
+    row as well.
+    """
+    return event.status == 'scheduled' and event.delivery_date >= date.today()
 
 
 def eligible_florists_for_event(event):
@@ -119,10 +120,6 @@ def claimable_events_for_florist(florist):
         florist.latitude, florist.longitude, florist.service_radius_km
     )
 
-    claimed_event_ids = DeliveryRequest.objects.filter(
-        status='accepted'
-    ).values_list('event_id', flat=True)
-
     candidates = Event.objects.filter(
         status='scheduled',
         delivery_date__gte=date.today(),
@@ -130,8 +127,6 @@ def claimable_events_for_florist(florist):
         order__longitude__isnull=False,
         order__latitude__gte=min_lat, order__latitude__lte=max_lat,
         order__longitude__gte=min_lng, order__longitude__lte=max_lng,
-    ).exclude(
-        Q(id__in=claimed_event_ids)
     ).select_related('order').order_by('delivery_date', 'id')
 
     return [event for event in candidates if florist_covers_event(florist, event)]

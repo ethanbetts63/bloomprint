@@ -71,7 +71,7 @@ class TestAvailableDeliveryListView:
 
     def test_board_excludes_already_claimed_events(self):
         florist = florist_at(*ROCKINGHAM)
-        event = event_at(*NEARBY)
+        event = event_at(*NEARBY, status='claimed')
         DeliveryRequestFactory(event=event, status='accepted')
         self.client.force_authenticate(user=florist.user)
 
@@ -160,7 +160,7 @@ class TestAvailableDeliveryDetailView:
 
     def test_claimed_delivery_returns_409(self):
         florist = florist_at(*ROCKINGHAM)
-        event = event_at(*NEARBY)
+        event = event_at(*NEARBY, status='claimed')
         DeliveryRequestFactory(event=event, status='accepted')
         self.client.force_authenticate(user=florist.user)
 
@@ -182,6 +182,53 @@ class TestAvailableDeliveryDetailView:
 class TestClaimDeliveryView:
     def setup_method(self):
         self.client = APIClient()
+
+    def test_claim_moves_the_event_to_claimed(self, mocker):
+        """The event status is the single source of truth for 'taken'."""
+        mocker.patch('data_management.utils.notification_factory.notify_florist_of_claim')
+        florist = florist_at(*ROCKINGHAM)
+        event = event_at(*NEARBY)
+        self.client.force_authenticate(user=florist.user)
+
+        self.client.post(claim_url(event))
+
+        event.refresh_from_db()
+        assert event.status == 'claimed'
+
+    def test_claim_cancels_the_unclaimed_warnings(self, mocker):
+        """Those alerts exist to say nobody has taken it. Someone just has."""
+        mocker.patch('data_management.utils.notification_factory.notify_florist_of_claim')
+        from data_management.models import Notification
+        from data_management.utils.notification_factory import create_admin_event_notifications
+
+        florist = florist_at(*ROCKINGHAM)
+        event = event_at(*NEARBY, delivery_date=date.today() + timedelta(days=30))
+        create_admin_event_notifications(event)
+        assert Notification.objects.filter(related_event=event, status='pending').exists()
+
+        self.client.force_authenticate(user=florist.user)
+        self.client.post(claim_url(event))
+
+        assert not Notification.objects.filter(
+            related_event=event, recipient_type='admin', status='pending',
+            subject__icontains='Unclaimed',
+        ).exists()
+
+    def test_claim_schedules_the_admin_delivery_day_reminder(self, mocker):
+        """Admin still wants a nudge to check the florist actually delivered."""
+        mocker.patch('data_management.utils.notification_factory.notify_florist_of_claim')
+        from data_management.models import Notification
+
+        florist = florist_at(*ROCKINGHAM)
+        event = event_at(*NEARBY)
+        self.client.force_authenticate(user=florist.user)
+
+        self.client.post(claim_url(event))
+
+        assert Notification.objects.filter(
+            related_event=event, recipient_type='admin',
+            scheduled_for=event.delivery_date, status='pending',
+        ).exists()
 
     def test_claim_emails_the_florist_a_confirmation(self, mocker):
         notify = mocker.patch(
@@ -224,15 +271,17 @@ class TestClaimDeliveryView:
         assert dr.status == 'accepted'
         assert dr.responded_at is not None
 
-    def test_claim_returns_token_for_the_job_sheet(self):
+    def test_claim_opens_the_job_sheet(self, mocker):
+        mocker.patch('data_management.utils.notification_factory.notify_florist_of_claim')
         florist = florist_at(*ROCKINGHAM)
         event = event_at(*NEARBY)
         self.client.force_authenticate(user=florist.user)
 
-        token = self.client.post(claim_url(event)).data['token']
+        claim_id = self.client.post(claim_url(event)).data['delivery_request_id']
 
-        detail = self.client.get(f'/api/business-accounts/delivery-requests/{token}/details/')
+        detail = self.client.get(f'/api/business-accounts/delivery-requests/{claim_id}/')
         assert detail.status_code == 200
+        assert detail.data['reference'] == event.reference
 
     def test_second_claim_on_same_event_conflicts(self):
         winner = florist_at(*ROCKINGHAM)

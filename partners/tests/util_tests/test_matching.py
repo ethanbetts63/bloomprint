@@ -93,7 +93,7 @@ class TestEventIsClaimable:
         assert event_is_claimable(event_at(*ROCKINGHAM, status='cancelled')) is False
 
     def test_already_claimed_event_is_not_claimable(self):
-        event = event_at(*ROCKINGHAM)
+        event = event_at(*ROCKINGHAM, status='claimed')
         DeliveryRequestFactory(event=event, status='accepted')
         assert event_is_claimable(event) is False
 
@@ -112,7 +112,7 @@ class TestClaimableEventsForFlorist:
 
     def test_board_hides_claimed_event(self):
         florist = florist_at(*ROCKINGHAM, radius_km=10)
-        event = event_at(*NEARBY)
+        event = event_at(*NEARBY, status='claimed')
         DeliveryRequestFactory(event=event, status='accepted')
         assert claimable_events_for_florist(florist) == []
 

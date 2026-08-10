@@ -106,7 +106,7 @@ export default function FloristDashboardPage() {
                 <TableCell className="text-slate-700">{formatDeliveryDate(request.delivery_date)}</TableCell>
                 <TableCell className="text-slate-900">{formatDashboardCurrency(request.florist_total)}</TableCell>
                 <TableCell className="text-right">
-                  <DashboardTableLink href={`/florist/delivery-request/${request.token}`}>Review</DashboardTableLink>
+                  <DashboardTableLink href={`/dashboard/florist/deliveries/${request.id}`}>Open</DashboardTableLink>
                 </TableCell>
               </TableRow>
             ))}

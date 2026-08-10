@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 def _build_event_body(event):
     order = event.order
     return (
-        f"Upcoming Bloom Print delivery requires ordering.\n\n"
+        f"No florist has claimed this delivery yet.\n\n"
         f"Recipient: {order.recipient_first_name} {order.recipient_last_name}\n"
         f"Address: {order.recipient_street_address}, {order.recipient_suburb}, "
         f"{order.recipient_city}, {order.recipient_state} {order.recipient_postcode}, "
@@ -23,13 +23,15 @@ def _build_event_body(event):
 
 def create_admin_event_notifications(event):
     """
-    Creates 4 pending admin notifications for a newly created event:
-    - email at delivery_date - 7 days
-    - sms at delivery_date - 7 days
-    - email at delivery_date - 3 days
-    - sms at delivery_date - 3 days
+    Schedules unclaimed-delivery warnings for admin at T-7 and T-3 (email + SMS).
 
-    Skips creating a notification if the scheduled_for date is in the past.
+    These used to say "order the flowers", from when Bloom Print sourced every
+    bouquet by hand. The florist who claims a delivery makes it now, so the only
+    thing left worth waking an admin for is a delivery nobody has taken.
+
+    They are created up front and cancelled when a florist claims, so one
+    arriving means the delivery is still sitting on the board. Skips any whose
+    send date has already passed.
     """
     today = date.today()
     body = _build_event_body(event)
@@ -50,7 +52,7 @@ def create_admin_event_notifications(event):
                 Notification(
                     recipient_type='admin',
                     channel=channel,
-                    subject=f"Action Required: Order flowers for delivery on {event.delivery_date}",
+                    subject=f"Unclaimed delivery for {event.delivery_date} — no florist yet",
                     body=email_body if channel == 'email' else sms_body,
                     scheduled_for=scheduled_for,
                     related_event=event,
@@ -189,7 +191,7 @@ def notify_florist_of_claim(delivery_request):
 
 def cancel_event_notifications(event):
     """
-    Called when admin marks an event as 'ordered'.
+    Called when a florist claims the event.
     Sets status='cancelled' on all pending notifications for this event.
     """
     Notification.objects.filter(related_event=event, status='pending').update(status='cancelled')
@@ -236,7 +238,7 @@ def create_customer_delivery_day_notification(event):
 
 def create_admin_delivery_day_notifications(event):
     """
-    Called when admin marks an event as 'ordered'.
+    Called when a florist claims the event.
     Creates 2 notifications (email + sms) scheduled for event.delivery_date:
     "Delivery day today — please confirm once delivered."
     """

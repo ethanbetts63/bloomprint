@@ -4,9 +4,9 @@ from partners.views import (
     BusinessAccountDashboardView,
     CommissionListView,
     BusinessAccountUpdateView,
-    DeliveryRequestDetailView,
     DeliveryRequestListView,
-    DeliveryRequestMarkDeliveredView,
+    FloristDeliveryDetailView,
+    FloristMarkDeliveredView,
     AvailableDeliveryListView,
     AvailableDeliveryDetailView,
     ClaimDeliveryView,
@@ -38,8 +38,8 @@ urlpatterns = [
     path('available-deliveries/<int:event_id>/claim/', ClaimDeliveryView.as_view(), name='claim-delivery'),
 
     path('delivery-requests/', DeliveryRequestListView.as_view(), name='delivery-request-list'),
-    path('delivery-requests/<str:token>/details/', DeliveryRequestDetailView.as_view(), name='delivery-request-detail'),
-    path('delivery-requests/<str:token>/mark-delivered/', DeliveryRequestMarkDeliveredView.as_view(), name='delivery-request-mark-delivered'),
+    path('delivery-requests/<int:delivery_id>/', FloristDeliveryDetailView.as_view(), name='florist-delivery-detail'),
+    path('delivery-requests/<int:delivery_id>/mark-delivered/', FloristMarkDeliveredView.as_view(), name='florist-mark-delivered'),
 
     path('admin/commissions/', AdminCommissionListView.as_view(), name='admin-commission-list'),
     path('admin/commissions/<int:pk>/', AdminCommissionDetailView.as_view(), name='admin-commission-detail'),

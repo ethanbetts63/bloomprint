@@ -44,12 +44,15 @@ class Event(models.Model):
         max_length=20,
         choices=(
             ('scheduled', 'Scheduled'),
-            ('ordered', 'Ordered'),
+            ('claimed', 'Claimed'),
             ('delivered', 'Delivered'),
             ('cancelled', 'Cancelled'),
         ),
         default='scheduled',
-        help_text="The status of the delivery."
+        help_text="Lifecycle of the delivery. 'scheduled' means paid for and on "
+                  "the claim board; 'claimed' means a florist has taken it. "
+                  "Replaces the old 'ordered', which described Bloom Print "
+                  "ordering flowers by hand — the florist does that now."
     )
     ordered_at = models.DateTimeField(null=True, blank=True)
     ordering_evidence_text = models.TextField(null=True, blank=True)

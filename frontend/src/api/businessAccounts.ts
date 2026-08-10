@@ -66,8 +66,9 @@ export async function updateBusinessDetails(data: BusinessDetailsUpdate): Promis
   return handleResponse(response);
 }
 
-export async function getDeliveryRequestByToken(token: string): Promise<DeliveryRequestDetail> {
-  return handleResponse(await fetch(`/api/business-accounts/delivery-requests/${token}/details/`));
+/** The job sheet for one of this florist's claimed deliveries. */
+export async function getFloristDelivery(deliveryId: number): Promise<DeliveryRequestDetail> {
+  return handleResponse(await authedFetch(`/api/business-accounts/delivery-requests/${deliveryId}/`));
 }
 
 /** The claim board: unclaimed deliveries inside this florist's service area. */
@@ -91,8 +92,11 @@ export async function claimDelivery(eventId: number): Promise<ClaimDeliveryResul
   );
 }
 
-export async function markDeliveryComplete(token: string): Promise<{ status: string }> {
-  return handleResponse(await authedFetch(`/api/business-accounts/delivery-requests/${token}/mark-delivered/`, { method: 'POST' }));
+/** Marks a claimed delivery done. This is what creates the money owed. */
+export async function markDeliveryComplete(deliveryId: number): Promise<{ status: string; already: boolean }> {
+  return handleResponse(
+    await authedFetch(`/api/business-accounts/delivery-requests/${deliveryId}/mark-delivered/`, { method: 'POST' }),
+  );
 }
 
 export async function initiateStripeConnectOnboarding(): Promise<{ url: string }> {

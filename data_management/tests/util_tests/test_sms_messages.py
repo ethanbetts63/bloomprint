@@ -63,10 +63,15 @@ class TestAdminEventReminder:
         msg = admin_event_reminder(event)
         assert '2025-07-04' in msg
 
-    def test_includes_budget(self):
+    def test_says_the_delivery_is_unclaimed(self):
+        """
+        This alert used to say "order the flowers", and quoted the budget so an
+        admin knew what to spend. Admin does not buy flowers any more — the
+        message exists to flag that no florist has taken the job.
+        """
         event = _make_event(budget=200)
         msg = admin_event_reminder(event)
-        assert '$200' in msg
+        assert 'Unclaimed' in msg
 
     def test_returns_string(self):
         event = _make_event()

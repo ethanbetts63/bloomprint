@@ -7,7 +7,6 @@ import type { AdminOrder } from '@/types/AdminOrder';
 import type { AdminOrderDetail } from '@/types/AdminOrderDetail';
 import type { AdminUser } from '@/types/AdminUser';
 import type { AdminUserDetail } from '@/types/AdminUserDetail';
-import type { MarkOrderedPayload } from '@/types/MarkOrderedPayload';
 import type { MarkDeliveredPayload } from '@/types/MarkDeliveredPayload';
 import type { AdminCommission } from '@/types/AdminCommission';
 import type { PayCommissionResult } from '@/types/PayCommissionResult';
@@ -40,18 +39,6 @@ export async function getAdminEventFloristBrief(
   const disposition = res.headers.get('Content-Disposition') ?? '';
   const match = disposition.match(/filename="?([^"';]+)"?/i);
   return { blob: await res.blob(), filename: match?.[1] ?? 'bloomprint-florist-brief.pdf' };
-}
-
-export async function markEventOrdered(id: number, payload: MarkOrderedPayload): Promise<AdminEvent> {
-  const res = await authedFetch(`/api/data/admin/events/${id}/mark-ordered/`, {
-    method: 'POST',
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data.detail || 'Failed to mark event as ordered');
-  }
-  return res.json();
 }
 
 export async function markEventDelivered(id: number, payload: MarkDeliveredPayload): Promise<AdminEvent> {
