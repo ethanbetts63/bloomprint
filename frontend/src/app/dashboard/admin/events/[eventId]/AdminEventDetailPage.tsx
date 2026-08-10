@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { FileDown, Loader2 } from 'lucide-react';
+import { FileDown, Loader2, Mail } from 'lucide-react';
 import { getAdminEvent, getAdminEventFloristBrief } from '@/api/admin';
 import {
   AdminDetailError, AdminDetailField, AdminDetailGrid, AdminDetailLoading, AdminDetailPage,
@@ -79,6 +79,15 @@ export default function AdminEventDetailPage() {
           : <FileDown className="mr-2 h-4 w-4" aria-hidden="true" />}
         Florist brief
       </Button>
+      {/* Only worth pitching a delivery nobody has taken. */}
+      {event.status === 'scheduled' && (
+        <Button variant="outline" asChild>
+          <Link href={`/dashboard/admin/events/${event.id}/florist-outreach`}>
+            <Mail className="mr-2 h-4 w-4" aria-hidden="true" />
+            Reach out to a florist
+          </Link>
+        </Button>
+      )}
       {event.status === 'claimed' && (
         <Button asChild><Link href={`/dashboard/admin/events/${event.id}/mark-delivered`}>Confirm delivery</Link></Button>
       )}

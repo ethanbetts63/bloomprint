@@ -11,6 +11,7 @@ import type { MarkDeliveredPayload } from '@/types/MarkDeliveredPayload';
 import type { AdminCommission } from '@/types/AdminCommission';
 import type { PayCommissionResult } from '@/types/PayCommissionResult';
 import type { CommissionActionResult } from '@/types/CommissionActionResult';
+import type { FloristOutreachDraft } from '@/types/FloristOutreachDraft';
 import type { Paginated } from '@/types/Paginated';
 
 export type { PayCommissionResult, CommissionActionResult };
@@ -24,6 +25,32 @@ export async function getAdminDashboard(): Promise<AdminDashboard> {
 export async function getAdminEvent(id: number): Promise<AdminEvent> {
   const res = await authedFetch(`/api/data/admin/events/${id}/`);
   if (!res.ok) throw new Error('Failed to fetch admin event');
+  return res.json();
+}
+
+/**
+ * The prefilled florist-outreach email for a delivery. The recipient is not
+ * included: admin supplies the address of a florist we have no record of.
+ */
+export async function getAdminFloristOutreachDraft(id: number): Promise<FloristOutreachDraft> {
+  const res = await authedFetch(`/api/data/admin/events/${id}/florist-outreach/`);
+  if (!res.ok) throw new Error('Failed to load the outreach draft');
+  return res.json();
+}
+
+/** Sends the operator's edited outreach, with the request brief attached. */
+export async function sendAdminFloristOutreach(
+  id: number,
+  payload: { to: string; subject: string; body: string },
+): Promise<{ detail: string }> {
+  const res = await authedFetch(`/api/data/admin/events/${id}/florist-outreach/`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.detail || data.to?.[0] || 'Outreach could not be sent');
+  }
   return res.json();
 }
 

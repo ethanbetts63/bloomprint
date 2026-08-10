@@ -19,10 +19,10 @@ class Command(BaseCommand):
         response = requests.post(
             f"https://api.mailgun.net/v3/{domain}/messages",
             auth=("api", api_key),
-            data={"from": f"Mailgun Sandbox <postmaster@{domain}>",
+            data={"from": settings.DEFAULT_FROM_EMAIL,
                   "to": "Ethan Betts-Ingram <ethanbetts63@gmail.com>",
-                  "subject": "Hello Ethan Betts-Ingram",
-                  "text": "Congratulations Ethan Betts-Ingram, you just sent an email with Mailgun! You are truly awesome!"})
+                  "subject": "Bloomprint Mailgun test",
+                  "text": f"Test email sent via {domain}, from {settings.DEFAULT_FROM_EMAIL}."})
         
         if response.status_code == 200:
             self.stdout.write(self.style.SUCCESS('Successfully sent email!'))

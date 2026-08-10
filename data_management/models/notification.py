@@ -6,6 +6,10 @@ class Notification(models.Model):
         ('admin', 'Admin'),
         ('business_account', 'Business account'),
         ('customer', 'Customer'),
+        # A florist who is not on the platform yet, emailed by hand from the
+        # admin event page to pitch them a delivery. There is no account to
+        # point at, so the address is all we have.
+        ('florist_prospect', 'Florist prospect'),
     )
     CHANNEL_CHOICES = (
         ('email', 'Email'),
@@ -27,7 +31,8 @@ class Notification(models.Model):
     )
     recipient_email = models.EmailField(
         null=True, blank=True,
-        help_text="Direct email target for customer notifications (no user row).",
+        help_text="Direct email target where there is no account to resolve — "
+                  "customer notifications and florist outreach.",
     )
 
     channel = models.CharField(max_length=10, choices=CHANNEL_CHOICES)

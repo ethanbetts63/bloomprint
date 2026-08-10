@@ -37,6 +37,15 @@ class TestTestMailgunCommand:
         assert 'mg.example.com' in url
 
     @patch('data_management.management.commands.test_mailgun.requests.post')
+    def test_mailgun_sends_from_default_from_email(self, mock_post, settings):
+        settings.DEFAULT_FROM_EMAIL = 'Bloomprint <hello@bloomprint.com.au>'
+        mock_post.return_value = MagicMock(status_code=200, text='{}')
+
+        call_command('test_mailgun', stdout=StringIO())
+
+        assert mock_post.call_args.kwargs['data']['from'] == 'Bloomprint <hello@bloomprint.com.au>'
+
+    @patch('data_management.management.commands.test_mailgun.requests.post')
     def test_mailgun_failure(self, mock_post):
         mock_response = MagicMock()
         mock_response.status_code = 401

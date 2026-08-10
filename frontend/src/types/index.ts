@@ -59,6 +59,7 @@ export type { AdminDashboard } from './AdminDashboard';
 export type { AdminBusinessAccount } from './AdminBusinessAccount';
 export type { AdminCommission } from './AdminCommission';
 export type { AdminEventListItem } from './AdminEventListItem';
+export type { FloristOutreachDraft } from './FloristOutreachDraft';
 export type { AdminOrder } from './AdminOrder';
 export type { AdminOrderEvent } from './AdminOrderEvent';
 export type { AdminOrderDetail } from './AdminOrderDetail';
