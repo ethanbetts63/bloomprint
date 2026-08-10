@@ -56,7 +56,7 @@ def build_outreach_draft(event):
         "requirement — you design it from whatever is good on the day. You deliver "
         "under your own name and branding, with your own card. The customer never "
         "sees ours.\n\n"
-        "More details are in the attached brief. Full ad\n\n"
+        "More details are in the attached brief. \n\n"
         f"If you'd like to take it, you can sign up at {settings.FLORIST_SIGNUP_URL} "
         "and claim it from your dashboard. Or just reply to this email with any "
         "questions and we'll answer them. There's no fee's or catches. All the "
