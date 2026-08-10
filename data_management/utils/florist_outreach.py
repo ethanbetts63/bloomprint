@@ -63,6 +63,9 @@ def build_outreach_draft(event):
         "information is on the florist page. We just need someone to delivery "
         "in your area and I liked the look of your site.\n\n"
         "\n\n If you sign up, I'll just send you order offers in your area automatically."
+        "Regularly, we pay out of stripe but sometimes for first time florists we can pay,"
+        " via a method that suits you if you'd prefer."
+
 
         "Kind regards,\n"
         "Ethan Betts\n"
