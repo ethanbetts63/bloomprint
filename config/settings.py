@@ -51,7 +51,9 @@ DEBUG = os.getenv('DEBUG') == 'True'
 
 ALLOWED_HOSTS = ['ethanbetts.pythonanywhere.com', 'api.bloomprint.com.au', 'www.bloomprint.com.au', '127.0.0.1', 'localhost']
 
-CSRF_TRUSTED_ORIGINS = ['https://www.bloomprint.com.au']
+CSRF_TRUSTED_ORIGINS = ['https://www.bloomprint.com.au', 
+                        'https://api.bloomprint.com.au'
+                        ]
 
 if DEBUG:
     CSRF_TRUSTED_ORIGINS.extend([
