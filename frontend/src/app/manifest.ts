@@ -2,8 +2,8 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Bloom Print',
-    short_name: 'Bloom Print',
+    name: 'Bloomprint',
+    short_name: 'Bloomprint',
     description:
       'The most romantic gestures are those that plan for a future together. Choose the date, set the budget, and we organise flower deliveries, time after time.',
     start_url: '/',

@@ -4,7 +4,7 @@
 FSL-1.1-MIT
 
 ## Notice
-Copyright 2026 Bloom Print
+Copyright 2026 Bloomprint
 
 ## Terms and Conditions
 

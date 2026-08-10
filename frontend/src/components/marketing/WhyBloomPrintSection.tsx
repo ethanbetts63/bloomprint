@@ -34,7 +34,7 @@ export const WhyBloomPrintSection = () => (
       <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-black/55">
-            Why Bloom Print?
+            Why Bloomprint?
           </p>
           <h2
             id="why-bloomprint-heading"
@@ -43,7 +43,7 @@ export const WhyBloomPrintSection = () => (
             Personalised flowers, made locally.
           </h2>
           <p className="mt-5 max-w-xl leading-relaxed text-black/65">
-            Bloom Print gives local florists room to work with what is fresh, seasonal and right for your brief. You get an original arrangement, and more of your order stays with the florist who made it.
+            Bloomprint gives local florists room to work with what is fresh, seasonal and right for your brief. You get an original arrangement, and more of your order stays with the florist who made it.
           </p>
 
           <div className="mt-7 space-y-5">

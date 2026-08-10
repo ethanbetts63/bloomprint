@@ -22,7 +22,7 @@ def test_send_password_reset_email_success(mocker):
     mock_post.assert_called_once()
     args, kwargs = mock_post.call_args
     assert kwargs['data']['to'] == [user.email]
-    assert kwargs['data']['subject'] == "Reset Your Bloom Print Password"
+    assert kwargs['data']['subject'] == "Reset Your Bloomprint Password"
 
 @pytest.mark.django_db
 def test_send_password_reset_email_blocked_user(mocker):

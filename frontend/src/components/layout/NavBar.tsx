@@ -74,7 +74,7 @@ const NavBar = () => {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between md:grid md:grid-cols-3">
 
-          <Link href="/" onClick={close} aria-label="Bloom Print company logo" className="flex items-center gap-3 flex-shrink-0">
+          <Link href="/" onClick={close} aria-label="Bloomprint company logo" className="flex items-center gap-3 flex-shrink-0">
             <img
               src={assetSrc(logo)}
               srcSet={`${assetSrc(logo128)} 128w, ${assetSrc(logo192)} 192w, ${assetSrc(logo256)} 256w`}

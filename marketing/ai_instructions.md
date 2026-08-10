@@ -14,7 +14,7 @@ and the intro paragraph is the text that follows the line: ...ests, I just liste
 The subject can be anything you feel is right. Try to keep it varied but it does not matter too much. here are some examples: 
 - Thoughts on this? 
 - What do you think of this? 
-- Affliate offer from Bloom Print
+- Affliate offer from Bloomprint
 - etc. 
 
 okay so then there is the intro paragraph. its going to be bit formulaic. You start by writnig in the episode name. But don't copy and paste. Only write the episode name in a way that is natural for example: 

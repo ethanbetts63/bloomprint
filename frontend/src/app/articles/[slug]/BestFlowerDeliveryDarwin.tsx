@@ -69,7 +69,7 @@ const BestFlowerDeliveryDarwin = () => {
             <li>Easy Flowers also doubles as the most affordable choice for simple, budget-friendly deliveries.</li>
           </ul>
           <p>Whether you’re sending flowers for a birthday, an apology, a celebration, or just because, one of these services will have you covered.</p>
-          <p>If a standard catalog bouquet feels too generic, <a href="/" className="underline hover:opacity-70">Bloom Print</a> lets you order by brief instead. Choose the occasion, budget, delivery date, and preferences, then a local florist designs a custom arrangement from the freshest flowers available.</p>
+          <p>If a standard catalog bouquet feels too generic, <a href="/" className="underline hover:opacity-70">Bloomprint</a> lets you order by brief instead. Choose the occasion, budget, delivery date, and preferences, then a local florist designs a custom arrangement from the freshest flowers available.</p>
         </div>
       </ArticleLayout>
       <section>

@@ -56,7 +56,7 @@ export function LoginForm({
                 <div className="flex flex-col items-center gap-2 text-center">
                   <h1 className="text-2xl font-bold">Florist, affiliate and staff access</h1>
                   <p className="text-muted-foreground text-balance text-sm">
-                    Sign in to your Bloom Print business account
+                    Sign in to your Bloomprint business account
                   </p>
                 </div>
 

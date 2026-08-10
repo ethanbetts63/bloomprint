@@ -8,7 +8,7 @@ class DeliveryRequestListSerializer(serializers.ModelSerializer):
     A row in the florist's list of deliveries they have claimed.
 
     Exposes the event's reference rather than its primary key: a florist quoting
-    "Event #7" reveals Bloom Print's volume.
+    "Event #7" reveals Bloomprint's volume.
 
     Only the florist's own figures appear here, because this lists work already
     taken. The customer's budget and our commission are shown in full on the

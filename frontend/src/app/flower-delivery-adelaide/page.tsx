@@ -48,7 +48,7 @@ const config: OccasionLandingPageConfig = {
     canonicalPath: '/flower-delivery-adelaide',
     structuredData: buildServiceSchema({
       serviceType: 'Flower Delivery',
-      name: 'Flower Delivery Adelaide by Bloom Print',
+      name: 'Flower Delivery Adelaide by Bloomprint',
       description:
         'Fresh flower delivery in Adelaide from local florists. Give the occasion, budget, and preferences, and an Adelaide florist designs and delivers a custom bouquet.',
       areaServed: {

@@ -1,4 +1,4 @@
-# Bloom Print - Django Project Configuration
+# Bloomprint - Django Project Configuration
 
 ## Purpose
 

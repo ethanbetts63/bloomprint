@@ -31,7 +31,7 @@ export const ContentIdeasSection = () => {
             Content that works
           </p>
           <h2 className="mt-3 text-3xl font-bold leading-tight font-playfair-display sm:text-4xl">
-            How to share Bloom Print.
+            How to share Bloomprint.
           </h2>
 
           <div className="mt-6 flex flex-col gap-4">

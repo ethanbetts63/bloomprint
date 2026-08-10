@@ -1,6 +1,6 @@
 {% extends "notifications/emails/base.html" %}
 
-{% block title %}Your Bloom Print delivery is today{% endblock %}
+{% block title %}Your Bloomprint delivery is today{% endblock %}
 
 {% block preheader %}Flowers are on their way to {{ recipient_name }} today!{% endblock %}
 
@@ -8,7 +8,7 @@
 <h1 style="font-family: Georgia, 'Times New Roman', serif; font-size: 22px; font-weight: bold; color: #1a1a1a; margin: 0 0 16px 0;">Hi {{ first_name }},</h1>
 
 <p style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #333333; margin: 0 0 24px 0; line-height: 26px;">
-    Your Bloom Print delivery is today! Flowers should be arriving for <strong>{{ recipient_name }}</strong>.
+    Your Bloomprint delivery is today! Flowers should be arriving for <strong>{{ recipient_name }}</strong>.
 </p>
 
 {% if next_delivery_date %}
@@ -22,6 +22,6 @@
 {% endif %}
 
 <p style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #333333; margin: 0; line-height: 26px;">
-    Thank you for choosing Bloom Print.
+    Thank you for choosing Bloomprint.
 </p>
 {% endblock %}

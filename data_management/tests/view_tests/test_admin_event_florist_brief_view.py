@@ -35,7 +35,7 @@ class TestAdminEventFloristBriefView:
         assert event.reference.lower() in disposition
 
     def test_shows_the_reference_and_not_the_primary_key(self):
-        """The sheet must never reveal how many deliveries Bloom Print has done."""
+        """The sheet must never reveal how many deliveries Bloomprint has done."""
         from pypdf import PdfReader
         from io import BytesIO
 
@@ -59,7 +59,7 @@ class TestAdminEventFloristBriefView:
         text = PdfReader(BytesIO(response.content)).pages[0].extract_text()
         assert '$126.00' in text   # what the florist has to spend
         assert '$140.00' in text   # the customer's budget, shown for transparency
-        assert '$14.00' in text    # Bloom Print's commission
+        assert '$14.00' in text    # Bloomprint's commission
 
     def test_requires_admin(self):
         event = EventFactory()

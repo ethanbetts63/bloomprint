@@ -51,7 +51,7 @@ class Event(models.Model):
         default='scheduled',
         help_text="Lifecycle of the delivery. 'scheduled' means paid for and on "
                   "the claim board; 'claimed' means a florist has taken it. "
-                  "Replaces the old 'ordered', which described Bloom Print "
+                  "Replaces the old 'ordered', which described Bloomprint "
                   "ordering flowers by hand — the florist does that now."
     )
     ordered_at = models.DateTimeField(null=True, blank=True)
@@ -63,7 +63,7 @@ class Event(models.Model):
         decimal_places=2,
         null=True,
         blank=True,
-        help_text="Snapshot: what the florist has to spend on flowers, after Bloom Print's "
+        help_text="Snapshot: what the florist has to spend on flowers, after Bloomprint's "
                   "commission. Frozen at creation so a later rate change cannot alter what "
                   "a florist was already promised."
     )
@@ -72,7 +72,7 @@ class Event(models.Model):
         decimal_places=2,
         null=True,
         blank=True,
-        help_text="Snapshot: Bloom Print's cut of the bouquet budget for this delivery."
+        help_text="Snapshot: Bloomprint's cut of the bouquet budget for this delivery."
     )
     delivery_fee = models.DecimalField(
         max_digits=10,
@@ -86,7 +86,7 @@ class Event(models.Model):
 
     @property
     def florist_total(self):
-        """What the florist invoices Bloom Print: their flower budget plus delivery."""
+        """What the florist invoices Bloomprint: their flower budget plus delivery."""
         return (self.florist_budget or Decimal('0.00')) + (self.delivery_fee or Decimal('0.00'))
 
     def money_breakdown(self):
@@ -115,7 +115,7 @@ class Event(models.Model):
         return {
             'budget': budget,
             'platform_commission': commission,
-            'commission_rate': commission_rate_label(),
+            'commission_rate': commission_rate_label(commission, budget),
             'florist_budget': flower_spend,
             'delivery_fee': delivery_fee,
             'florist_total': (flower_spend + delivery_fee).quantize(Decimal('0.01')),

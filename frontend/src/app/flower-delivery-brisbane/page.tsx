@@ -48,7 +48,7 @@ const config: OccasionLandingPageConfig = {
     canonicalPath: '/flower-delivery-brisbane',
     structuredData: buildServiceSchema({
       serviceType: 'Flower Delivery',
-      name: 'Flower Delivery Brisbane by Bloom Print',
+      name: 'Flower Delivery Brisbane by Bloomprint',
       description:
         'Fresh flower delivery in Brisbane from local florists. Give the occasion, budget, and preferences, and a Brisbane florist designs and delivers a custom bouquet.',
       areaServed: {

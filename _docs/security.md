@@ -1,4 +1,4 @@
-# Bloom Print Security Overview
+# Bloomprint Security Overview
 
 This document explains every significant security measure in the application — what the threat is, how we defend against it, and where in the code that defence lives. It is written to be readable without a security background.
 

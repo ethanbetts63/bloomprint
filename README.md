@@ -1,4 +1,4 @@
-# Bloom Print
+# Bloomprint
 
 **Live Site:** [https://www.bloomprint.com.au/]
 
@@ -174,7 +174,7 @@ This project is licensed under the **Functional Source License 1.1 (FSL-1.1-MIT)
 
 ### What this means:
 * **Personal & Internal Use:** You are free to use, modify, and distribute this code for personal projects, internal business tools, and educational purposes.
-* **Non-Compete:** You **cannot** use this code to create a commercial product or service that competes with **Bloom Print**.
+* **Non-Compete:** You **cannot** use this code to create a commercial product or service that competes with **Bloomprint**.
 * **Future Open Source:** This specific version of the code will automatically become fully open-source under the **MIT License** on **December 23, 2027**.
 
 For the full legal terms, please see the [LICENSE.md](./LICENSE.md) file.

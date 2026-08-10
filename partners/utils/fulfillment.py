@@ -18,7 +18,7 @@ def create_fulfillment_payable(event):
     Records what the florist is owed for delivering this event.
 
     The amount is the florist's total from the event's frozen snapshot — the
-    flower budget after Bloom Print's commission, plus the delivery fee in full
+    flower budget after Bloomprint's commission, plus the delivery fee in full
     where one was charged. It is emphatically not the customer's budget, which
     is what this used to pay: that handed away the whole commission on orders
     above the delivery threshold, and underpaid the florist by the delivery fee

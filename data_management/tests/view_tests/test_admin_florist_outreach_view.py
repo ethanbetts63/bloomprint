@@ -56,7 +56,8 @@ class TestOutreachDraft:
         data = admin_api.get(url(event)).data
 
         assert 'Rockingham' in data['body']
-        assert str(event.delivery_date) in data['body']
+        # Day-month-year, not ISO: this is read by a florist, not a machine.
+        assert f'{event.delivery_date.day} {event.delivery_date:%B %Y}' in data['body']
         assert data['florist_total'] in data['body']
 
     def test_draft_pitches_signing_up_rather_than_claiming(self, admin_api, event):

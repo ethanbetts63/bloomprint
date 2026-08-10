@@ -44,7 +44,7 @@ export default function FloristDeliveryDetailPage() {
     try {
       const result = await markDeliveryComplete(deliveryId);
       toast.success(result.already ? 'Already marked delivered' : 'Marked as delivered', {
-        description: 'Your payment for this delivery is now with Bloom Print for approval.',
+        description: 'Your payment for this delivery is now with Bloomprint for approval.',
       });
       await load();
     } catch (reason) {
@@ -93,7 +93,7 @@ export default function FloristDeliveryDetailPage() {
         <AdminDetailGrid>
           <AdminDetailField label="Customer's budget" value={formatDashboardCurrency(money.budget)} />
           <AdminDetailField
-            label={`Bloom Print commission (${money.commission_rate})`}
+            label={`Bloomprint commission (${money.commission_rate})`}
             value={`−${formatDashboardCurrency(money.platform_commission)}`}
           />
           <AdminDetailField label="Flowers to the value of" value={formatDashboardCurrency(money.florist_budget)} />

@@ -1,6 +1,6 @@
-# Bloom Print Testing Strategy
+# Bloomprint Testing Strategy
 
-This document outlines the testing strategy for the Bloom Print project.
+This document outlines the testing strategy for the Bloomprint project.
 
 ## 1. Core Technology Stack
 

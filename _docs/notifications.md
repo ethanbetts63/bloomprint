@@ -1,6 +1,6 @@
 # Notifications
 
-Bloom Print sends notifications via two channels: **email** (Mailgun) and **SMS** (Twilio). There are two delivery mechanisms: immediate direct API calls, and a queued system processed by a daily cron job.
+Bloomprint sends notifications via two channels: **email** (Mailgun) and **SMS** (Twilio). There are two delivery mechanisms: immediate direct API calls, and a queued system processed by a daily cron job.
 
 ---
 

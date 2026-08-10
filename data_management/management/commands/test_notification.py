@@ -17,12 +17,12 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             '--subject',
-            default='Bloom Print Test Notification',
+            default='Bloomprint Test Notification',
             help='Subject line for email notifications.',
         )
         parser.add_argument(
             '--body',
-            default='This is a test notification from the Bloom Print application.',
+            default='This is a test notification from the Bloomprint application.',
             help='Body text of the notification.',
         )
 

@@ -1,6 +1,6 @@
 {% extends "notifications/emails/base.html" %}
 
-{% block title %}New Bloom Print Order Received{% endblock %}
+{% block title %}New Bloomprint Order Received{% endblock %}
 
 {% block preheader %}New order received{% if order %} — {{ order.recipient_first_name }} {{ order.recipient_last_name }}, delivery {{ order.start_date }}{% endif %}.{% endblock %}
 
@@ -20,7 +20,7 @@
 </table>
 {% else %}
 <p style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #333333; margin: 0 0 24px 0; line-height: 26px;">
-    New Bloom Print payment received.<br>
+    New Bloomprint payment received.<br>
     <strong>Payment ID:</strong> {{ payment_id }}
 </p>
 {% endif %}

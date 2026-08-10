@@ -17,7 +17,7 @@ ADMIN_USER = {
 ADMIN_BUSINESS_ACCOUNT = {
     'account_type': 'florist',
     'status': 'active',
-    'business_name': 'Bloom Print',
+    'business_name': 'Bloomprint',
     'phone': '0423853830',
     'street_address': '78 Harold Street',
     'suburb': 'Dianella',

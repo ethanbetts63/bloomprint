@@ -58,7 +58,7 @@ def send_customer_payment_notification(order):
     text_lines = [
         f"Hi {first_name},",
         "",
-        "Your Bloom Print order has been confirmed!",
+        "Your Bloomprint order has been confirmed!",
         "",
         f"Recipient: {recipient_name}",
     ]
@@ -88,7 +88,7 @@ def send_customer_payment_notification(order):
         "",
         "If anything above looks wrong, reply to this email and we'll fix it before your first delivery.",
         "",
-        "Thank you for choosing Bloom Print!",
+        "Thank you for choosing Bloomprint!",
     ])
     text_body = "\n".join(text_lines)
 
@@ -99,7 +99,7 @@ def send_customer_payment_notification(order):
             data={
                 "from": settings.DEFAULT_FROM_EMAIL,
                 "to": [order.customer_email],
-                "subject": "Your Bloom Print order is confirmed",
+                "subject": "Your Bloomprint order is confirmed",
                 "text": text_body,
                 "html": html_body,
             },

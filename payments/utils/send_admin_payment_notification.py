@@ -13,7 +13,7 @@ def send_admin_cancellation_notification(message: str):
     """
     Sends an admin notification for a plan cancellation event (email + SMS).
     """
-    subject = "Bloom Print Plan Cancelled — Action May Be Required"
+    subject = "Bloomprint Plan Cancelled — Action May Be Required"
     admin_email = settings.ADMIN_EMAIL
     admin_number = settings.ADMIN_NUMBER
 
@@ -62,7 +62,7 @@ def send_admin_payment_notification(payment_id: str, order=None):
         payment_id: The ID of the successful payment, for logging purposes.
         order: The Order instance associated with the payment (optional, for order context).
     """
-    subject = "New Bloom Print Order Received"
+    subject = "New Bloomprint Order Received"
     admin_email = settings.ADMIN_EMAIL
     admin_number = settings.ADMIN_NUMBER
 

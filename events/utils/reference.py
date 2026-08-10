@@ -1,7 +1,7 @@
 """Human-quotable, non-sequential references for customer- and florist-facing use.
 
 Database primary keys leak volume: a florist handed "Delivery #1" learns exactly
-how many deliveries Bloom Print has ever done. References are random rather than
+how many deliveries Bloomprint has ever done. References are random rather than
 offset-sequential, so two of them reveal nothing about what happened in between.
 """
 

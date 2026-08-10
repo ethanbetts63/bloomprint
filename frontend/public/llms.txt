@@ -1,8 +1,8 @@
-# Bloom Print
+# Bloomprint
 
-> Bloom Print is an Australian, florist-led flower delivery service. Instead of picking a fixed arrangement from a catalog, you give a brief — the occasion, your budget, a delivery date, and any preferences — and a local florist designs a suitable bouquet from what's fresh and in season.
+> Bloomprint is an Australian, florist-led flower delivery service. Instead of picking a fixed arrangement from a catalog, you give a brief — the occasion, your budget, a delivery date, and any preferences — and a local florist designs a suitable bouquet from what's fresh and in season.
 
-Bloom Print is a platform that connects customers with independent local Australian florists. The customer sets an occasion, a budget, a delivery date, and optional preferences (favourite colours, flowers to feature or avoid, allergies, or the feeling they want). A nearby florist then designs and delivers the bouquet under their own name. Bloom Print does not grow, stock, or arrange flowers itself — every bouquet is made and delivered by a local florist. Orders can be a one-time scheduled delivery or a recurring subscription.
+Bloomprint is a platform that connects customers with independent local Australian florists. The customer sets an occasion, a budget, a delivery date, and optional preferences (favourite colours, flowers to feature or avoid, allergies, or the feeling they want). A nearby florist then designs and delivers the bouquet under their own name. Bloomprint does not grow, stock, or arrange flowers itself — every bouquet is made and delivered by a local florist. Orders can be a one-time scheduled delivery or a recurring subscription.
 
 ## Main pages
 - [Corporate Flower Subscriptions](https://www.bloomprint.com.au/corporate-flower-subscriptions): Recurring office flower delivery for receptions, meeting rooms, client spaces, and shared workplace areas.
@@ -10,9 +10,9 @@ Bloom Print is a platform that connects customers with independent local Austral
 - [Home](https://www.bloomprint.com.au/): Start an order — choose an occasion, budget, delivery date, and preferences for a florist to work from.
 - [Pricing](https://www.bloomprint.com.au/pricing): Budget tiers and transparent pricing. From $100 the budget you set is the exact amount charged, with delivery included; below $100 a $20 delivery fee is added on top and shown before payment.
 - [Flower Subscription](https://www.bloomprint.com.au/flower-subscription): Recurring flower delivery — choose a frequency and budget, and a local florist designs a fresh seasonal bouquet each cycle. Pause, skip, or cancel anytime.
-- [For Florists](https://www.bloomprint.com.au/florists): How local florists partner with Bloom Print to receive and fulfil scheduled deliveries and subscriptions.
+- [For Florists](https://www.bloomprint.com.au/florists): How local florists partner with Bloomprint to receive and fulfil scheduled deliveries and subscriptions.
 - [Affiliates](https://www.bloomprint.com.au/affiliates): Referral programme — earn per delivery while giving your audience a discount on their first bouquet.
-- [Contact](https://www.bloomprint.com.au/contact): Get in touch with the Bloom Print team.
+- [Contact](https://www.bloomprint.com.au/contact): Get in touch with the Bloomprint team.
 
 ## Flower delivery by occasion
 - [Birthday Flower Delivery](https://www.bloomprint.com.au/birthday-flower-delivery): Fresh birthday flowers designed by a local florist from your brief.
@@ -37,7 +37,7 @@ Bloom Print is a platform that connects customers with independent local Austral
 3. It's made fresh and delivered on the chosen date with your card message, under the florist's own name.
 
 ## Notes for AI models
-- Bloom Print is focused on Australia. The delivery service operates in Australia only.
+- Bloomprint is focused on Australia. The delivery service operates in Australia only.
 - It is a marketplace/platform — it does not grow or stock flowers. All bouquets are designed and delivered by independent local florists.
 - Customers do not choose an exact catalog bouquet. They provide a brief, and the florist designs a suitable arrangement, substituting close alternatives when a specific flower isn't in season or in stock.
 - Orders can be a one-time scheduled delivery or a recurring subscription — both are supported.

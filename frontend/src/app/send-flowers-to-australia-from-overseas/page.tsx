@@ -42,7 +42,7 @@ const overseasFaqs: FaqItem[] = [
   {
     question: 'What currency will I pay in?',
     answer:
-      'Bloom Print prices are shown and charged in Australian dollars (AUD). The total is displayed before payment, so you can review it before completing the order.',
+      'Bloomprint prices are shown and charged in Australian dollars (AUD). The total is displayed before payment, so you can review it before completing the order.',
   },
   {
     question: 'How far ahead should I order flowers for Australia?',
@@ -50,9 +50,9 @@ const overseasFaqs: FaqItem[] = [
       'Please order at least three days before the delivery date. Ordering earlier is helpful for important occasions and gives the local florist more time to plan around seasonal availability.',
   },
   {
-    question: 'Where in Australia can Bloom Print deliver?',
+    question: 'Where in Australia can Bloomprint deliver?',
     answer:
-      'Bloom Print serves Perth, Sydney, Melbourne, Brisbane, Adelaide, Hobart, and surrounding suburbs where a local florist is available. Final availability depends on the exact address and delivery date.',
+      'Bloomprint serves Perth, Sydney, Melbourne, Brisbane, Adelaide, Hobart, and surrounding suburbs where a local florist is available. Final availability depends on the exact address and delivery date.',
   },
   {
     question: 'Can I include a personal card message?',
@@ -71,7 +71,7 @@ const config: OccasionLandingPageConfig = {
     canonicalPath: '/send-flowers-to-australia-from-overseas',
     structuredData: buildServiceSchema({
       serviceType: 'Flower Delivery to Australia from Overseas',
-      name: 'Send Flowers to Australia from Overseas with Bloom Print',
+      name: 'Send Flowers to Australia from Overseas with Bloomprint',
       description:
         'Order flowers for delivery in Australia from anywhere in the world. A local Australian florist creates and delivers a fresh arrangement from your brief.',
       areaServed: { '@type': 'Country', name: 'Australia' },
@@ -159,7 +159,7 @@ const OverseasDeliveryDetails = () => (
           </h2>
           <p className="mt-4 leading-relaxed text-black/65">
             Sending flowers internationally should not mean sending flowers on an international
-            journey. Bloom Print passes your brief to a florist close to the Australian delivery
+            journey. Bloomprint passes your brief to a florist close to the Australian delivery
             address, keeping the flowers fresh and the process straightforward.
           </p>
 

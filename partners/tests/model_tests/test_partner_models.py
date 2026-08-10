@@ -140,7 +140,7 @@ class TestPayoutModel:
         assert payout.status == 'pending'
 
     def test_currency_default_is_aud(self):
-        """Bloom Print is an Australian platform; payouts are in AUD."""
+        """Bloomprint is an Australian platform; payouts are in AUD."""
         payout = PayoutFactory()
         assert payout.currency == 'AUD'
 

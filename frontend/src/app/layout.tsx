@@ -20,8 +20,8 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.bloomprint.com.au",
   ),
   title: {
-    default: "Bloom Print | Australian Florist-Led Flower Delivery",
-    template: "%s | Bloom Print",
+    default: "Bloomprint | Australian Florist-Led Flower Delivery",
+    template: "%s | Bloomprint",
   },
   description:
     "Tell us the occasion, budget, and flower preferences. A local Australian florist designs a bouquet that fits.",

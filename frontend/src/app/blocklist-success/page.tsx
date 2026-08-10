@@ -14,7 +14,7 @@ export default function Page() {
           <CardTitle className="text-2xl">You've Been Unsubscribed</CardTitle>
           <CardDescription className="pt-2">
             Your email address has been successfully added to our blocklist.
-            You will not receive any further automated emails from Bloom Print.
+            You will not receive any further automated emails from Bloomprint.
           </CardDescription>
         </CardHeader>
         <CardContent className="text-center">

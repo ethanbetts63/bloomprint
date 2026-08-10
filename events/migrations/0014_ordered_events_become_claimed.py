@@ -3,7 +3,7 @@ from django.db import migrations
 
 def ordered_to_claimed(apps, schema_editor):
     """
-    'ordered' meant Bloom Print had sourced the flowers by hand. Under the claim
+    'ordered' meant Bloomprint had sourced the flowers by hand. Under the claim
     board the florist who claimed the delivery makes it, so the equivalent state
     is 'claimed'.
 

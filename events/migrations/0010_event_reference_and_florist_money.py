@@ -68,7 +68,7 @@ class Migration(migrations.Migration):
             name='florist_budget',
             field=models.DecimalField(
                 blank=True, decimal_places=2, max_digits=10, null=True,
-                help_text="Snapshot: what the florist has to spend on flowers, after Bloom Print's "
+                help_text="Snapshot: what the florist has to spend on flowers, after Bloomprint's "
                           "commission. Frozen at creation so a later rate change cannot alter what "
                           "a florist was already promised.",
             ),
@@ -78,7 +78,7 @@ class Migration(migrations.Migration):
             name='platform_commission',
             field=models.DecimalField(
                 blank=True, decimal_places=2, max_digits=10, null=True,
-                help_text="Snapshot: Bloom Print's cut of the bouquet budget for this delivery.",
+                help_text="Snapshot: Bloomprint's cut of the bouquet budget for this delivery.",
             ),
         ),
         migrations.AddField(
@@ -105,7 +105,7 @@ class Migration(migrations.Migration):
             field=models.DecimalField(
                 blank=True, decimal_places=2, max_digits=10, null=True,
                 help_text="Snapshotted AFFILIATE REFERRAL commission for this delivery, set at "
-                          "creation. Not Bloom Print's own cut — that is platform_commission.",
+                          "creation. Not Bloomprint's own cut — that is platform_commission.",
             ),
         ),
     ]

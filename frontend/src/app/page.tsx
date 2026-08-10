@@ -25,7 +25,7 @@ const homeFaqs: FaqItem[] = [
   {
     question: 'Where do you deliver?',
     answer:
-      'Bloom Print is focused on Australia. Availability can depend on the delivery location and florist coverage.',
+      'Bloomprint is focused on Australia. Availability can depend on the delivery location and florist coverage.',
   },
 ];
 

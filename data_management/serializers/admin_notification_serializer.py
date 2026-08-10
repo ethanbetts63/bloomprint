@@ -36,7 +36,7 @@ class AdminNotificationListSerializer(serializers.ModelSerializer):
             account = obj.recipient_business_account
             return account.business_name or str(account)
         if obj.recipient_type == 'admin':
-            return 'Bloom Print admin'
+            return 'Bloomprint admin'
         return None
 
 

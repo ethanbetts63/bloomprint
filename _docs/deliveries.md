@@ -15,7 +15,7 @@ scheduled  →  claimed  →  delivered
   `DeliveryRequest`, so the event status and the claim row cannot disagree.
 - **delivered** — fulfilled. Creates the florist's payable.
 
-There is no `ordered` state. It meant "Bloom Print has sourced the flowers by
+There is no `ordered` state. It meant "Bloomprint has sourced the flowers by
 hand", which the claiming florist now does. `events/migrations/0014` maps any
 remaining `ordered` rows to `claimed`.
 

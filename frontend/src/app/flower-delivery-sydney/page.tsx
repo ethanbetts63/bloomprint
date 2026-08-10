@@ -48,7 +48,7 @@ const config: OccasionLandingPageConfig = {
     canonicalPath: '/flower-delivery-sydney',
     structuredData: buildServiceSchema({
       serviceType: 'Flower Delivery',
-      name: 'Flower Delivery Sydney by Bloom Print',
+      name: 'Flower Delivery Sydney by Bloomprint',
       description:
         'Fresh flower delivery in Sydney from local florists. Give the occasion, budget, and preferences, and a Sydney florist designs and delivers a custom bouquet.',
       areaServed: {

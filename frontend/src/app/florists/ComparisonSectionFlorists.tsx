@@ -44,7 +44,7 @@ const ComparisonSection = () => (
           <div className="grid grid-cols-3 text-[10px] md:text-xs font-semibold uppercase tracking-wider border-b border-black/5">
             <div className="px-4 md:px-8 py-4 text-gray-500">Feature</div>
             <div className="px-2 md:px-6 py-4 text-center text-gray-500">Big Networks</div>
-            <div className="px-2 md:px-6 py-4 text-center text-black font-bold bg-[var(--colorgreen)]/[0.06]">Bloom Print</div>
+            <div className="px-2 md:px-6 py-4 text-center text-black font-bold bg-[var(--colorgreen)]/[0.06]">Bloomprint</div>
           </div>
           {rows.map((row, i) => (
             <div

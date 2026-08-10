@@ -25,7 +25,7 @@ export default function Page() {
             <div className="bg-black/5 rounded-2xl p-6 space-y-2">
               <p className="text-xs font-bold tracking-widest uppercase text-black/40">Contact</p>
               <a
-                href={`mailto:${REFUND_EMAIL}?subject=Order%20Support%20-%20Bloom Print`}
+                href={`mailto:${REFUND_EMAIL}?subject=Order%20Support%20-%20Bloomprint`}
                 className="text-lg font-semibold text-black underline hover:text-black/70 transition-colors"
               >
                 {REFUND_EMAIL}

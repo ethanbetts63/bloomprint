@@ -24,7 +24,7 @@ export const ArticleCarousel = ({ exclude, showAll = false }: ArticleCarouselPro
   return (
     <div className="w-full bg-[var(--color2)] py-12">
       <div className="container mx-auto px-4">
-        <h2 className="mb-2 text-center text-3xl font-bold tracking-tight text-black">From the Bloom Print Blog</h2>
+        <h2 className="mb-2 text-center text-3xl font-bold tracking-tight text-black">From the Bloomprint Blog</h2>
         <p className="mb-8 text-center text-lg text-black">
           Insights and guides for long-term floral planning.
         </p>

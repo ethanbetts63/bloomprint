@@ -75,7 +75,7 @@ const BestFlowerDeliveryAdelaide = () => {
             <li>Most affordable: GO FLOWERS for budget-friendly blooms that still arrive fresh.</li>
           </ul>
           <p>No matter the occasion — from birthdays and anniversaries to spontaneous “just because” surprises — one of these Adelaide florists will help you send the perfect bouquet.</p>
-          <p>If you want a bouquet that is designed for the recipient rather than picked from a fixed catalog, <a href="/" className="underline hover:opacity-70">Bloom Print</a> gives the florist a proper brief: occasion, budget, delivery date, message, and preferences. The result is a custom local-florist order with more room for fresh seasonal choice.</p>
+          <p>If you want a bouquet that is designed for the recipient rather than picked from a fixed catalog, <a href="/" className="underline hover:opacity-70">Bloomprint</a> gives the florist a proper brief: occasion, budget, delivery date, message, and preferences. The result is a custom local-florist order with more room for fresh seasonal choice.</p>
         </div>
       </ArticleLayout>
       <section>

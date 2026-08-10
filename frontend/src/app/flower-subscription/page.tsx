@@ -9,7 +9,7 @@ export const metadata = getRouteMetadata("/flower-subscription");
 
 const subscriptionFaqs: FaqItem[] = [
   {
-    question: 'How does a flower subscription with Bloom Print work?',
+    question: 'How does a flower subscription with Bloomprint work?',
     answer:
       'Set a budget and delivery frequency — weekly, fortnightly, or monthly — and a local Australian florist designs a fresh bouquet for each delivery. Every drop is built from what is best and in season that week, so no two arrivals are identical.',
   },
@@ -31,7 +31,7 @@ const subscriptionFaqs: FaqItem[] = [
   {
     question: 'Where do you deliver flower subscriptions?',
     answer:
-      'Bloom Print is focused on Australia. Recurring delivery availability depends on the delivery address and local florist coverage.',
+      'Bloomprint is focused on Australia. Recurring delivery availability depends on the delivery address and local florist coverage.',
   },
 ];
 
@@ -40,7 +40,7 @@ const config: OccasionLandingPageConfig = {
     canonicalPath: '/flower-subscription',
     structuredData: buildServiceSchema({
       serviceType: 'Flower Subscription Delivery',
-      name: 'Flower Subscription by Bloom Print',
+      name: 'Flower Subscription by Bloomprint',
       description:
         'Recurring flower delivery designed by local Australian florists. Choose a frequency and budget, and receive fresh seasonal bouquets on a weekly, fortnightly, or monthly schedule.',
     }),

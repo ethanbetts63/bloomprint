@@ -1,7 +1,7 @@
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bloomprint.com.au';
 
-export const SITE_NAME = 'Bloom Print';
+export const SITE_NAME = 'Bloomprint';
 
 const DEFAULT_IMAGE = '/og-images/og-homepage.webp';
 const PUBLISHER_LOGO = '/favicon-512x512.png';
@@ -287,7 +287,7 @@ function getPageType(path: string): 'WebPage' | 'CollectionPage' {
 }
 
 function cleanTitle(title: string): string {
-  return title.replace(/\s*\|\s*Bloom Print\s*$/i, '');
+  return title.replace(/\s*\|\s*Bloomprint\s*$/i, '');
 }
 
 function resolveSchemaImage(pathOrUrl?: string): string {

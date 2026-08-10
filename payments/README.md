@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The `payments` app handles all Stripe payment processing for Bloom Print. It supports both one-time upfront payments (PaymentIntents) and recurring subscription payments (Stripe Subscriptions). Payment fulfillment is entirely webhook-driven.
+The `payments` app handles all Stripe payment processing for Bloomprint. It supports both one-time upfront payments (PaymentIntents) and recurring subscription payments (Stripe Subscriptions). Payment fulfillment is entirely webhook-driven.
 
 ## Model
 

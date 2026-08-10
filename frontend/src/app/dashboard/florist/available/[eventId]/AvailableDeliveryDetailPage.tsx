@@ -89,7 +89,7 @@ export default function AvailableDeliveryDetailPage() {
         <AdminDetailGrid>
           <AdminDetailField label="Customer's budget" value={formatDashboardCurrency(money.budget)} />
           <AdminDetailField
-            label={`Bloom Print commission (${money.commission_rate})`}
+            label={`Bloomprint commission (${money.commission_rate})`}
             value={`−${formatDashboardCurrency(money.platform_commission)}`}
           />
           <AdminDetailField label="Flowers to the value of" value={formatDashboardCurrency(money.florist_budget)} />

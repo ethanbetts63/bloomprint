@@ -62,7 +62,7 @@ def send_notification(notification, attachments=None):
                 data={
                     "from": settings.DEFAULT_FROM_EMAIL,
                     "to": [email],
-                    "subject": notification.subject or "Bloom Print Notification",
+                    "subject": notification.subject or "Bloomprint Notification",
                     "text": text_body,
                     "html": html_body,
                 },

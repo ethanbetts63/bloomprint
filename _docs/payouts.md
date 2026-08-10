@@ -7,7 +7,7 @@ How money reaches a partner. Two kinds of partner get paid, for different reason
 
 Florists do **not** earn referral commissions, and affiliates never fulfil
 deliveries. All money moves via Stripe Connect: customer payments land in the
-Bloom Print platform balance, and admin initiates a transfer to the partner's
+Bloomprint platform balance, and admin initiates a transfer to the partner's
 connected Express account per payout.
 
 ---
@@ -26,7 +26,7 @@ the claim board, the job sheet, and the payable.
 | `florist_budget` | `budget − platform_commission` — what the florist spends on flowers |
 | `florist_total` | `florist_budget + delivery_fee` — **what the florist is paid** |
 
-Bloom Print therefore keeps exactly the commission rate of the budget on every
+Bloomprint therefore keeps exactly the commission rate of the budget on every
 order, and the delivery fee passes to the florist untouched. Below the delivery
 threshold the florist is paid *more* than the budget, because the customer paid
 the fee on top.

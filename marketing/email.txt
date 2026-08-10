@@ -5,7 +5,7 @@ I’ll paste my generic pitch below but just quickly — I always listen to an e
 
 But anyway, here's the quick pitch: 
 
-I run Bloom Print.
+I run Bloomprint.
 
 The vast majority of online flower orders are routed through large networks that take 25-50% commissions from local florists and require strict “bouquet recipes”. The result is florists get squeezed and customers get bad bouquets. We built a model that only charges 15%, gives creative control back to the florist, and includes delivery from $100.
 

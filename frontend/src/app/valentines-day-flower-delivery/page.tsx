@@ -31,7 +31,7 @@ const valentinesFaqs: FaqItem[] = [
   {
     question: 'Where do you deliver?',
     answer:
-      'Bloom Print is focused on Australia. Availability can depend on the delivery location and florist coverage.',
+      'Bloomprint is focused on Australia. Availability can depend on the delivery location and florist coverage.',
   },
 ];
 
@@ -40,7 +40,7 @@ const config: OccasionLandingPageConfig = {
     canonicalPath: '/valentines-day-flower-delivery',
     structuredData: buildServiceSchema({
       serviceType: "Valentine's Day Flower Delivery",
-      name: "Valentine's Day Flower Delivery by Bloom Print",
+      name: "Valentine's Day Flower Delivery by Bloomprint",
       description:
         "Fresh Valentine's Day flowers designed by local Australian florists and delivered on February 14.",
     }),

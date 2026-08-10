@@ -45,7 +45,7 @@ const corporateFaqs: FaqItem[] = [
   {
     question: 'Can we arrange flowers for multiple office locations?',
     answer:
-      'Each delivery address needs its own subscription. For a coordinated rollout across several offices, contact Bloom Print so we can understand the locations, schedules, and budgets involved.',
+      'Each delivery address needs its own subscription. For a coordinated rollout across several offices, contact Bloomprint so we can understand the locations, schedules, and budgets involved.',
   },
   {
     question: 'How often can corporate flowers be delivered?',

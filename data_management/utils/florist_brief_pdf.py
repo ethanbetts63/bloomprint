@@ -2,7 +2,7 @@
 
 The brief is what an admin hands to a florist in person: the delivery details,
 the customer's brief, and — the part the florist actually cares about — the
-amount they have to spend on flowers once Bloom Print's commission is out.
+amount they have to spend on flowers once Bloomprint's commission is out.
 """
 
 from decimal import Decimal
@@ -27,15 +27,13 @@ ASSETS = ROOT / "frontend" / "src" / "assets"
 LOGO_PATH = ASSETS / "bloomprint_logo.png"
 FONT_DIR = ASSETS / "fonts" / "Playfair_Display" / "static"
 
-CREAM = colors.HexColor("#f8f3ef")
+# Deliberately monochrome: the brief is printed and faxed around florist shops,
+# and a tinted panel with a coloured edge bar survives neither well.
 WHITE = colors.white
 INK = colors.HexColor("#171717")
 BODY = colors.HexColor("#44403c")
 MUTED = colors.HexColor("#78716c")
-LINE = colors.HexColor("#e2ddd8")
-GREEN = colors.HexColor("#3cdd7a")
-GREEN_DEEP = colors.HexColor("#12613a")
-GREEN_TINT = colors.HexColor("#eaf1e7")
+LINE = colors.HexColor("#d4d4d4")
 
 # Playfair for display type to match the site, Helvetica for everything else.
 DISPLAY = "Helvetica-Bold"
@@ -172,11 +170,11 @@ def build_florist_brief(event, variant: str = "claimed") -> bytes:
     buffer = BytesIO()
     page_width, page_height = A4
     pdf = canvas.Canvas(buffer, pagesize=A4)
-    pdf.setTitle(f"Bloom Print florist brief — {event.reference}")
-    pdf.setAuthor("Bloom Print")
+    pdf.setTitle(f"Bloomprint florist brief — {event.reference}")
+    pdf.setAuthor("Bloomprint")
     pdf.setSubject(f"Delivery brief for {event.delivery_date:%d %B %Y}")
 
-    pdf.setFillColor(CREAM)
+    pdf.setFillColor(WHITE)
     pdf.rect(0, 0, page_width, page_height, fill=1, stroke=0)
 
     margin = 42
@@ -201,7 +199,7 @@ def build_florist_brief(event, variant: str = "claimed") -> bytes:
 
     pdf.setFont(display, 23)
     pdf.setFillColor(INK)
-    pdf.drawString(text_x, header_y + 26, "Bloom Print")
+    pdf.drawString(text_x, header_y + 26, "Bloomprint")
     pdf.setFont("Helvetica", 9.5)
     pdf.setFillColor(MUTED)
     pdf.drawString(text_x, header_y + 11, "Delivery available to claim" if is_request else "Florist brief")
@@ -225,14 +223,13 @@ def build_florist_brief(event, variant: str = "claimed") -> bytes:
     # ---- The money panel ----------------------------------------------------
     panel_height = 118
     panel_y = header_y - 22 - panel_height
-    pdf.setFillColor(GREEN_TINT)
-    pdf.roundRect(margin, panel_y, content_width, panel_height, 10, fill=1, stroke=0)
-    pdf.setFillColor(GREEN)
-    pdf.roundRect(margin, panel_y, 5, panel_height, 2.5, fill=1, stroke=0)
+    pdf.setStrokeColor(LINE)
+    pdf.setLineWidth(0.8)
+    pdf.roundRect(margin, panel_y, content_width, panel_height, 10, fill=0, stroke=1)
 
     pad = 22
     pdf.setFont("Helvetica-Bold", 8.5)
-    pdf.setFillColor(GREEN_DEEP)
+    pdf.setFillColor(MUTED)
     pdf.drawString(margin + pad, panel_y + panel_height - 26, "FLOWERS TO THE VALUE OF")
 
     pdf.setFont(display, 42)
@@ -248,7 +245,7 @@ def build_florist_brief(event, variant: str = "claimed") -> bytes:
     )
 
     # Breakdown, right-aligned inside the panel.
-    rows = [("Customer's budget", money(budget)), (f"Bloom Print commission ({rate_label})", f"−{money(commission)}")]
+    rows = [("Customer's budget", money(budget)), (f"Bloomprint commission ({rate_label})", f"−{money(commission)}")]
     if delivery_fee > 0:
         rows.append(("Delivery fee (paid to you in full)", f"+{money(delivery_fee)}"))
     else:
@@ -261,7 +258,7 @@ def build_florist_brief(event, variant: str = "claimed") -> bytes:
     for index, (label, value) in enumerate(rows):
         final = index == len(rows) - 1
         if final:
-            pdf.setStrokeColor(colors.HexColor("#c9d6c4"))
+            pdf.setStrokeColor(LINE)
             pdf.setLineWidth(0.8)
             pdf.line(label_x - 96, row_y + 12, value_x, row_y + 12)
             row_y -= 4
@@ -281,7 +278,7 @@ def build_florist_brief(event, variant: str = "claimed") -> bytes:
 
     def section_heading(text, x, y, width):
         pdf.setFont("Helvetica-Bold", 8.5)
-        pdf.setFillColor(GREEN_DEEP)
+        pdf.setFillColor(MUTED)
         pdf.drawString(x, y, text.upper())
         pdf.setStrokeColor(LINE)
         pdf.setLineWidth(0.8)
@@ -384,7 +381,7 @@ def build_florist_brief(event, variant: str = "claimed") -> bytes:
         qr_title = "Claim this delivery"
         qr_copy = (
             "Scan to claim it on your dashboard. First to claim gets it, and the full "
-            "address and card message unlock straight away. New to Bloom Print? Set your "
+            "address and card message unlock straight away. New to Bloomprint? Set your "
             "own coverage, claim only the orders you want, and keep your own branding — "
             "no monthly fees, no penalties for passing."
         )
@@ -416,7 +413,7 @@ def build_florist_brief(event, variant: str = "claimed") -> bytes:
     # ---- Footer -------------------------------------------------------------
     pdf.setFont("Helvetica", 7.5)
     pdf.setFillColor(MUTED)
-    pdf.drawString(margin, margin - 8, "Bloom Print — bloomprint.com.au")
+    pdf.drawString(margin, margin - 8, "Bloomprint — bloomprint.com.au")
     # The buyer's name appears on the claimed variant so the florist can sign
     # the card, but never their contact details, and never any internal ID:
     # this sheet goes to a third party.

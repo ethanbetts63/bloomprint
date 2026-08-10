@@ -20,11 +20,11 @@ export default function Page() {
         "@context": "https://schema.org",
         "@type": "Service",
         "serviceType": "Flower Delivery",
-        "name": "Bloom Print Flower Delivery",
+        "name": "Bloomprint Flower Delivery",
         "description": "Personalized flower delivery. Choose a budget tier, add your preferences, and a local florist designs and delivers the bouquet.",
         "provider": {
             "@type": "Organization",
-            "name": "Bloom Print",
+            "name": "Bloomprint",
             "url": "https://www.bloomprint.com.au"
         },
         "areaServed": [

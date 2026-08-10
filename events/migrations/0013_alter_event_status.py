@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                     ("cancelled", "Cancelled"),
                 ],
                 default="scheduled",
-                help_text="Lifecycle of the delivery. 'scheduled' means paid for and on the claim board; 'claimed' means a florist has taken it. Replaces the old 'ordered', which described Bloom Print ordering flowers by hand — the florist does that now.",
+                help_text="Lifecycle of the delivery. 'scheduled' means paid for and on the claim board; 'claimed' means a florist has taken it. Replaces the old 'ordered', which described Bloomprint ordering flowers by hand — the florist does that now.",
                 max_length=20,
             ),
         ),

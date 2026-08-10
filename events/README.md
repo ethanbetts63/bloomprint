@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The `events` app is the core domain of Bloom Print. It manages orders (one-time or recurring flower plans), the individual deliveries (events) within them, and the guest checkout flow customers use to build and pay for an order.
+The `events` app is the core domain of Bloomprint. It manages orders (one-time or recurring flower plans), the individual deliveries (events) within them, and the guest checkout flow customers use to build and pay for an order.
 
 ## Models
 

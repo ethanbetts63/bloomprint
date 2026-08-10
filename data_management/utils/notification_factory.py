@@ -25,7 +25,7 @@ def create_admin_event_notifications(event):
     """
     Schedules unclaimed-delivery warnings for admin at T-7 and T-3 (email + SMS).
 
-    These used to say "order the flowers", from when Bloom Print sourced every
+    These used to say "order the flowers", from when Bloomprint sourced every
     bouquet by hand. The florist who claims a delivery makes it now, so the only
     thing left worth waking an admin for is a delivery nobody has taken.
 
@@ -88,7 +88,7 @@ def notify_florists_of_new_delivery(event):
     where = ', '.join(part for part in [order.recipient_suburb, order.recipient_state] if part)
     subject = f"New delivery available in {where or 'your area'} — {event.delivery_date}"
     body = (
-        f"A new Bloom Print delivery is available to claim.\n\n"
+        f"A new Bloomprint delivery is available to claim.\n\n"
         f"Reference: {event.reference}\n"
         f"Area: {where or 'Not specified'}\n"
         f"Delivery date: {event.delivery_date}\n"
@@ -216,20 +216,20 @@ def create_customer_delivery_day_notification(event):
 
     body = (
         f"Hi {first_name},\n\n"
-        f"Your Bloom Print delivery is today! "
+        f"Your Bloomprint delivery is today! "
         f"Flowers should be arriving for {recipient_name}.\n"
     )
 
     if next_event:
         body += f"\nYour next delivery after this one is scheduled for {next_event.delivery_date}.\n"
 
-    body += "\nThank you for choosing Bloom Print!"
+    body += "\nThank you for choosing Bloomprint!"
 
     Notification.objects.create(
         recipient_type='customer',
         recipient_email=order.customer_email,
         channel='email',
-        subject="Your Bloom Print delivery is today!",
+        subject="Your Bloomprint delivery is today!",
         body=body,
         scheduled_for=event.delivery_date,
         related_event=event,

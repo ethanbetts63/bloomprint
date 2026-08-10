@@ -11,11 +11,11 @@ def admin_payment_received(order, payment_id):
     """Sent to admin immediately after a successful payment."""
     if order:
         return (
-            f"New Bloom Print order: {order.recipient_first_name} {order.recipient_last_name}, "
+            f"New Bloomprint order: {order.recipient_first_name} {order.recipient_last_name}, "
             f"delivery {order.start_date}, ${order.budget}. "
             f"Payment ID: {payment_id}"
         )
-    return f"New Bloom Print payment received. Payment ID: {payment_id}"
+    return f"New Bloomprint payment received. Payment ID: {payment_id}"
 
 
 def admin_event_reminder(event):
@@ -48,4 +48,4 @@ def admin_cancellation(ordered_event_descriptions):
     Sent to admin when a customer cancels a plan that has already-ordered events.
     ordered_event_descriptions: a string listing the affected events (pre-formatted by caller).
     """
-    return f"Bloom Print plan cancelled. Events needing florist contact:\n{ordered_event_descriptions}"
+    return f"Bloomprint plan cancelled. Events needing florist contact:\n{ordered_event_descriptions}"

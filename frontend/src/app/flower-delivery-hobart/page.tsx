@@ -48,7 +48,7 @@ const config: OccasionLandingPageConfig = {
     canonicalPath: '/flower-delivery-hobart',
     structuredData: buildServiceSchema({
       serviceType: 'Flower Delivery',
-      name: 'Flower Delivery Hobart by Bloom Print',
+      name: 'Flower Delivery Hobart by Bloomprint',
       description:
         'Fresh flower delivery in Hobart from local florists. Give the occasion, budget, and preferences, and a Hobart florist designs and delivers a custom bouquet.',
       areaServed: {

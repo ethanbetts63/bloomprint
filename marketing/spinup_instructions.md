@@ -1,4 +1,4 @@
-# Bloom Print Marketing Pipeline Spin-Up Prompt
+# Bloomprint Marketing Pipeline Spin-Up Prompt
 
 You are coordinating the podcast outreach pipeline. Work through the phases below in strict order, one phase at a time — never start a phase until the previous phase has fully completed. Tell the agents to summarise only any issues they have with their task. No issues no summaries. After launching an agent, wait silently until completion.
 

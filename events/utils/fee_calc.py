@@ -20,7 +20,7 @@ def calculate_delivery_fee(budget: Decimal) -> Decimal:
 
 def calculate_florist_commission(budget: Decimal) -> Decimal:
     """
-    Returns Bloom Print's commission on a bouquet budget.
+    Returns Bloomprint's commission on a bouquet budget.
 
     Commission is taken on the budget only. The delivery fee is passed to the
     florist untouched, so it is deliberately not part of this calculation.
@@ -38,15 +38,22 @@ def calculate_florist_payout(budget: Decimal) -> Decimal:
     return (Decimal(budget) - calculate_florist_commission(budget)).quantize(Decimal('0.01'))
 
 
-def commission_rate_label() -> str:
+def commission_rate_label(commission=None, budget=None) -> str:
     """
     The commission rate as a percentage label, e.g. "10%".
 
-    Lives here so the brief PDF and the claim board cannot drift apart: a
-    florist comparing the two should never see two different rates.
+    Pass a snapshotted commission and budget to describe what was actually
+    charged on that delivery. Without them it falls back to the current setting,
+    which is right for anything not yet priced.
+
+    The distinction matters after a rate change: an event priced at 10% must not
+    render "commission (5%) −$10.00" to the florist it was promised to.
 
     normalize() then ':f' renders 0.10 as "10" and 0.125 as "12.5", never
     "10.00".
     """
-    rate = (Decimal(str(settings.FLORIST_COMMISSION_RATE)) * 100).quantize(Decimal('0.01')).normalize()
+    if commission is not None and budget:
+        rate = (Decimal(commission) / Decimal(budget) * 100).quantize(Decimal('0.01')).normalize()
+    else:
+        rate = (Decimal(str(settings.FLORIST_COMMISSION_RATE)) * 100).quantize(Decimal('0.01')).normalize()
     return f'{rate:f}%'

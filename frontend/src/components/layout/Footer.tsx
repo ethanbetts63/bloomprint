@@ -77,10 +77,10 @@ const Footer = () => {
               src={assetSrc(logo)}
               srcSet={`${assetSrc(logo128)} 128w, ${assetSrc(logo192)} 192w, ${assetSrc(logo256)} 256w`}
               sizes="64px"
-              alt="Bloom Print Logo"
+              alt="Bloomprint Logo"
               loading="lazy"
             />
-            <p className="text-sm opacity-80">&copy; {currentYear} Bloom Print. All rights reserved.</p>
+            <p className="text-sm opacity-80">&copy; {currentYear} Bloomprint. All rights reserved.</p>
             <div className="flex items-center gap-1 mt-1">
               <span className="text-xs opacity-60">Powered by</span>
               <img src={assetSrc(stripeLogo)} alt="Stripe" className="h-5" width="50" height="60" loading="lazy" />

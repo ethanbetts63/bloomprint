@@ -38,11 +38,15 @@ MIN_BUDGET = 65
 DELIVERY_INCLUDED_THRESHOLD = 65
 DELIVERY_FEE = 20
 
-# Bloom Print's cut of the bouquet budget. The delivery fee is not commissioned —
-# it passes to the florist in full. Quoted to florists as a flat 10%.
-# Changing this only affects new orders: Order reprices while pending_payment
-# only, and Event snapshots the florist's figures at creation.
-FLORIST_COMMISSION_RATE = os.environ.get("FLORIST_COMMISSION_RATE", "0.10")
+# Bloomprint's cut of the bouquet budget. The delivery fee is not commissioned —
+# it passes to the florist in full. Quoted to florists as a flat 5%.
+#
+# This never changes what a customer pays: they pay budget + delivery fee, and
+# the rate only decides how the budget splits between us and the florist.
+# Existing deliveries are unaffected — Event freezes platform_commission and
+# florist_budget at creation, so a rate change cannot rewrite what a florist was
+# already promised. Only events created afterwards use the new rate.
+FLORIST_COMMISSION_RATE = os.environ.get("FLORIST_COMMISSION_RATE", "0.05")
 
 # Where the florist-brief QR code sends a florist who scans it. An unclaimed
 # delivery points at the signup page, since the reader may not have an account;
