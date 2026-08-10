@@ -215,7 +215,7 @@ def build_florist_brief(event, variant: str = "claimed") -> bytes:
     pdf.setFillColor(MUTED)
     pdf.drawRightString(
         page_width - margin, header_y + 11,
-        "First to claim it gets it" if is_request else "Quote this reference",
+        "Quote this reference",
     )
 
     pdf.setStrokeColor(LINE)
