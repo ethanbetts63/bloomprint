@@ -36,7 +36,7 @@ def _user_agent():
     Nominatim requires a User-Agent identifying the app, with a contact address.
     A generic one (or requests' default) is grounds for being blocked.
     """
-    contact = getattr(settings, 'ADMIN_EMAIL', None) or 'admin@bloomprint.com.au'
+    contact = getattr(settings, 'ADMIN_EMAIL', None)
     return f'BloomPrint/1.0 ({contact})'
 
 

@@ -1,7 +1,7 @@
 import UnifiedSummaryCard from '@/components/order/UnifiedSummaryCard';
 import FlowBackButton from '@/components/order/FlowBackButton';
 
-const REFUND_EMAIL = 'admin@bloomprint.com.au';
+const REFUND_EMAIL = 'hello@bloomprint.com.au';
 
 export default function Page() {
   return (

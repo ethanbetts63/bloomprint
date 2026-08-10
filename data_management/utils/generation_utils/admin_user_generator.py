@@ -5,8 +5,8 @@ from partners.models.discount_code import DiscountCode
 User = get_user_model()
 
 ADMIN_USER = {
-    'username': 'admin@bloomprint.com.au',
-    'email': 'admin@bloomprint.com.au',
+    'username': 'hello@bloomprint.com.au',
+    'email': 'hello@bloomprint.com.au',
     'first_name': 'Ethan',
     'last_name': 'Betts',
     'is_superuser': True,

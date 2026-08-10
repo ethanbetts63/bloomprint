@@ -208,7 +208,7 @@ SIMPLE_JWT = {
 
 MAILGUN_API_KEY = os.environ.get("MAILGUN_API_KEY")
 MAILGUN_DOMAIN = os.environ.get("MAILGUN_DOMAIN")
-DEFAULT_FROM_EMAIL = "Bloom Print <postmaster@mail.bloomprint.com.au>"
+DEFAULT_FROM_EMAIL = "Bloomprint <hello@bloomprint.com.au>"
 
 TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
 
