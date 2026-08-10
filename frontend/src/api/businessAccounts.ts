@@ -76,6 +76,11 @@ export async function getAvailableDeliveries(params: ListParams = {}): Promise<P
   return handleResponse(await authedFetch(`/api/business-accounts/available-deliveries/${query}`));
 }
 
+/** One claimable delivery in full. 409 if someone claimed it first. */
+export async function getAvailableDelivery(eventId: number): Promise<AvailableDelivery> {
+  return handleResponse(await authedFetch(`/api/business-accounts/available-deliveries/${eventId}/`));
+}
+
 /**
  * Claim a delivery. First come, first served — a 409 means another florist got
  * there first, which is an expected outcome rather than an error to retry.

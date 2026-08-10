@@ -42,6 +42,46 @@ class AvailableDeliveryListView(APIView):
         return paginator.get_paginated_response(serializer.data)
 
 
+class AvailableDeliveryDetailView(APIView):
+    """
+    One claimable delivery, in full — same non-PII fields as the board row.
+
+    Scoped exactly like the board: a florist can only read a delivery that is
+    still claimable and inside their own service area, so this cannot be used
+    to enumerate orders by id.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, event_id):
+        florist = _florist_or_none(request.user)
+        if florist is None:
+            return Response({'detail': 'No florist account was found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if florist.status != 'active':
+            return Response(
+                {'detail': 'Your account is not yet approved to view deliveries.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        try:
+            event = Event.objects.select_related('order').get(pk=event_id)
+        except Event.DoesNotExist:
+            return Response({'detail': 'Delivery not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # A 404 rather than a 403: whether a delivery exists outside your area
+        # is not something you get to learn.
+        if not florist_covers_event(florist, event):
+            return Response({'detail': 'Delivery not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if not event_is_claimable(event):
+            return Response(
+                {'detail': 'This delivery has already been claimed.'},
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        return Response(AvailableDeliverySerializer(event).data)
+
+
 class ClaimDeliveryView(APIView):
     """
     First-come-first-served claim.

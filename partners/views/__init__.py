@@ -7,7 +7,11 @@ from .delivery_request_views import (
     DeliveryRequestListView,
     DeliveryRequestMarkDeliveredView,
 )
-from .available_delivery_views import AvailableDeliveryListView, ClaimDeliveryView
+from .available_delivery_views import (
+    AvailableDeliveryListView,
+    AvailableDeliveryDetailView,
+    ClaimDeliveryView,
+)
 from .stripe_connect_onboard_view import StripeConnectOnboardView
 from .stripe_connect_status_view import StripeConnectStatusView
 from .payout_views import PayoutListView, PayoutDetailView

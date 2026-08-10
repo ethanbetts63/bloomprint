@@ -94,6 +94,47 @@ class TestNotifyFloristsOfNewDelivery:
         assert notification.status == 'pending'
         assert notification.scheduled_for == date.today()
 
+    def test_attaches_the_request_brief_without_recipient_pii(self, mocker):
+        """Every florist in radius receives this, and email cannot be unsent."""
+        from pypdf import PdfReader
+        from io import BytesIO
+
+        send = mocker.patch('data_management.utils.send_notification.send_notification')
+        florist_at(*ROCKINGHAM)
+        event = event_at(
+            *NEARBY,
+            message='Happy birthday Mum!',
+            order__recipient_last_name='Chen',
+            order__recipient_street_address='12 Read Street',
+        )
+
+        notify_florists_of_new_delivery(event)
+
+        attachments = send.call_args.kwargs['attachments']
+        filename, pdf_bytes, mimetype = attachments[0]
+        assert filename.endswith('.pdf')
+        assert mimetype == 'application/pdf'
+
+        text = PdfReader(BytesIO(pdf_bytes)).pages[0].extract_text()
+        assert 'Read Street' not in text
+        assert 'Chen' not in text
+        assert 'Happy birthday Mum' not in text
+
+    def test_a_broken_pdf_does_not_stop_the_email(self, mocker):
+        """Without the brief a florist can still claim; without the email they cannot."""
+        send = mocker.patch('data_management.utils.send_notification.send_notification')
+        mocker.patch(
+            'data_management.utils.florist_brief_pdf.build_florist_brief',
+            side_effect=RuntimeError('reportlab exploded'),
+        )
+        florist_at(*ROCKINGHAM)
+        event = event_at(*NEARBY)
+
+        notify_florists_of_new_delivery(event)
+
+        send.assert_called_once()
+        assert send.call_args.kwargs['attachments'] is None
+
     def test_body_carries_the_reference_and_florist_payment(self, mocker):
         mocker.patch('data_management.utils.send_notification.send_notification')
         florist_at(*ROCKINGHAM)

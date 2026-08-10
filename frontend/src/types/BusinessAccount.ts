@@ -79,6 +79,12 @@ export interface AvailableDelivery {
   postcode: string | null;
   occasion: string | null;
   flower_notes: string | null;
+  preferred_delivery_time: string | null;
+  /** The customer's budget. Shown openly — the commission split is transparent. */
+  budget: string | null;
+  platform_commission: string | null;
+  /** Commission rate as a label, e.g. "10%". */
+  commission_rate: string;
   florist_budget: string | null;
   delivery_fee: string | null;
   /** florist_budget + delivery_fee — what the florist would invoice. */

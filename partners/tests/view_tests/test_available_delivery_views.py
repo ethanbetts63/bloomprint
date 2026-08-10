@@ -3,6 +3,7 @@ from datetime import date, timedelta
 
 from rest_framework.test import APIClient
 
+from events.models import Event
 from events.tests.factories.event_factory import EventFactory
 from partners.models import DeliveryRequest
 from partners.tests.factories.business_account_factory import BusinessAccountFactory
@@ -96,9 +97,107 @@ class TestAvailableDeliveryListView:
 
 
 @pytest.mark.django_db
+class TestAvailableDeliveryDetailView:
+    def setup_method(self):
+        self.client = APIClient()
+
+    def detail_url(self, event):
+        return f'/api/business-accounts/available-deliveries/{event.id}/'
+
+    def test_returns_the_full_non_pii_detail(self):
+        florist = florist_at(*ROCKINGHAM)
+        event = event_at(*NEARBY)
+        self.client.force_authenticate(user=florist.user)
+
+        response = self.client.get(self.detail_url(event))
+
+        assert response.status_code == 200
+        assert response.data['reference'] == event.reference
+        assert 'flower_notes' in response.data
+        assert 'suburb' in response.data
+
+    def test_shows_the_full_money_breakdown(self):
+        """Transparency: the florist can check our commission arithmetic."""
+        florist = florist_at(*ROCKINGHAM)
+        event = event_at(*NEARBY)
+        self.client.force_authenticate(user=florist.user)
+
+        data = self.client.get(self.detail_url(event)).data
+
+        for field in ('budget', 'platform_commission', 'commission_rate',
+                      'florist_budget', 'delivery_fee', 'florist_total'):
+            assert field in data, field
+        assert data['commission_rate'].endswith('%')
+
+    def test_still_withholds_recipient_pii(self):
+        florist = florist_at(*ROCKINGHAM)
+        event_at(*NEARBY)
+        self.client.force_authenticate(user=florist.user)
+
+        data = self.client.get(self.detail_url(Event.objects.latest('id'))).data
+
+        for leaked in ('recipient_name', 'recipient_street_address', 'message', 'delivery_notes'):
+            assert leaked not in data
+
+    def test_outside_service_area_is_404_not_403(self):
+        """Whether a delivery exists elsewhere is not something you get to learn."""
+        florist = florist_at(*ROCKINGHAM)
+        event = event_at(*FAR_AWAY)
+        self.client.force_authenticate(user=florist.user)
+
+        assert self.client.get(self.detail_url(event)).status_code == 404
+
+    def test_claimed_delivery_returns_409(self):
+        florist = florist_at(*ROCKINGHAM)
+        event = event_at(*NEARBY)
+        DeliveryRequestFactory(event=event, status='accepted')
+        self.client.force_authenticate(user=florist.user)
+
+        assert self.client.get(self.detail_url(event)).status_code == 409
+
+    def test_pending_florist_is_forbidden(self):
+        florist = florist_at(*ROCKINGHAM, status='pending')
+        event = event_at(*NEARBY)
+        self.client.force_authenticate(user=florist.user)
+
+        assert self.client.get(self.detail_url(event)).status_code == 403
+
+    def test_requires_auth(self):
+        event = event_at(*NEARBY)
+        assert self.client.get(self.detail_url(event)).status_code in (401, 403)
+
+
+@pytest.mark.django_db
 class TestClaimDeliveryView:
     def setup_method(self):
         self.client = APIClient()
+
+    def test_claim_emails_the_florist_a_confirmation(self, mocker):
+        notify = mocker.patch(
+            'data_management.utils.notification_factory.notify_florist_of_claim'
+        )
+        florist = florist_at(*ROCKINGHAM)
+        event = event_at(*NEARBY)
+        self.client.force_authenticate(user=florist.user)
+
+        self.client.post(claim_url(event))
+
+        notify.assert_called_once()
+
+    def test_claim_survives_a_failing_confirmation_email(self, mocker):
+        """The claim is committed; an email failure must not undo it."""
+        mocker.patch(
+            'data_management.utils.notification_factory.notify_florist_of_claim',
+            side_effect=RuntimeError('mailgun down'),
+        )
+        florist = florist_at(*ROCKINGHAM)
+        event = event_at(*NEARBY)
+        self.client.force_authenticate(user=florist.user)
+
+        response = self.client.post(claim_url(event))
+
+        assert response.status_code == 201
+        assert DeliveryRequest.objects.filter(event=event, status='accepted').exists()
 
     def test_claim_creates_accepted_delivery_request(self):
         florist = florist_at(*ROCKINGHAM)

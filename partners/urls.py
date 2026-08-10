@@ -8,6 +8,7 @@ from partners.views import (
     DeliveryRequestListView,
     DeliveryRequestMarkDeliveredView,
     AvailableDeliveryListView,
+    AvailableDeliveryDetailView,
     ClaimDeliveryView,
     StripeConnectOnboardView,
     StripeConnectStatusView,
@@ -33,6 +34,7 @@ urlpatterns = [
     path('discount-codes/', AffiliateDiscountCodeListCreateView.as_view(), name='affiliate-discount-code-list-create'),
 
     path('available-deliveries/', AvailableDeliveryListView.as_view(), name='available-delivery-list'),
+    path('available-deliveries/<int:event_id>/', AvailableDeliveryDetailView.as_view(), name='available-delivery-detail'),
     path('available-deliveries/<int:event_id>/claim/', ClaimDeliveryView.as_view(), name='claim-delivery'),
 
     path('delivery-requests/', DeliveryRequestListView.as_view(), name='delivery-request-list'),

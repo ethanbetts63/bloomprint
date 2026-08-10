@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -23,6 +24,7 @@ function areaLabel(delivery: AvailableDelivery): string {
  * outcome, not a failure, and the row simply disappears on refresh.
  */
 export default function AvailableDeliveriesBoard({ onClaimed }: { onClaimed?: () => void }) {
+  const router = useRouter();
   const [deliveries, setDeliveries] = useState<AvailableDelivery[]>([]);
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -94,13 +96,19 @@ export default function AvailableDeliveriesBoard({ onClaimed }: { onClaimed?: ()
       minWidth={800}
     >
       {deliveries.map((delivery) => (
-        <TableRow key={delivery.id} className="border-slate-100 hover:bg-slate-50">
+        <TableRow
+          key={delivery.id}
+          className="cursor-pointer border-slate-100 hover:bg-slate-50"
+          onClick={() => router.push(`/dashboard/florist/available/${delivery.id}`)}
+        >
           <TableCell className="font-medium text-slate-900">{delivery.reference}</TableCell>
           <TableCell className="text-slate-700">{areaLabel(delivery)}</TableCell>
           <TableCell className="text-slate-700">{formatDashboardDateOnly(delivery.delivery_date)}</TableCell>
           <TableCell className="text-slate-600">{delivery.occasion || '—'}</TableCell>
           <TableCell className="text-slate-900">{formatDashboardCurrency(delivery.florist_total)}</TableCell>
-          <TableCell className="text-right">
+          {/* Stop the row's navigation: clicking Claim should claim, not open
+              the detail page underneath it. */}
+          <TableCell className="text-right" onClick={(event) => event.stopPropagation()}>
             <Button
               size="sm"
               onClick={() => handleClaim(delivery)}
