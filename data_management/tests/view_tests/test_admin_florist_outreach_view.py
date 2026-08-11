@@ -150,6 +150,37 @@ class TestSendOutreach:
         assert 'Chen' not in text
         assert 'Happy birthday Mum' not in text
 
+    def test_can_attach_the_full_brief_with_pii(self, admin_api, event, mocker):
+        send, captured = fake_send()
+        mocker.patch('data_management.utils.send_notification.send_notification', send)
+
+        admin_api.post(
+            url(event),
+            {
+                'to': 'shop@example.com', 'subject': 'Delivery', 'body': 'Hello',
+                'brief_variant': 'claimed',
+            },
+            format='json',
+        )
+
+        _, pdf_bytes, _ = captured['attachments'][0]
+        text = PdfReader(BytesIO(pdf_bytes)).pages[0].extract_text()
+        assert 'Read Street' in text
+        assert 'Chen' in text
+
+    def test_rejects_an_unknown_brief_variant(self, admin_api, event):
+        response = admin_api.post(
+            url(event),
+            {
+                'to': 'shop@example.com', 'subject': 'Delivery', 'body': 'Hello',
+                'brief_variant': 'everything',
+            },
+            format='json',
+        )
+
+        assert response.status_code == 400
+        assert not Notification.objects.filter(recipient_type='florist_prospect').exists()
+
     def test_rejects_a_missing_recipient(self, admin_api, event):
         response = admin_api.post(
             url(event), {'subject': 'Delivery', 'body': 'Hello'}, format='json'

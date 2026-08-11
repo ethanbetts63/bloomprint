@@ -40,14 +40,19 @@ export async function getAdminFloristOutreachDraft(id: number): Promise<FloristO
   return res.json();
 }
 
-/** Sends the operator's edited outreach, with the request brief attached. */
+/** Sends the operator's edited outreach with the selected brief attached. */
 export async function sendAdminFloristOutreach(
   id: number,
-  payload: { to: string; subject: string; body: string },
+  payload: { to: string; subject: string; body: string; briefVariant: 'request' | 'claimed' },
 ): Promise<{ detail: string }> {
   const res = await authedFetch(`/api/data/admin/events/${id}/florist-outreach/`, {
     method: 'POST',
-    body: JSON.stringify(payload),
+    body: JSON.stringify({
+      to: payload.to,
+      subject: payload.subject,
+      body: payload.body,
+      brief_variant: payload.briefVariant,
+    }),
   });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));

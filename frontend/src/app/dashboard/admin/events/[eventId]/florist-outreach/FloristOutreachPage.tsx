@@ -19,6 +19,7 @@ export default function FloristOutreachPage() {
   const [to, setTo] = useState('');
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
+  const [briefVariant, setBriefVariant] = useState<'request' | 'claimed'>('request');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
 
@@ -45,8 +46,10 @@ export default function FloristOutreachPage() {
     if (!confirm(`Send this outreach to ${to.trim()}?`)) return;
     setSending(true);
     try {
-      await sendAdminFloristOutreach(eventId, { to, subject, body });
-      toast.success('Outreach sent.', { description: 'The request brief was attached.' });
+      await sendAdminFloristOutreach(eventId, { to, subject, body, briefVariant });
+      toast.success('Outreach sent.', {
+        description: briefVariant === 'request' ? 'The PII-limited brief was attached.' : 'The full brief was attached.',
+      });
       router.push(`/dashboard/admin/events/${eventId}`);
     } catch (reason) {
       toast.error('Outreach could not be sent', { description: errorMessage(reason) });
@@ -93,12 +96,22 @@ export default function FloristOutreachPage() {
           </div>
         )}
 
-        {/* Worth saying out loud: the attachment is the request variant, so the
-            recipient's name, address and card message are not in it. */}
-        <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-          The request brief is attached automatically. It shows the area, date, brief and payment,
-          and deliberately withholds the recipient&apos;s name, address and card message until the
-          delivery is claimed.
+        <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+          <label className="block font-medium text-slate-900" htmlFor="brief-variant">Brief to attach</label>
+          <select
+            id="brief-variant"
+            value={briefVariant}
+            onChange={(event) => setBriefVariant(event.target.value as 'request' | 'claimed')}
+            className="mt-2 h-10 w-full max-w-md rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-900"
+          >
+            <option value="request">PII-limited brief (default)</option>
+            <option value="claimed">Full brief — includes recipient details</option>
+          </select>
+          <p className="mt-2">
+            {briefVariant === 'request'
+              ? 'Includes the area, date, brief and payment, but withholds the recipient name, address and card message.'
+              : 'Includes the recipient name, delivery address and card message. Only send this to a florist you have authorised to fulfil the delivery.'}
+          </p>
         </div>
 
         <EmailComposer

@@ -51,7 +51,16 @@ class AdminFloristOutreachView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        notification = send_florist_outreach(event, to=to, subject=subject, body=body)
+        brief_variant = (request.data.get('brief_variant') or 'request').strip()
+        if brief_variant not in ('request', 'claimed'):
+            return Response(
+                {'brief_variant': ['Choose either the PII-limited or full brief.']},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        notification = send_florist_outreach(
+            event, to=to, subject=subject, body=body, brief_variant=brief_variant,
+        )
         if notification.status != 'sent':
             return Response(
                 {'detail': 'Email could not be sent. The failed attempt was recorded.'},

@@ -98,7 +98,7 @@ def build_outreach_draft(event):
     }
 
 
-def send_florist_outreach(event, *, to, subject, body):
+def send_florist_outreach(event, *, to, subject, body, brief_variant='request'):
     """
     Sends the outreach and records exactly what went out.
 
@@ -118,8 +118,9 @@ def send_florist_outreach(event, *, to, subject, body):
         related_event=event,
     )
 
-    # The request variant: the reader has not committed to this delivery, so it
-    # carries no recipient name, address, or card message.
-    send_notification(notification, attachments=_brief_attachment(event, 'request'))
+    # The request variant is the safe default: its recipient has not committed
+    # to this delivery, so it carries no recipient name, address, or card
+    # message. Admin may deliberately choose the full brief when appropriate.
+    send_notification(notification, attachments=_brief_attachment(event, brief_variant))
     notification.refresh_from_db()
     return notification
