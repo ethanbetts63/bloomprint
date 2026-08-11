@@ -4,6 +4,9 @@ export interface DashboardAccount {
   status: 'pending' | 'active' | 'suspended';
   business_name: string;
   phone: string;
+  bsb: string;
+  account_number: string;
+  account_name: string;
   street_address: string;
   suburb: string;
   city: string;
@@ -122,6 +125,9 @@ export type DiscountValidationResult = DiscountCodeValidation;
 export interface BusinessDetailsUpdate {
   business_name?: string;
   phone?: string;
+  bsb?: string;
+  account_number?: string;
+  account_name?: string;
   street_address?: string;
   suburb?: string;
   city?: string;

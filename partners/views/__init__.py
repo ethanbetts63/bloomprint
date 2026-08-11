@@ -8,6 +8,8 @@ from .available_delivery_views import (
     AvailableDeliveryListView,
     AvailableDeliveryDetailView,
     ClaimDeliveryView,
+    AdminAvailableDeliveryListView,
+    AdminClaimDeliveryView,
 )
 from .stripe_connect_onboard_view import StripeConnectOnboardView
 from .stripe_connect_status_view import StripeConnectStatusView

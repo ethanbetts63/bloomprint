@@ -71,3 +71,24 @@ class TestBusinessAccountUpdateSerializer:
         assert serializer.is_valid()
         updated = serializer.save()
         assert updated.phone == '+15559876543'
+
+    def test_florist_can_optionally_save_bank_details(self):
+        partner = BusinessAccountFactory(account_type='florist', latitude=40.0, longitude=-74.0)
+        serializer = BusinessAccountUpdateSerializer(
+            instance=partner,
+            data={'bsb': '123-456', 'account_number': '12345678', 'account_name': 'Petal Co'},
+            partial=True,
+        )
+        assert serializer.is_valid(), serializer.errors
+        updated = serializer.save()
+        assert updated.bsb == '123-456'
+        assert updated.account_number == '12345678'
+        assert updated.account_name == 'Petal Co'
+
+    def test_affiliate_cannot_add_bank_details(self):
+        partner = BusinessAccountFactory(account_type='affiliate')
+        serializer = BusinessAccountUpdateSerializer(
+            instance=partner, data={'bsb': '123-456'}, partial=True,
+        )
+        assert not serializer.is_valid()
+        assert 'bsb' in serializer.errors

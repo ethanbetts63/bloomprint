@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { toast } from 'sonner';
-import { approveBusinessAccount, denyBusinessAccount, getAdminBusinessAccount, payCommission } from '@/api/admin';
+import { approveBusinessAccount, denyBusinessAccount, getAdminBusinessAccount, payCommission, updateAdminBusinessAccount } from '@/api/admin';
 import {
   AdminDetailError, AdminDetailField, AdminDetailGrid, AdminDetailLoading, AdminDetailPage,
   AdminDetailSection, AdminDetailTable, AdminInlineLink,
@@ -13,13 +13,35 @@ import {
   DashboardStatusPill, formatDashboardCurrency, formatDashboardDateLong,
 } from '@/components/dashboard/DashboardData';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import AvailableDeliveriesBoard from '@/components/dashboard/AvailableDeliveriesBoard';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { errorMessage } from '@/lib/errors';
 import type { AdminCommission } from '@/types/AdminCommission';
 import type { AdminBusinessAccount } from '@/types/AdminBusinessAccount';
 
 const ServiceAreaMap = dynamic(() => import('@/components/marketing/ServiceAreaMap'), { ssr: false });
+
+type AccountForm = {
+  business_name: string; phone: string; bsb: string; account_number: string; account_name: string;
+  first_name: string; last_name: string; email: string;
+  street_address: string; suburb: string; city: string; state: string; postcode: string; country: string;
+  latitude: string; longitude: string; service_radius_km: string;
+};
+
+function accountForm(account: AdminBusinessAccount): AccountForm {
+  return {
+    business_name: account.business_name, phone: account.phone, bsb: account.bsb,
+    account_number: account.account_number, account_name: account.account_name,
+    first_name: account.first_name, last_name: account.last_name, email: account.email,
+    street_address: account.street_address, suburb: account.suburb, city: account.city,
+    state: account.state, postcode: account.postcode, country: account.country,
+    latitude: account.latitude?.toString() ?? '', longitude: account.longitude?.toString() ?? '',
+    service_radius_km: account.service_radius_km.toString(),
+  };
+}
 
 export default function AdminBusinessAccountDetailPage() {
   const accountId = useParams<{ accountId: string }>().accountId;
@@ -29,6 +51,9 @@ export default function AdminBusinessAccountDetailPage() {
   const [submitting, setSubmitting] = useState(false);
   const [payingId, setPayingId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [savingDetails, setSavingDetails] = useState(false);
+  const [form, setForm] = useState<AccountForm | null>(null);
 
   useEffect(() => {
     if (!accountId) return;
@@ -76,12 +101,73 @@ export default function AdminBusinessAccountDetailPage() {
     account.street_address, account.suburb, account.city, account.state, account.postcode, account.country,
   ].filter(Boolean).join(', ');
 
-  const actions = account.status === 'pending' ? (
+  const editField = (name: keyof AccountForm, label: string, type = 'text') => (
+    <div className="space-y-2">
+      <Label htmlFor={name} className="text-slate-700">{label}</Label>
+      <Input
+        id={name}
+        type={type}
+        value={form?.[name] ?? ''}
+        onChange={(event) => setForm((current) => current ? { ...current, [name]: event.target.value } : current)}
+        className="border-slate-300 bg-white text-slate-950"
+      />
+    </div>
+  );
+
+  function startEditing() {
+    if (!account) return;
+    setForm(accountForm(account));
+    setEditing(true);
+  }
+
+  async function saveDetails() {
+    const accountToUpdate = account;
+    if (!form || !accountToUpdate) return;
+    const latitude = form.latitude === '' ? null : Number(form.latitude);
+    const longitude = form.longitude === '' ? null : Number(form.longitude);
+    const serviceRadius = Number(form.service_radius_km);
+    if ((latitude !== null && !Number.isFinite(latitude)) || (longitude !== null && !Number.isFinite(longitude)) || !Number.isInteger(serviceRadius) || serviceRadius < 1) {
+      toast.error('Enter valid coordinates and a whole-number service radius.');
+      return;
+    }
+
+    setSavingDetails(true);
+    try {
+      const updated = await updateAdminBusinessAccount(accountToUpdate.id, {
+        business_name: form.business_name, phone: form.phone,
+        first_name: form.first_name, last_name: form.last_name, email: form.email,
+        street_address: form.street_address, suburb: form.suburb, city: form.city,
+        state: form.state, postcode: form.postcode, country: form.country,
+        ...(isDelivery ? {
+          bsb: form.bsb, account_number: form.account_number, account_name: form.account_name,
+          latitude, longitude, service_radius_km: serviceRadius,
+        } : {}),
+      });
+      setAccount(updated);
+      setEditing(false);
+      setForm(null);
+      toast.success('Account details updated.');
+    } catch (reason) {
+      toast.error(errorMessage(reason) || 'Failed to update account details.');
+    } finally {
+      setSavingDetails(false);
+    }
+  }
+
+  const actions = (
     <>
-      <Button variant="outline" disabled={submitting} onClick={() => updateStatus('deny')}>Deny</Button>
-      <Button disabled={submitting} onClick={() => updateStatus('approve')}>Approve</Button>
+      {editing ? (
+        <>
+          <Button variant="outline" disabled={savingDetails} onClick={() => { setEditing(false); setForm(null); }}>Cancel</Button>
+          <Button disabled={savingDetails} onClick={saveDetails}>{savingDetails && <Spinner className="mr-2 h-4 w-4 text-current" />}Save details</Button>
+        </>
+      ) : <Button variant="outline" onClick={startEditing}>Edit details</Button>}
+      {account.status === 'pending' && <>
+        <Button variant="outline" disabled={submitting || savingDetails} onClick={() => updateStatus('deny')}>Deny</Button>
+        <Button disabled={submitting || savingDetails} onClick={() => updateStatus('approve')}>Approve</Button>
+      </>}
     </>
-  ) : undefined;
+  );
 
   return (
     <AdminDetailPage
@@ -92,7 +178,17 @@ export default function AdminBusinessAccountDetailPage() {
       actions={actions}
     >
       <AdminDetailSection title={isDelivery ? 'Florist details' : 'Affiliate details'} className={isDelivery ? undefined : 'xl:col-span-2'}>
-        <AdminDetailGrid>
+        {editing ? <AdminDetailGrid>
+          {editField('business_name', 'Business name')}
+          <AdminDetailField label="Account type" value={isDelivery ? 'Florist' : 'Affiliate'} />
+          {editField('first_name', 'First name')}{editField('last_name', 'Last name')}
+          {editField('email', 'Email', 'email')}{editField('phone', 'Phone', 'tel')}
+          <AdminDetailField label="Status" value={<DashboardStatusPill status={account.status} />} />
+          <AdminDetailField label="Stripe onboarding" value={<DashboardStatusPill status={account.stripe_connect_onboarding_complete ? 'complete' : 'incomplete'} />} />
+          {isDelivery && editField('bsb', 'BSB')}
+          {isDelivery && editField('account_number', 'Account number')}
+          {isDelivery && <div className="sm:col-span-2">{editField('account_name', 'Account name')}</div>}
+        </AdminDetailGrid> : <AdminDetailGrid>
           <AdminDetailField label="Business name" value={account.business_name} />
           <AdminDetailField label="Account type" value={isDelivery ? 'Florist' : 'Affiliate'} />
           <AdminDetailField label="First name" value={account.first_name} />
@@ -100,16 +196,24 @@ export default function AdminBusinessAccountDetailPage() {
           <AdminDetailField label="Email" value={account.email} />
           <AdminDetailField label="Phone" value={account.phone} />
           <AdminDetailField label="Status" value={<DashboardStatusPill status={account.status} />} />
-          <AdminDetailField
-            label="Stripe onboarding"
-            value={<DashboardStatusPill status={account.stripe_connect_onboarding_complete ? 'complete' : 'incomplete'} />}
-          />
-        </AdminDetailGrid>
+          <AdminDetailField label="Stripe onboarding" value={<DashboardStatusPill status={account.stripe_connect_onboarding_complete ? 'complete' : 'incomplete'} />} />
+          {isDelivery && <AdminDetailField label="BSB" value={account.bsb} mono />}
+          {isDelivery && <AdminDetailField label="Account number" value={account.account_number} mono />}
+          {isDelivery && <AdminDetailField label="Account name" value={account.account_name} />}
+        </AdminDetailGrid>}
       </AdminDetailSection>
 
       {isDelivery && (
         <AdminDetailSection title="Service area">
-          <AdminDetailGrid>
+          {editing ? <AdminDetailGrid>
+            <div className="sm:col-span-2">{editField('street_address', 'Street address')}</div>
+            {editField('suburb', 'Suburb')}{editField('city', 'City')}
+            {editField('state', 'State')}{editField('postcode', 'Postcode')}
+            <div className="sm:col-span-2">{editField('country', 'Country')}</div>
+            {editField('service_radius_km', 'Service radius (km)', 'number')}
+            <div />
+            {editField('latitude', 'Latitude', 'number')}{editField('longitude', 'Longitude', 'number')}
+          </AdminDetailGrid> : <AdminDetailGrid>
             <AdminDetailField label="Address" value={address} wide />
             <AdminDetailField label="Service radius" value={`${account.service_radius_km} km`} />
             <AdminDetailField
@@ -119,7 +223,7 @@ export default function AdminBusinessAccountDetailPage() {
                 : null}
               mono
             />
-          </AdminDetailGrid>
+          </AdminDetailGrid>}
           {account.latitude != null && account.longitude != null && (
             <div className="mt-5">
               <ServiceAreaMap
@@ -171,6 +275,12 @@ export default function AdminBusinessAccountDetailPage() {
           ))}
         </AdminDetailTable>
       </AdminDetailSection>
+
+      {isDelivery && (
+        <div className="xl:col-span-2">
+          <AvailableDeliveriesBoard adminAccountId={account.id} />
+        </div>
+      )}
     </AdminDetailPage>
   );
 }

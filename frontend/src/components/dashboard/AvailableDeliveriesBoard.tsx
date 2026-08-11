@@ -6,6 +6,7 @@ import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { claimDelivery, getAvailableDeliveries } from '@/api/businessAccounts';
+import { claimAdminAvailableDelivery, getAdminAvailableDeliveries } from '@/api/admin';
 import { formatDashboardCurrency, formatDashboardDateOnly } from '@/components/dashboard/DashboardData';
 import DashboardOverviewTable from '@/components/dashboard/DashboardOverviewTable';
 import { Button } from '@/components/ui/button';
@@ -23,7 +24,14 @@ function areaLabel(delivery: AvailableDelivery): string {
  * sees the same rows, so a claim can lose the race — a 409 is an ordinary
  * outcome, not a failure, and the row simply disappears on refresh.
  */
-export default function AvailableDeliveriesBoard({ onClaimed }: { onClaimed?: () => void }) {
+export default function AvailableDeliveriesBoard({
+  onClaimed,
+  adminAccountId,
+}: {
+  onClaimed?: () => void;
+  /** When set, show and claim deliveries on behalf of this florist. */
+  adminAccountId?: number;
+}) {
   const router = useRouter();
   const [deliveries, setDeliveries] = useState<AvailableDelivery[]>([]);
   const [count, setCount] = useState(0);
@@ -33,7 +41,9 @@ export default function AvailableDeliveriesBoard({ onClaimed }: { onClaimed?: ()
 
   const load = useCallback(async () => {
     try {
-      const page = await getAvailableDeliveries({ pageSize: 10 });
+      const page = adminAccountId === undefined
+        ? await getAvailableDeliveries({ pageSize: 10 })
+        : await getAdminAvailableDeliveries(adminAccountId, { pageSize: 10 });
       setDeliveries(page.results);
       setCount(page.count);
       setError(null);
@@ -42,7 +52,7 @@ export default function AvailableDeliveriesBoard({ onClaimed }: { onClaimed?: ()
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [adminAccountId]);
 
   useEffect(() => {
     void load();
@@ -51,14 +61,22 @@ export default function AvailableDeliveriesBoard({ onClaimed }: { onClaimed?: ()
   const handleClaim = async (delivery: AvailableDelivery) => {
     setClaimingId(delivery.id);
     try {
-      const result = await claimDelivery(delivery.id);
-      toast.success(`${result.reference} is yours`, {
-        description: 'Full delivery details are now on your deliveries list.',
-      });
+      const result = adminAccountId === undefined
+        ? await claimDelivery(delivery.id)
+        : await claimAdminAvailableDelivery(adminAccountId, delivery.id);
+      toast.success(
+        adminAccountId === undefined ? `${result.reference} is yours` : `${result.reference} claimed for this florist`,
+        {
+          description: adminAccountId === undefined
+            ? 'Full delivery details are now on your deliveries list.'
+            : 'The florist has been sent the full delivery brief.',
+        },
+      );
       onClaimed?.();
       await load();
     } catch (reason) {
-      if (reason instanceof ApiError && reason.status === 409) {
+      if ((reason instanceof ApiError && reason.status === 409)
+        || (reason instanceof Error && 'status' in reason && reason.status === 409)) {
         toast.info('Already claimed', { description: 'Another florist got there first.' });
         await load();
       } else {
@@ -98,8 +116,8 @@ export default function AvailableDeliveriesBoard({ onClaimed }: { onClaimed?: ()
       {deliveries.map((delivery) => (
         <TableRow
           key={delivery.id}
-          className="cursor-pointer border-slate-100 hover:bg-slate-50"
-          onClick={() => router.push(`/dashboard/florist/available/${delivery.id}`)}
+          className={adminAccountId === undefined ? 'cursor-pointer border-slate-100 hover:bg-slate-50' : 'border-slate-100'}
+          onClick={adminAccountId === undefined ? () => router.push(`/dashboard/florist/available/${delivery.id}`) : undefined}
         >
           <TableCell className="font-medium text-slate-900">{delivery.reference}</TableCell>
           <TableCell className="text-slate-700">{areaLabel(delivery)}</TableCell>

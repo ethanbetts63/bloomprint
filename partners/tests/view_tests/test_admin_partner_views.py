@@ -39,6 +39,52 @@ class TestAdminBusinessAccountDetailView:
         assert response.data['stripe_connect_account_id'] == 'acct_abc'
         assert response.data['stripe_connect_onboarding_complete'] is True
 
+    def test_florist_detail_view_includes_bank_details(self):
+        partner = BusinessAccountFactory(
+            account_type='florist',
+            bsb='123-456',
+            account_number='12345678',
+            account_name='Petal Co',
+        )
+
+        response = self.client.get(f'/api/business-accounts/admin/{partner.id}/')
+
+        assert response.status_code == 200
+        assert response.data['bsb'] == '123-456'
+        assert response.data['account_number'] == '12345678'
+        assert response.data['account_name'] == 'Petal Co'
+
+    def test_admin_can_update_florist_details(self):
+        partner = BusinessAccountFactory(
+            account_type='florist', latitude=-31.95, longitude=115.86,
+        )
+
+        response = self.client.patch(
+            f'/api/business-accounts/admin/{partner.id}/',
+            {
+                'business_name': 'Updated Petals',
+                'phone': '08 1234 5678',
+                'bsb': '123-456',
+                'account_number': '12345678',
+                'account_name': 'Updated Petals Pty Ltd',
+                'first_name': 'Ada',
+                'last_name': 'Bloom',
+                'email': 'ada@example.com',
+            },
+            format='json',
+        )
+
+        assert response.status_code == 200
+        partner.refresh_from_db()
+        partner.user.refresh_from_db()
+        assert partner.business_name == 'Updated Petals'
+        assert partner.bsb == '123-456'
+        assert partner.account_number == '12345678'
+        assert partner.account_name == 'Updated Petals Pty Ltd'
+        assert partner.user.first_name == 'Ada'
+        assert partner.user.last_name == 'Bloom'
+        assert partner.user.email == 'ada@example.com'
+
     def test_detail_view_requires_admin(self):
         non_admin = UserFactory(is_staff=False)
         client = APIClient()

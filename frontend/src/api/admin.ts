@@ -1,7 +1,7 @@
 import { authedFetch } from './apiClient';
 import type { AdminDashboard } from '@/types/AdminDashboard';
 import type { AdminEvent } from '@/types/AdminEvent';
-import type { AdminBusinessAccount } from '@/types/AdminBusinessAccount';
+import type { AdminBusinessAccount, AdminBusinessAccountUpdate } from '@/types/AdminBusinessAccount';
 import type { AdminEventListItem } from '@/types/AdminEventListItem';
 import type { AdminOrder } from '@/types/AdminOrder';
 import type { AdminOrderDetail } from '@/types/AdminOrderDetail';
@@ -14,6 +14,7 @@ import type { CommissionActionResult } from '@/types/CommissionActionResult';
 import type { FloristOutreachDraft } from '@/types/FloristOutreachDraft';
 import type { AdminMessage, AdminMessageDetail } from '@/types/AdminMessage';
 import type { Paginated } from '@/types/Paginated';
+import type { AvailableDelivery, ClaimDeliveryResult } from '@/types/BusinessAccount';
 
 export type { PayCommissionResult, CommissionActionResult };
 
@@ -112,6 +113,51 @@ export async function getAdminBusinessAccounts(params: AdminListParams = {}): Pr
 export async function getAdminBusinessAccount(id: number): Promise<AdminBusinessAccount> {
   const res = await authedFetch(`/api/business-accounts/admin/${id}/`);
   if (!res.ok) throw new Error('Failed to fetch florist or affiliate');
+  return res.json();
+}
+
+export async function updateAdminBusinessAccount(
+  id: number,
+  data: AdminBusinessAccountUpdate,
+): Promise<AdminBusinessAccount> {
+  const res = await authedFetch(`/api/business-accounts/admin/${id}/`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw Object.assign(new Error(body.detail || 'Failed to update business account'), { data: body });
+  }
+  return res.json();
+}
+
+/** The deliveries this florist can see and claim from their own dashboard. */
+export async function getAdminAvailableDeliveries(
+  accountId: number,
+  params: { page?: number; pageSize?: number } = {},
+): Promise<Paginated<AvailableDelivery>> {
+  const query = new URLSearchParams();
+  if (params.page) query.set('page', String(params.page));
+  if (params.pageSize) query.set('page_size', String(params.pageSize));
+  const suffix = query.toString() ? `?${query.toString()}` : '';
+  const res = await authedFetch(`/api/business-accounts/admin/${accountId}/available-deliveries/${suffix}`);
+  if (!res.ok) throw new Error('Failed to fetch the florist\'s available deliveries');
+  return res.json();
+}
+
+/** Claim an eligible delivery for the specified florist. */
+export async function claimAdminAvailableDelivery(
+  accountId: number,
+  eventId: number,
+): Promise<ClaimDeliveryResult> {
+  const res = await authedFetch(
+    `/api/business-accounts/admin/${accountId}/available-deliveries/${eventId}/claim/`,
+    { method: 'POST' },
+  );
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw Object.assign(new Error(data.detail || 'Failed to claim delivery'), { status: res.status });
+  }
   return res.json();
 }
 
@@ -244,5 +290,18 @@ export async function getAdminMessages(params: {
 export async function getAdminMessage(id: number): Promise<AdminMessageDetail> {
   const res = await authedFetch(`/api/data/admin/messages/${id}/`);
   if (!res.ok) throw new Error('Failed to load message');
+  return res.json();
+}
+
+/** Send a staff-written email that is not linked to an order or delivery. */
+export async function sendAdminMessage(payload: { to: string; subject: string; body: string }): Promise<{ detail: string }> {
+  const res = await authedFetch('/api/data/admin/messages/compose/', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.detail || data.to?.[0] || 'Email could not be sent');
+  }
   return res.json();
 }

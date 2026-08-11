@@ -38,6 +38,7 @@ class BusinessAccountDashboardSerializer(serializers.ModelSerializer):
         model = BusinessAccount
         fields = [
             'id', 'account_type', 'status', 'business_name', 'phone',
+            'bsb', 'account_number', 'account_name',
             'commission_summary', 'discount_code_summary',
             'street_address', 'suburb', 'city', 'state', 'postcode', 'country',
             'latitude', 'longitude', 'service_radius_km',

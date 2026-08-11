@@ -10,6 +10,8 @@ from partners.views import (
     AvailableDeliveryListView,
     AvailableDeliveryDetailView,
     ClaimDeliveryView,
+    AdminAvailableDeliveryListView,
+    AdminClaimDeliveryView,
     StripeConnectOnboardView,
     StripeConnectStatusView,
     PayoutListView,
@@ -51,6 +53,8 @@ urlpatterns = [
     path('admin/<int:pk>/approve/', AdminApproveBusinessAccountView.as_view(), name='admin-approve-business-account'),
     path('admin/<int:pk>/deny/', AdminDenyBusinessAccountView.as_view(), name='admin-deny-business-account'),
     path('admin/<int:pk>/commissions/<int:commission_id>/pay/', AdminPayCommissionView.as_view(), name='admin-pay-commission'),
+    path('admin/<int:account_id>/available-deliveries/', AdminAvailableDeliveryListView.as_view(), name='admin-available-delivery-list'),
+    path('admin/<int:account_id>/available-deliveries/<int:event_id>/claim/', AdminClaimDeliveryView.as_view(), name='admin-claim-delivery'),
 
     path('stripe-connect/onboard/', StripeConnectOnboardView.as_view(), name='stripe-connect-onboard'),
     path('stripe-connect/status/', StripeConnectStatusView.as_view(), name='stripe-connect-status'),

@@ -7,7 +7,10 @@ from django.db.models import Q
 from config.pagination import DashboardPagination
 from partners.models import BusinessAccount
 from partners.serializers.admin_business_account_serializer import AdminBusinessAccountSerializer
-from partners.serializers.admin_business_account_detail_serializer import AdminBusinessAccountDetailSerializer
+from partners.serializers.admin_business_account_detail_serializer import (
+    AdminBusinessAccountDetailSerializer,
+    AdminBusinessAccountUpdateSerializer,
+)
 
 
 ACCOUNT_ORDERING_MAP = {
@@ -58,6 +61,23 @@ class AdminBusinessAccountDetailView(APIView):
             )
         except BusinessAccount.DoesNotExist:
             return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(AdminBusinessAccountDetailSerializer(account).data)
+
+    def patch(self, request, pk):
+        try:
+            account = BusinessAccount.objects.select_related('user').get(pk=pk)
+        except BusinessAccount.DoesNotExist:
+            return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = AdminBusinessAccountUpdateSerializer(account, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        account = serializer.save()
+        account = (
+            BusinessAccount.objects
+            .select_related('user')
+            .prefetch_related('commissions')
+            .get(pk=account.pk)
+        )
         return Response(AdminBusinessAccountDetailSerializer(account).data)
 
 

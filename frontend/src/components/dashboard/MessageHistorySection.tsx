@@ -15,6 +15,7 @@ export const MESSAGE_KIND_LABEL: Record<string, string> = {
   admin: 'To admin',
   business_account: 'To partner',
   customer: 'To customer',
+  manual: 'Manual email',
   florist_prospect: 'Florist outreach',
 };
 

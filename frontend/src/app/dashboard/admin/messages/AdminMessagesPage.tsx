@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Search } from 'lucide-react';
+import { PenLine, Search } from 'lucide-react';
 
 import { getAdminMessages } from '@/api/admin';
 import { DashboardStatusPill, formatDashboardDateLong } from '@/components/dashboard/DashboardData';
@@ -29,6 +29,7 @@ const KIND_OPTIONS = [
   { value: 'florist_prospect', label: 'Florist outreach' },
   { value: 'business_account', label: 'Partners' },
   { value: 'customer', label: 'Customers' },
+  { value: 'manual', label: 'Manual emails' },
   { value: 'admin', label: 'Admin' },
 ];
 
@@ -99,6 +100,11 @@ export default function AdminMessagesPage() {
       {error && <p className="px-4 pt-4 text-sm text-red-600 md:px-6">{error}</p>}
       <DashboardDataTable
         title="Messages"
+        titleAction={(
+          <Button onClick={() => router.push('/dashboard/admin/messages/compose')}>
+            <PenLine className="mr-1.5 h-4 w-4" /> Compose
+          </Button>
+        )}
         filterSummary={
           relatedEvent
             ? `Everything sent about delivery #${relatedEvent}`

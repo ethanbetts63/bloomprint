@@ -9,6 +9,7 @@ from .views.admin_event_detail_view import AdminEventDetailView
 from .views.admin_event_florist_brief_view import AdminEventFloristBriefView
 from .views.admin_mark_delivered_view import AdminMarkDeliveredView
 from .views.admin_florist_outreach_view import AdminFloristOutreachView
+from .views.admin_compose_message_view import AdminComposeMessageView
 from .views.admin_notification_views import AdminNotificationListView, AdminNotificationDetailView
 from .views.admin_order_list_view import AdminOrderListView
 from .views.admin_order_detail_view import AdminOrderDetailView
@@ -32,6 +33,7 @@ urlpatterns = [
     path('admin/events/<int:pk>/florist-outreach/', AdminFloristOutreachView.as_view(), name='admin-florist-outreach'),
 
     path('admin/messages/', AdminNotificationListView.as_view(), name='admin-message-list'),
+    path('admin/messages/compose/', AdminComposeMessageView.as_view(), name='admin-compose-message'),
     path('admin/messages/<int:pk>/', AdminNotificationDetailView.as_view(), name='admin-message-detail'),
     path('admin/users/', AdminUserListView.as_view(), name='admin-user-list'),
     path('admin/users/<int:pk>/', AdminUserDetailView.as_view(), name='admin-user-detail'),

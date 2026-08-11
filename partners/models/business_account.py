@@ -31,6 +31,11 @@ class BusinessAccount(models.Model):
     )
     business_name = models.CharField(max_length=255, blank=True)
     phone = models.CharField(max_length=30, blank=True)
+    # These are collected after registration, when a florist is ready to
+    # receive manual payouts. They intentionally remain optional.
+    bsb = models.CharField(max_length=7, blank=True)
+    account_number = models.CharField(max_length=20, blank=True)
+    account_name = models.CharField(max_length=255, blank=True)
 
     street_address = models.CharField(max_length=255, blank=True)
     suburb = models.CharField(max_length=100, blank=True)

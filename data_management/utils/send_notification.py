@@ -24,7 +24,7 @@ def resolve_recipient(notification):
         phone = getattr(account, 'phone', None)
         return email, phone
 
-    if rtype in ('customer', 'florist_prospect'):
+    if rtype in ('customer', 'florist_prospect', 'manual'):
         return notification.recipient_email, None
 
     return None, None

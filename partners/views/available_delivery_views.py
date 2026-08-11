@@ -3,7 +3,7 @@ import logging
 from django.db import transaction
 from django.utils import timezone
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -93,11 +93,8 @@ class ClaimDeliveryView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, event_id):
-        florist = _florist_or_none(request.user)
-        if florist is None:
-            return Response({'detail': 'No florist account was found.'}, status=status.HTTP_404_NOT_FOUND)
-
+    @staticmethod
+    def claim_for_florist(florist, event_id, *, assigned_by_admin=False):
         if florist.status != 'active':
             return Response(
                 {'detail': 'Your account is not yet approved to claim deliveries.'},
@@ -151,7 +148,7 @@ class ClaimDeliveryView(APIView):
             # Admin still wants a nudge on the day, to watch that the florist
             # actually delivers.
             create_admin_delivery_day_notifications(event)
-            notify_florist_of_claim(delivery_request)
+            notify_florist_of_claim(delivery_request, assigned_by_admin=assigned_by_admin)
         except Exception:
             logger.exception(
                 "Claim %s succeeded but its follow-up notifications failed.", delivery_request.pk
@@ -165,3 +162,39 @@ class ClaimDeliveryView(APIView):
             },
             status=status.HTTP_201_CREATED,
         )
+
+    def post(self, request, event_id):
+        florist = _florist_or_none(request.user)
+        if florist is None:
+            return Response({'detail': 'No florist account was found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        return self.claim_for_florist(florist, event_id)
+
+
+class AdminAvailableDeliveryListView(APIView):
+    """An admin's view of the same claim board a particular florist sees."""
+    permission_classes = [IsAdminUser]
+
+    def get(self, request, account_id):
+        try:
+            florist = BusinessAccount.objects.get(pk=account_id, account_type='florist')
+        except BusinessAccount.DoesNotExist:
+            return Response({'detail': 'Florist not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        events = claimable_events_for_florist(florist) if florist.status == 'active' else []
+        paginator = DashboardPagination()
+        page = paginator.paginate_queryset(events, request, view=self)
+        return paginator.get_paginated_response(AvailableDeliverySerializer(page, many=True).data)
+
+
+class AdminClaimDeliveryView(ClaimDeliveryView):
+    """Claims a delivery for a florist, using the same guarded claim path."""
+    permission_classes = [IsAdminUser]
+
+    def post(self, request, account_id, event_id):
+        try:
+            florist = BusinessAccount.objects.get(pk=account_id, account_type='florist')
+        except BusinessAccount.DoesNotExist:
+            return Response({'detail': 'Florist not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        return self.claim_for_florist(florist, event_id, assigned_by_admin=True)

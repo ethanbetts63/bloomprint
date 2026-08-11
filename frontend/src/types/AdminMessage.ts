@@ -6,7 +6,7 @@
  */
 export interface AdminMessage {
   id: number;
-  recipient_type: 'admin' | 'business_account' | 'customer' | 'florist_prospect';
+  recipient_type: 'admin' | 'business_account' | 'customer' | 'florist_prospect' | 'manual';
   /** Resolved address or number — the row itself may only hold an account FK. */
   to: string;
   recipient_name: string | null;

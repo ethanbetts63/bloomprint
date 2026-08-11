@@ -6,6 +6,8 @@ class Notification(models.Model):
         ('admin', 'Admin'),
         ('business_account', 'Business account'),
         ('customer', 'Customer'),
+        # A staff-written email with no linked delivery or existing account.
+        ('manual', 'Manual email'),
         # A florist who is not on the platform yet, emailed by hand from the
         # admin event page to pitch them a delivery. There is no account to
         # point at, so the address is all we have.
