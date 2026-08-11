@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { toast } from 'sonner';
 import { approveBusinessAccount, denyBusinessAccount, getAdminBusinessAccount, payCommission } from '@/api/admin';
 import {
@@ -17,6 +18,8 @@ import { TableCell, TableRow } from '@/components/ui/table';
 import { errorMessage } from '@/lib/errors';
 import type { AdminCommission } from '@/types/AdminCommission';
 import type { AdminBusinessAccount } from '@/types/AdminBusinessAccount';
+
+const ServiceAreaMap = dynamic(() => import('@/components/marketing/ServiceAreaMap'), { ssr: false });
 
 export default function AdminBusinessAccountDetailPage() {
   const accountId = useParams<{ accountId: string }>().accountId;
@@ -117,6 +120,18 @@ export default function AdminBusinessAccountDetailPage() {
               mono
             />
           </AdminDetailGrid>
+          {account.latitude != null && account.longitude != null && (
+            <div className="mt-5">
+              <ServiceAreaMap
+                latitude={account.latitude}
+                longitude={account.longitude}
+                radiusKm={account.service_radius_km}
+                onLocationChange={() => undefined}
+                onRadiusChange={() => undefined}
+                readOnly
+              />
+            </div>
+          )}
         </AdminDetailSection>
       )}
 

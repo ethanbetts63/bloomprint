@@ -48,10 +48,11 @@ class TestAdminEventFloristBriefView:
         assert 'DELIVERY #' not in text.upper()
         assert f'Order #{order.pk}' not in text
 
-    def test_shows_the_florist_money_not_just_the_customer_budget(self):
+    def test_shows_the_florist_money_not_just_the_customer_budget(self, settings):
         from pypdf import PdfReader
         from io import BytesIO
 
+        settings.FLORIST_COMMISSION_RATE = '0.10'
         order = OrderFactory(budget=Decimal('140.00'))
         event = EventFactory(order=order)
         response = self.client.get(self._url(event.id))

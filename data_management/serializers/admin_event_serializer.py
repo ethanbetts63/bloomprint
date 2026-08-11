@@ -31,12 +31,20 @@ class AdminEventSerializer(serializers.ModelSerializer):
     customer_last_name = serializers.CharField(source='order.customer_last_name')
     customer_email = serializers.EmailField(source='order.customer_email')
 
+    # The same breakdown the brief prints and the florist sees, from the same
+    # source, so admin cannot be looking at different figures to the florist.
+    money = serializers.SerializerMethodField()
+
+    def get_money(self, obj):
+        return {key: str(value) for key, value in obj.money_breakdown().items()}
+
     class Meta:
         model = Event
         fields = [
             'id', 'reference', 'delivery_date', 'status', 'message',
             'ordered_at', 'ordering_evidence_text',
             'delivered_at', 'delivery_evidence_text',
+            'money',
             'florist_budget', 'platform_commission', 'delivery_fee',
             'order_id', 'order_type', 'budget', 'total_amount', 'frequency',
             'start_date', 'preferred_delivery_time', 'delivery_notes',

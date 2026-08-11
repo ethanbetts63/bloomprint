@@ -45,8 +45,10 @@ class TestAdminMarkDeliveredView:
 
         commission = Commission.objects.get(event=event, commission_type='fulfillment')
         assert commission.business_account == partner
-        # $120 budget, 10% commission, delivery included above the threshold.
-        assert commission.amount == Decimal('108.00')
+        # The payable is the florist's snapshotted total, whatever the rate was
+        # when the event was priced — never the customer's budget.
+        assert commission.amount == event.money_breakdown()['florist_total']
+        assert commission.amount != plan.budget
         assert commission.amount != plan.budget
         assert commission.status == 'pending'
 

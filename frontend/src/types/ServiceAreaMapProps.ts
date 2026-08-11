@@ -4,4 +4,6 @@ export interface ServiceAreaMapProps {
   radiusKm: number;
   onLocationChange: (lat: number, lng: number) => void;
   onRadiusChange: (radius: number) => void;
+  /** Show the selected area without allowing changes. */
+  readOnly?: boolean;
 }

@@ -1,3 +1,5 @@
+import type { FloristMoneyBreakdown } from './BusinessAccount';
+
 export interface AdminEvent {
   id: number;
   delivery_date: string;
@@ -9,6 +11,8 @@ export interface AdminEvent {
   delivery_evidence_text: string | null;
   // Order fields
   reference: string;
+  /** The florist-facing money split, from Event.money_breakdown(). */
+  money: FloristMoneyBreakdown;
   florist_budget: string | null;
   platform_commission: string | null;
   delivery_fee: string | null;

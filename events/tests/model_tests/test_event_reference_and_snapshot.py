@@ -58,7 +58,20 @@ class TestEventReference:
         assert generate_unique_reference(Event) == 'BP-BBBBBB'
 
 
+@pytest.fixture
+def rate_10(settings):
+    """
+    Pin the rate at 10%.
+
+    These assert the snapshot holds specific figures, so they must not move when
+    the business rate is changed — the point being tested is that the snapshot
+    freezes, not what it freezes to.
+    """
+    settings.FLORIST_COMMISSION_RATE = '0.10'
+
+
 @pytest.mark.django_db
+@pytest.mark.usefixtures('rate_10')
 class TestEventMoneySnapshot:
     def test_snapshots_the_florist_money_at_creation(self):
         order = OrderFactory(budget=Decimal('140.00'), status='active')

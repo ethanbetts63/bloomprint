@@ -35,8 +35,8 @@ MIN_DAYS_BEFORE_CREATE = 3
 MIN_DAYS_BEFORE_EDIT = 7
 SUBSCRIPTION_CHARGE_LEAD_DAYS = 7
 MIN_BUDGET = 65
-DELIVERY_INCLUDED_THRESHOLD = 65
-DELIVERY_FEE = 20
+DELIVERY_INCLUDED_THRESHOLD = 100
+DELIVERY_FEE = 18
 
 # Bloomprint's cut of the bouquet budget. The delivery fee is not commissioned —
 # it passes to the florist in full. Quoted to florists as a flat 5%.

@@ -1,7 +1,7 @@
 
 const briefRows = [
   { label: 'Occasion', value: 'Birthday — for their mum' },
-  { label: 'Budget', value: '$90 — you receive $81.00, delivery included, prepaid' },
+  { label: 'Budget', value: '$100 — you receive $95.00, delivery included, prepaid' },
   { label: 'Preferences', value: '"Loves pink and soft pastels. No lilies — allergies."', italic: true },
   { label: 'Delivery', value: 'Friday, 12 June — address and card message included' },
 ];

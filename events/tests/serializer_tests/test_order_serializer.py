@@ -19,5 +19,5 @@ class TestOrderSerializerBudgetValidation:
 
         assert serializer.validate_budget(Decimal("65.00")) == Decimal("65.00")
 
-    def test_delivery_included_threshold_matches_minimum(self):
-        assert settings.DELIVERY_INCLUDED_THRESHOLD == settings.MIN_BUDGET == 65
+    def test_delivery_included_threshold_is_configured(self):
+        assert settings.DELIVERY_INCLUDED_THRESHOLD == 100

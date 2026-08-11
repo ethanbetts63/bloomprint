@@ -19,7 +19,7 @@ export function minDeliveryDate(isEdit = false): string {
  * DELIVERY_INCLUDED_THRESHOLD in settings.py) and returns it on the order as
  * `delivery_fee` — always price the checkout from that, never from these.
  */
-export const DELIVERY_INCLUDED_THRESHOLD = 65;
-export const DELIVERY_FEE = 20;
+export const DELIVERY_INCLUDED_THRESHOLD = 100;
+export const DELIVERY_FEE = 18;
 
 export const MS_PER_DAY = 86400000;

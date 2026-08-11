@@ -72,6 +72,9 @@ export default function AdminEventDetailPage() {
     event.recipient_street_address, event.recipient_suburb, event.recipient_city,
     event.recipient_state, event.recipient_postcode, event.recipient_country,
   ].filter(Boolean).join(', ');
+  // Snapshotted at creation, so this is what the florist was actually promised
+  // rather than what today's rate would produce.
+  const money = event.money;
   const actions = (
     <div className="flex flex-wrap items-center gap-2">
       <Button variant="outline" onClick={() => downloadBrief(event.id)} disabled={briefLoading}>
@@ -134,6 +137,29 @@ export default function AdminEventDetailPage() {
           <AdminDetailField
             label="Order"
             value={<AdminInlineLink href={`/dashboard/admin/orders/${event.order_id}`}>View order #{event.order_id}</AdminInlineLink>}
+          />
+        </AdminDetailGrid>
+      </AdminDetailSection>
+
+      <AdminDetailSection title="Money">
+        <AdminDetailGrid>
+          <AdminDetailField label="Customer's budget" value={formatDashboardCurrency(money.budget)} />
+          <AdminDetailField
+            label={`Our commission (${money.commission_rate})`}
+            value={formatDashboardCurrency(money.platform_commission)}
+          />
+          <AdminDetailField label="Florist's flower budget" value={formatDashboardCurrency(money.florist_budget)} />
+          {Number(money.delivery_fee) > 0 ? (
+            <AdminDetailField
+              label="Delivery fee (to florist in full)"
+              value={formatDashboardCurrency(money.delivery_fee)}
+            />
+          ) : (
+            <AdminDetailField label="Delivery" value="Included in the budget" />
+          )}
+          <AdminDetailField
+            label="Florist payout"
+            value={<span className="font-semibold">{formatDashboardCurrency(money.florist_total)}</span>}
           />
         </AdminDetailGrid>
       </AdminDetailSection>
