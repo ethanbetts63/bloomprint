@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 
 import { sendAdminMessage } from '@/api/admin';
 import EmailComposer from '@/components/dashboard/EmailComposer';
+import { Button } from '@/components/ui/button';
 import { errorMessage } from '@/lib/errors';
 
 /** A blank version of the florist-outreach composer, with no attached brief. */
@@ -69,7 +70,23 @@ export default function AdminComposeMessagePage() {
           onSend={send}
         />
 
-        <div className="mt-4 border-t border-slate-100 pt-4">
+        <section className="mt-4 rounded-lg border border-slate-200 bg-slate-50/70 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="font-medium text-slate-900">Attachments</h2>
+              <p className="mt-0.5 text-xs text-slate-500">Up to 10 files; 20 MB each and 24 MB total.</p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={sending}
+              className="border-slate-300 bg-white text-slate-800 hover:bg-slate-100 hover:text-slate-950"
+            >
+              <Paperclip className="h-4 w-4" /> Attach files
+            </Button>
+          </div>
           <input
             ref={fileInputRef}
             type="file"
@@ -80,34 +97,31 @@ export default function AdminComposeMessagePage() {
               event.target.value = '';
             }}
           />
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={sending}
-            className="inline-flex items-center gap-2 text-sm font-medium text-slate-700 hover:text-slate-950 disabled:opacity-50"
-          >
-            <Paperclip className="h-4 w-4" /> Attach files
-          </button>
-          <p className="mt-1 text-xs text-slate-500">Up to 10 files; 20 MB each and 24 MB total.</p>
           {attachments.length > 0 && (
-            <ul className="mt-3 space-y-2">
+            <ul className="mt-4 space-y-2 border-t border-slate-200 pt-3">
               {attachments.map((file, index) => (
-                <li key={`${file.name}-${file.lastModified}-${index}`} className="flex items-center justify-between gap-3 rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-700">
-                  <span className="min-w-0 truncate">{file.name} <span className="text-slate-500">({(file.size / 1024 / 1024).toFixed(1)} MB)</span></span>
-                  <button
+                <li key={`${file.name}-${file.lastModified}-${index}`} className="flex items-center justify-between gap-3 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-xs">
+                  <span className="flex min-w-0 items-center gap-2 truncate">
+                    <Paperclip className="h-4 w-4 shrink-0 text-slate-500" />
+                    <span className="truncate">{file.name} <span className="text-slate-500">({(file.size / 1024 / 1024).toFixed(1)} MB)</span></span>
+                  </span>
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="icon-sm"
                     onClick={() => setAttachments((current) => current.filter((_, currentIndex) => currentIndex !== index))}
                     disabled={sending}
                     aria-label={`Remove ${file.name}`}
-                    className="shrink-0 text-slate-500 hover:text-slate-950 disabled:opacity-50"
+                    className="shrink-0 text-slate-500 hover:bg-slate-100 hover:text-slate-950"
                   >
                     <X className="h-4 w-4" />
-                  </button>
+                  </Button>
                 </li>
               ))}
             </ul>
           )}
-        </div>
+          {attachments.length === 0 && <p className="mt-4 border-t border-slate-200 pt-3 text-sm text-slate-500">No files attached.</p>}
+        </section>
       </div>
     </div>
   );
