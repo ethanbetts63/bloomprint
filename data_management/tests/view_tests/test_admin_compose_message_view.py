@@ -1,4 +1,5 @@
 import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APIClient
 
 from data_management.models import Notification
@@ -35,6 +36,30 @@ class TestAdminComposeMessageView:
         assert notification.body == 'A hand-written message.'
         assert notification.related_event is None
         assert notification.status == 'sent'
+
+    def test_sends_uploaded_files_as_attachments(self, mocker):
+        captured = {}
+
+        def send_with_attachment(notification, attachments=None):
+            captured['attachments'] = attachments
+            notification.status = 'sent'
+            notification.save(update_fields=['status'])
+
+        mocker.patch('data_management.utils.send_notification.send_notification', send_with_attachment)
+
+        response = self.client.post(
+            URL,
+            {
+                'to': 'hello@example.com', 'subject': 'Hello', 'body': 'Message',
+                'attachments': SimpleUploadedFile(
+                    'notes.txt', b'Attachment contents', content_type='text/plain',
+                ),
+            },
+            format='multipart',
+        )
+
+        assert response.status_code == 200
+        assert captured['attachments'] == [('notes.txt', b'Attachment contents', 'text/plain')]
 
     def test_rejects_an_invalid_recipient(self):
         response = self.client.post(

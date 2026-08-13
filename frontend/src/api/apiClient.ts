@@ -20,7 +20,11 @@ async function refreshToken(): Promise<boolean> {
 export async function authedFetch(url: string, options: RequestInit = {}): Promise<Response> {
     options.credentials = 'include';
     options.headers = { ...(options.headers as Record<string, string>) };
-    (options.headers as Record<string, string>)['Content-Type'] = 'application/json';
+    // Let the browser set multipart boundaries for file uploads. Setting
+    // Content-Type ourselves breaks FormData requests by omitting the boundary.
+    if (!(options.body instanceof FormData)) {
+        (options.headers as Record<string, string>)['Content-Type'] = 'application/json';
+    }
 
     if (!SAFE_METHODS.test(options.method || 'GET')) {
         const csrfToken = getCsrfToken();

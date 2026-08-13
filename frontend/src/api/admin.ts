@@ -299,10 +299,20 @@ export async function getAdminMessage(id: number): Promise<AdminMessageDetail> {
 }
 
 /** Send a staff-written email that is not linked to an order or delivery. */
-export async function sendAdminMessage(payload: { to: string; subject: string; body: string }): Promise<{ detail: string }> {
+export async function sendAdminMessage(payload: {
+  to: string;
+  subject: string;
+  body: string;
+  attachments?: File[];
+}): Promise<{ detail: string }> {
+  const form = new FormData();
+  form.set('to', payload.to);
+  form.set('subject', payload.subject);
+  form.set('body', payload.body);
+  payload.attachments?.forEach((file) => form.append('attachments', file));
   const res = await authedFetch('/api/data/admin/messages/compose/', {
     method: 'POST',
-    body: JSON.stringify(payload),
+    body: form,
   });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));

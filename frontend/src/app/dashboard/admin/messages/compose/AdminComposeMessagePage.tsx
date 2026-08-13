@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Paperclip, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { sendAdminMessage } from '@/api/admin';
@@ -15,7 +16,9 @@ export default function AdminComposeMessagePage() {
   const [to, setTo] = useState('');
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
+  const [attachments, setAttachments] = useState<File[]>([]);
   const [sending, setSending] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const send = async () => {
     if (!to.trim()) {
@@ -26,7 +29,7 @@ export default function AdminComposeMessagePage() {
 
     setSending(true);
     try {
-      await sendAdminMessage({ to, subject, body });
+      await sendAdminMessage({ to, subject, body, attachments });
       toast.success('Email sent.');
       router.push('/dashboard/admin/messages');
     } catch (reason) {
@@ -65,6 +68,46 @@ export default function AdminComposeMessagePage() {
           onBodyChange={setBody}
           onSend={send}
         />
+
+        <div className="mt-4 border-t border-slate-100 pt-4">
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            className="sr-only"
+            onChange={(event) => {
+              setAttachments((current) => [...current, ...Array.from(event.target.files ?? [])]);
+              event.target.value = '';
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={sending}
+            className="inline-flex items-center gap-2 text-sm font-medium text-slate-700 hover:text-slate-950 disabled:opacity-50"
+          >
+            <Paperclip className="h-4 w-4" /> Attach files
+          </button>
+          <p className="mt-1 text-xs text-slate-500">Up to 10 files; 20 MB each and 24 MB total.</p>
+          {attachments.length > 0 && (
+            <ul className="mt-3 space-y-2">
+              {attachments.map((file, index) => (
+                <li key={`${file.name}-${file.lastModified}-${index}`} className="flex items-center justify-between gap-3 rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-700">
+                  <span className="min-w-0 truncate">{file.name} <span className="text-slate-500">({(file.size / 1024 / 1024).toFixed(1)} MB)</span></span>
+                  <button
+                    type="button"
+                    onClick={() => setAttachments((current) => current.filter((_, currentIndex) => currentIndex !== index))}
+                    disabled={sending}
+                    aria-label={`Remove ${file.name}`}
+                    className="shrink-0 text-slate-500 hover:text-slate-950 disabled:opacity-50"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
     </div>
   );

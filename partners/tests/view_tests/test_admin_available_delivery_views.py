@@ -54,7 +54,7 @@ class TestAdminAvailableDeliveryViews:
         assert response.data['count'] == 1
         assert response.data['results'][0]['reference'] == visible.reference
 
-    def test_claim_assigns_the_delivery_to_that_florist(self, mocker):
+    def test_claim_assigns_the_delivery_to_that_florist_without_emailing_them(self, mocker):
         notify = mocker.patch('data_management.utils.notification_factory.notify_florist_of_claim')
         florist = florist_at(*ROCKINGHAM)
         event = event_at(*NEARBY)
@@ -65,7 +65,7 @@ class TestAdminAvailableDeliveryViews:
         claim = DeliveryRequest.objects.get(event=event, status='accepted')
         assert claim.business_account == florist
         assert Event.objects.get(pk=event.pk).status == 'claimed'
-        notify.assert_called_once_with(claim, assigned_by_admin=True)
+        notify.assert_not_called()
 
     def test_pending_florist_has_no_board_and_cannot_be_assigned(self):
         florist = florist_at(*ROCKINGHAM, status='pending')

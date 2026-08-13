@@ -153,9 +153,9 @@ def _brief_attachment(event, variant):
     return [(f'bloomprint-{event.reference}.pdf', pdf_bytes, 'application/pdf')]
 
 
-def notify_florist_of_claim(delivery_request, *, assigned_by_admin=False):
+def notify_florist_of_claim(delivery_request):
     """
-    Confirms a claim or admin assignment to the florist, with the full brief attached.
+    Confirms a claim to the florist who won it, with the full brief attached.
 
     This is the moment the recipient's address and card message are released, so
     it is the first document that carries them.
@@ -165,22 +165,14 @@ def notify_florist_of_claim(delivery_request, *, assigned_by_admin=False):
     event = delivery_request.event
     order = event.order
     where = ', '.join(part for part in [order.recipient_suburb, order.recipient_state] if part)
-    subject = (
-        f'Delivery assigned — {event.reference} on {event.delivery_date}'
-        if assigned_by_admin else f"It's yours — {event.reference} on {event.delivery_date}"
-    )
-    opening = (
-        'Bloomprint has claimed this delivery for you.'
-        if assigned_by_admin else 'Congratulations, you claimed this delivery.'
-    )
 
     notification = Notification.objects.create(
         recipient_type='business_account',
         recipient_business_account=delivery_request.business_account,
         channel='email',
-        subject=subject,
+        subject=f"It's yours — {event.reference} on {event.delivery_date}",
         body=(
-            f"{opening}\n\n"
+            f"Congratulations, you claimed this delivery.\n\n"
             f"Reference: {event.reference}\n"
             f"Deliver on: {event.delivery_date}\n"
             f"Area: {where or 'See attached brief'}\n"

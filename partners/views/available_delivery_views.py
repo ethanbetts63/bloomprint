@@ -148,7 +148,11 @@ class ClaimDeliveryView(APIView):
             # Admin still wants a nudge on the day, to watch that the florist
             # actually delivers.
             create_admin_delivery_day_notifications(event)
-            notify_florist_of_claim(delivery_request, assigned_by_admin=assigned_by_admin)
+            # A florist receives the full brief when they choose to claim it.
+            # An admin assignment is deliberately quiet: the operator may be
+            # holding the florist on the phone or arranging the hand-off first.
+            if not assigned_by_admin:
+                notify_florist_of_claim(delivery_request)
         except Exception:
             logger.exception(
                 "Claim %s succeeded but its follow-up notifications failed.", delivery_request.pk
